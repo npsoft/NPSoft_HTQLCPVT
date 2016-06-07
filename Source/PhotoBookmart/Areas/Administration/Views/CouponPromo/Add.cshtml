@@ -1,0 +1,322 @@
+﻿@model CouponPromo
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit coupon promotion - " + Model.Code;
+    }
+    else
+    {
+        ViewBag.Title = "Add coupon promotion";
+    }
+
+    var options = Db.Select<Product_Option>();
+    var products = Db.Select<Product>();
+    var countries = Db.Select<Country>();
+    Db.Close();
+}
+<style type="text/css">
+    #ui-datepicker-div
+    {
+        z-index: 1000 !important;
+    }
+</style>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+
+        $(".float-than-or-equal-zero").spinner({
+            min: 0.00,
+            step: 0.01,
+            numberFormat: "n"
+        });
+
+        $(".mws-spinner-integer-than-or-equals-zero").spinner({
+            min: 0,
+            step: 1,
+            numberFormat: "n"
+        });
+
+        $('#date_begin_add ,#date_end_add').datetimepicker({
+            stepMinute: 5,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin_add") {
+                    $('#date_end_add').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin_add').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        jQuery("#isApplyToOption").on("change", function () {
+            if (jQuery(this).is(":checked")) {
+                jQuery("#AppliedProductsRow").hide();
+                jQuery("#AppliedOptionsRow").show();
+            }
+            else {
+                jQuery("#AppliedProductsRow").show();
+                jQuery("#AppliedOptionsRow").hide();
+            }
+        }).trigger("change");
+
+        jQuery("#isPercentDiscount").on("change", function () {
+            if (jQuery(this).is(":checked")) {
+                jQuery("#DiscountAmountLabel").html("Discount Percent (%)");
+//                jQuery("#DiscountAmountDisplayRow").hide();
+//                jQuery("#DiscountAmountDisplayCurrencySignRow").hide();
+            }
+            else {
+                jQuery("#DiscountAmountLabel").html("Discount Amount");
+//                jQuery("#DiscountAmountDisplayRow").show();
+//                jQuery("#DiscountAmountDisplayCurrencySignRow").show();
+            }
+
+        }).trigger("change");
+
+        jQuery("#UserForm").submit(function () {
+
+            if (jQuery("#CouponType").val() == "1" && jQuery("#CountryCode").val() == "any")
+            {
+                // groupon
+                alert("Please select country of this groupon code");
+                jQuery("#CountryCode").focus();
+                return false;
+            }
+
+            if (jQuery("#CouponType").val() == "0" && !jQuery("#isPercentDiscount").prop("checked"))
+            {
+                // promotion code always get the percent discount
+                alert("Promotion code can not accept the Fixed Amount discount");
+                return false;
+            }
+
+            if (jQuery("#CouponType").val() == "1" && jQuery("#isPercentDiscount").prop("checked")) {
+                // groupon code always accept fix amount
+                alert("Groupon code can not accept percentage discount");
+                return false;
+            }
+
+            
+            if (jQuery("#isApplyToOption").attr("checked") == "checked") {
+                if (jQuery("#options_select").val() == null) {
+                    notify_error("Form validation", "Please select » Options for discount");
+                    jQuery("#options_select").focus();
+                    return false;
+                }
+            }
+
+            show_loading();
+
+            jQuery.post($(this).attr("action"), jQuery(this).serialize(), function (data) {
+
+                hide_loading();
+
+                if (data.Message != null && data.Message != "") {
+
+                    notify_error(data.Message);
+                }
+
+                if (data.RedirectUrl != null && data.RedirectUrl != "") {
+
+                    location = data.RedirectUrl;
+                }
+
+                return false;
+            });
+
+            return false;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Index", "CouponPromo", new { })" ><i
+            class="icol-arrow-left"></i>Coupons Promotion Management</a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "CouponPromo", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Coupon Type</label>
+                    <div class="mws-form-item">
+                        <select id="CouponType" name="CouponType" class="large">
+                            <option value="@((int)Enum_CouponType.Monthly_PromoCode)" @if (Model.CouponType == (int)Enum_CouponType.Monthly_PromoCode)
+                                                                                      {<text>selected</text>}>Promo</option>
+                            <option value="@((int)Enum_CouponType.Groupon)" @if (Model.CouponType == (int)Enum_CouponType.Groupon)
+                                                                            {<text>selected</text>}>Groupon</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Coupon Code</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Code, new { @class = "large" })
+                        <span>Leave blank for auto generate in format PTBM[YEAR][MONTH][XX]</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Require Security Code</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="SecurityCodeRequired" id="SecurityCodeRequired" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.SecurityCodeRequired)                                                                                                        {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+               @* <div class="mws-form-row" id="SecurityCodeRow">
+                    <label class="mws-form-label">
+                        Security Code</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.SecurityCode, new { @class = "large" })
+                    </div>
+                </div>*@
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Option Discount</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="isApplyToOption" id="isApplyToOption"  value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.isApplyToOption)
+                                                                                                                                                                 {<text>checked="checked"</text>}>
+                        <br />
+                        <span>If yes, then this coupon will be applied to Product Options, if no, then will
+                            be applied to bill total exclude the shipping cost</span>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="AppliedOptionsRow">
+                    <label class="mws-form-label">
+                        Apply to Options</label>
+                    <div class="mws-form-item">
+                        <select name="AppliedOptions" id="options_select" class="mws-select2 large" multiple="multiple">
+                            @foreach (var item in options)
+                            {
+                                <option value="@item.Id" @{ if (Model.AppliedOptions.Contains(item.Id))
+                                                            { <text> selected </text>  } }>@item.InternalName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="AppliedProductsRow">
+                    <label class="mws-form-label">
+                        Exclude Products</label>
+                    <div class="mws-form-item">
+                        <select name="ExceptProducts" id="products_select" class="mws-select2 large" multiple="multiple">
+                            @foreach (var p_groupby in products.GroupBy(x => x.CatId))
+                            {
+                                var cat = Db.Select<Product_Category>(x => x.Where(m => m.Id == p_groupby.Key).Limit(1)).FirstOrDefault();
+                                var cat_name = "Deleted Cat";
+                                if (cat != null)
+                                {
+                                    cat_name = cat.Name;
+                                }
+                                <optgroup label="@cat_name">
+                                    @foreach (var item in p_groupby)
+                                    {
+                                        <option value="@item.Id" @{ if (Model.ExceptProducts.Contains(item.Id))
+                                                                    { <text> selected </text>  } }>@item.Name</option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Percent Discount</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="isPercentDiscount" id="isPercentDiscount" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.isPercentDiscount)
+                                                                                                                                                                    {<text>checked="checked"</text>}>
+                        <br />
+                        <span>If yes, this coupon will discount an percent specified by 'Discount Amount', if
+                            no, then it will subtract the cost in RM</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label" id="DiscountAmountLabel">
+                        Discount Amount</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.DiscountAmount, new { @class = "mws-spinner-decimal float-than-or-equal-zero large" })
+                        <span>This is the discount amount we will use to calculate in bill total</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Country</label>
+                    <div class="mws-form-item">
+                        <select name="CountryCode" id="CountryCode" class="mws-select2 large">
+                            <option value="any" @if (string.IsNullOrEmpty(Model.CountryCode))
+                                                {<text>selected</text>})>Any</option>
+                            @foreach (var cg in countries.GroupBy(x => x.Status))
+                            {
+                                var label = "Active";
+                                if (!cg.FirstOrDefault().Status)
+                                {
+                                    label = "Inactive";
+                                }
+
+                                <optgroup label="@label">
+                                    @foreach (var item in cg)
+                                    {
+                                        <option value="@item.Code" @if (item.Code == Model.CountryCode)
+                                                                   {<text>selected</text>}>@item.Name</option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Issue To</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.IssueTo, new { @id = "IssueTo", @class = "large" })
+                        <span>The name of merchant/shop whom you will send this coupon security code and they
+                            will sell it for you. Leave it blank if you use your self</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Effective Date Duration</label>
+                    <div class="mws-form-item">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    <input type="text" name="BeginDate" id="date_begin_add" class="large"  value="@Model.BeginDate" />
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    <input type="text" name="EndDate" id="date_end_add" class="large" value="@Model.EndDate" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Used</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Used, new { @class = "mws-spinner-integer-than-or-equals-zero large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Maximum Use</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.MaxUse, new { @class = "mws-spinner-integer-than-or-equals-zero large" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

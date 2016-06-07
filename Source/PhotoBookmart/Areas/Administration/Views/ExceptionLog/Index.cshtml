@@ -1,0 +1,154 @@
+﻿@model ExceptionFilterModel
+@{
+    ViewBag.Title = "System Exceptions Managements";
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<div class="head">
+    <h3>
+        System Exceptions Managements</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-calendar"></i>Search Exceptions</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("List", "ExceptionLog", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Between And</label>
+                    <div class="mws-form-item">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(mbox => mbox.BetweenDate, new { @id = "date_begin" })
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(mbox => mbox.AndDate, new { @id = "date_end" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Host</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(mbox => mbox.Host, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Search Term</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(mbox => mbox.Search, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Http Method</label>
+                    <div class="mws-form-item">
+                        <select name="HttpMethod" id="HttpMethod" class="large">
+                            <option value="">Any</option>
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Result Type</label>
+                    <div class="mws-form-item">
+                        <select name="ResultType" id="ResultType" class="large">
+                            <option value="0">HTML List</option>
+                            <option value="1">Excel File</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+            <!-- End Form -->
+        }
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>System Exceptions Managements</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+    </div>
+</div>
+<div id="mws-jui-dialog">
+    <div class="mws-dialog-inner">
+        <p></p>
+    </div>
+</div>
+<script type="text/javascript">
+
+    function viewdetail(item) {
+            var id = jQuery(item).attr("item_id");
+
+            jQuery.post("@Url.Action("Detail")"+"?id="+id, function (returnObj) {
+                hide_loading();
+                jQuery("#mws-jui-dialog .mws-dialog-inner").html(returnObj);
+                 $("#mws-jui-dialog").dialog("option", {
+                    modal: true,
+                    title: "Exception Detail for "+id
+                }).dialog("open");
+            }, "html");
+    }
+
+    $(document).ready(function () {
+        $('#date_begin,#date_end').datetimepicker({
+            stepMinute: 5,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin") {
+                    $('#date_end').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        $("#mws-jui-dialog").dialog({
+            autoOpen: false,
+            title: "Exception Detail",
+            modal: true,
+            width: "900"
+            
+        });
+
+        jQuery("#UserForm").submit(function () {
+            if (jQuery("#ResultType").val() == 1) {
+                return true;
+            }
+            else {
+                show_loading();
+
+                jQuery.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (returnObj) {
+                    $.pnotify({
+                        title: 'Success',
+                        text: returnObj.Message,
+                        type: 'info',
+                        opacity: .8
+                    });
+                    //var x = jQuery(returnObj);
+                    $(".listuser").html("");
+                    $(".listuser").html(returnObj);
+                    hide_loading();
+                }, "html");
+
+                return false;
+            }
+        });
+    })
+
+</script>

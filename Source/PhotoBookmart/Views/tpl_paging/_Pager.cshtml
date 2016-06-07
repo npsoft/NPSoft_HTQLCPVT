@@ -1,0 +1,59 @@
+﻿@{
+    int distance = (int)ViewData["Distance"];
+
+    int currPage = (int)ViewData["CurrPage"];
+
+    int pageSize = (int)ViewData["PageSize"];
+
+    int totalItem = (int)ViewData["TotalItem"];
+
+    int totalPage = (int)ViewData["TotalPage"];
+
+    string idFooterWrapper = (string)ViewData["IdFooterWrapper"];
+
+    string nameFunctionPaging = (string)ViewData["NameFunctionPaging"];
+      
+    int startItem = (currPage - 1) * pageSize + 1;
+
+    int endItem = currPage != totalPage ? currPage * pageSize : totalItem;
+
+    int seqLeft = currPage > distance ? currPage - distance : 1;
+
+    int seqRight = totalPage - currPage > distance ? currPage + distance : totalPage;
+}
+<div class="dataTables_wrapper" id="@idFooterWrapper">
+    <div class="dataTables_info" id="ListTable_info">Showing @startItem to @endItem of @totalItem entries</div>
+    <div class="dataTables_paginate paging_full_numbers" id="ListTable_paginate">
+        @if (currPage != 1)
+        {
+            <a tabindex="0" class="first paginate_button" id="ListTable_first" onclick="javascript:@(nameFunctionPaging)(1);">First</a>
+            <a tabindex="0" class="previous paginate_button" id="ListTable_previous" onclick="javascript:@(nameFunctionPaging)(@(currPage - 1));">Previous</a>
+        }
+        else
+        {
+            <a tabindex="0" class="first paginate_button paginate_button_disabled" id="ListTable_first">First</a>
+            <a tabindex="0" class="previous paginate_button paginate_button_disabled" id="ListTable_previous">Previous</a>
+        }
+        <span>
+            @for (int i = seqLeft; i < currPage; i++)
+            {
+                <a tabindex="0" class="paginate_button" onclick="javascript:@(nameFunctionPaging)(@i);">@i</a>
+            }
+            <a tabindex="0" class="paginate_active" onclick="javascript:@(nameFunctionPaging)(@currPage);">@currPage</a>
+            @for (int i = currPage + 1; i < seqRight + 1; i++)
+            {
+                <a tabindex="0" class="paginate_button" onclick="javascript:@(nameFunctionPaging)(@i);">@i</a>
+            }
+        </span>
+        @if (currPage != totalPage && totalPage != 0)
+        {
+            <a tabindex="0" class="next paginate_button" id="ListTable_next" onclick="javascript:@(nameFunctionPaging)(@(currPage + 1));">Next</a>
+            <a tabindex="0" class="last paginate_button" id="ListTable_last" onclick="javascript:@(nameFunctionPaging)(@totalPage);">Last</a>
+        }
+        else
+        {
+            <a tabindex="0" class="next paginate_button paginate_button_disabled" id="ListTable_next">Next</a>
+            <a tabindex="0" class="last paginate_button paginate_button_disabled" id="ListTable_last">Last</a>
+        }
+    </div>
+</div>

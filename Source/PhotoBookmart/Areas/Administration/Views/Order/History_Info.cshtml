@@ -1,0 +1,30 @@
+﻿@model Order
+<div class="mws-panel grid_5" id="panel_history" data-url="@Url.Action("History_LoadNext", new { id = Model.Id })" page="0">
+    <div class="mws-panel-header">
+        <span><i class="icon-list"></i>Order History</span>
+    </div>
+    <div class="mws-panel-body" style="padding: 0px;">
+        <div style="">
+            <div class="chat_list_footer">
+                @using (Html.BeginForm("History_InsertComment", "Order", FormMethod.Post, new { enctype = "multipart/form-data", @id = "OrderHistory_Form_InsertMessage", @class = "mws-form" }))
+                {
+                    <input type="hidden" name="OrderId" value="@Model.Id" />
+                    <div class="input-group">
+                        <input type="text" class="form-control input-sm rounded" placeholder="Say something"
+                            name="Message" id="OrderHistory_Message">
+                        <span class="input-group-btn">
+                            <div style="font-size: 12px; display: inline; margin-right: 10px;">
+                                Private Message
+                                <input type="checkbox" class="form-control" rel="tooltip" data-placement="bottom" value="true" name="isPrivate" title="Only Admin and staff can see messages"></div>
+                            <button class="btn btn-sm btn-danger font-bold btn-rounded" type="submit" id="panel_history_submit">
+                                Send</button>
+                        </span>
+                    </div>
+                }
+            </div>
+            <div class="chat-list">
+            </div>
+            <!-- End history list -->
+        </div>
+    </div>
+</div>

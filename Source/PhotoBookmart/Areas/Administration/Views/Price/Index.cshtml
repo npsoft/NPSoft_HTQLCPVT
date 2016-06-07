@@ -1,0 +1,73 @@
+﻿@{
+    long id = (long)ViewData["id"];
+    string name = ViewData["name"].ToString();
+    Enum_Price_MasterType type = (Enum_Price_MasterType)ViewData["type"];
+    //ViewBag.Title = "Manage Price for " + name;
+    if (type == Enum_Price_MasterType.ProductShippingPrice)
+    {
+        ViewBag.Title = "Manage shipping price for " + name;
+    }
+    else if (type == Enum_Price_MasterType.ProductOption)
+    {
+        ViewBag.Title = "Manage options price for " + name;
+    }
+    else if (type == Enum_Price_MasterType.Product)
+    {
+        ViewBag.Title = "Manage price for product " + name;
+    }
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+    <div>
+        <div class="grid_3">
+            <a type="button" class="btn btn-primary" href="javascript:void(0)" id="nav_add_button">
+                New Price</a>
+            @{
+                if (type == Enum_Price_MasterType.ProductOption)
+                {
+                <a type="button" class="btn" href="@Url.Action("Index", "ProductOption")">Product Options
+                    Management</a>
+                }
+                else {
+                    <a type="button" class="btn" href="@Url.Action("Detail", "WebsiteProduct", new { id=id })">Product detail</a>
+                }
+            }
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div class="mws-panel grid_8 listuser">
+</div>
+<script type="text/javascript">
+    function PageTable_Reload() {
+        show_loading();
+        var lang_id = jQuery("#Page_langId").val();
+        if (lang_id ==null)
+        {
+            lang_id=0;
+        }
+         $.get("@Url.Action("List", new { type = type, id = id })", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+    }
+
+    $(document).ready(function () {
+        PageTable_Reload();
+
+        jQuery("#Page_langId").change(function(){
+            PageTable_Reload();
+        });
+
+        jQuery("#nav_add_button").click(function(){
+            var url="@Html.Raw(Url.Action("Add", new { type = type, m_id = id }))";
+            window.location.href=url;
+
+        });
+    });
+
+</script>

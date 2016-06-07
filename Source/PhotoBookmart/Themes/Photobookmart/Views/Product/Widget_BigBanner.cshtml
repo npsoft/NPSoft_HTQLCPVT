@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+    var cat = Db.Where<Product_Category>(x => x.Status);
+    bool isFirst = true;
+}
+<!-- Widget Bigbanner-->
+<div class='dynamic_element dynamic_el_5 template-portfolio-overview content portfolio-size-3 '>
+    <div class='portfolio-wrap ajax_portfolio_container avia_not_sortable'>
+        <div class='portfolio-details stretch_full'>
+            <div class='portfolio-details-inner'>
+            </div>
+        </div>
+        <div class='portfolio-sort-container isotope'>
+            @foreach (var item in cat)
+            {
+                var grayscale_filename = item.Filename;
+                if (!string.IsNullOrEmpty(item.Filename_grayscale))
+                {
+                    grayscale_filename = item.Filename_grayscale;
+                }
+                <div data-ajax-id='@item.Id' class='isotope-item post-entry no_margin flex_column all_sort portfolio-entry-overview portfolio-loop-1 portfolio-parity-odd  one_third @if (isFirst) { isFirst = false; <text>first</text> } portfolio-entry-description'>
+                    <div class='inner-entry'>
+                        <div class='slideshow_container  slide_container_small'>
+                            <ul class='slideshow preloading fade_slider' data-autorotation='true' data-autorotation-timer='3'
+                                data-transition='fade'>
+                                <li data-animation='random' class='featured featured_container1 caption_right caption_right_framed caption_framed  '>
+                                    <div class='slideshow_media_wrap'>
+                                        <a href='@Url.Action("Detail", "Style", new { id = item.SeoName })'>
+                                            <img src='/@item.Filename' title='@item.Name'
+                                                alt='' data-imgw='495' data-imgh='400' />
+
+                                             <img src='/@grayscale_filename'
+                                                    title='@item.Name' alt='' data-imgw='495' data-imgh='400' class='greyscale-image filtered-image' /></a></div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class='portfolio-title title_container'>
+                            <h1 class='main-title'>
+                                <a href='@Url.Action("Detail", "Style", new { id = item.SeoName })' rel='bookmark' title='Permanent Link: @item.Name'>
+                                    @item.Name</a></h1>
+                        </div>
+                        <div class='portfolio_excerpt'>
+                            <p>
+                                @item.DescShort</p>
+                        </div>
+                    </div>
+                    <!-- end post-entry-->
+                </div>
+            }
+        </div>
+    </div>
+    <!-- end -->
+</div>
+<!--Widget Bigbanner -->

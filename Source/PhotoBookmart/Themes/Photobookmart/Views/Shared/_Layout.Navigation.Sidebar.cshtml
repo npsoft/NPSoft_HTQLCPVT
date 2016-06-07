@@ -1,0 +1,26 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.cshtml";
+}
+
+@section _ClassWrapper {
+    class="container_wrap main_color sidebar_right"
+}
+
+@section _TitleMain {
+    @RenderSection("_TitleMain", true)
+}
+
+@section _TrailLink {
+    @RenderSection("_TrailLink", true)
+}
+
+<div class='template-page content  eight alpha units'>	
+	<div class='post-entry post-entry-type-page post-entry-763'>
+		<span class='entry-border-overflow extralight-border'></span>
+		<div class="eight alpha alpha units entry-content">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_Sidebar")

@@ -1,0 +1,138 @@
+﻿@model Site_Testimonial
+@{  
+    var Langname = ViewData["LangName"].ToString();
+     if (Model.Id > 0)
+     {
+         ViewBag.Title = "Edit testimonial " + Model.Name + " on website " + Model.SiteName + " / " + Langname;
+     }
+     else
+     {
+         ViewBag.Title = "Add testimonial for website " + Model.SiteName + " / " + Langname;
+     }
+     var Languages = (List<Language>)ViewData["Langs"];
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CKEDITOR.replace('ckeditorId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+
+        jQuery("#UserForm").submit(function () {
+            jQuery("#ckeditorId").val(CKEDITOR.instances.ckeditorId.getData());
+
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter navigation name");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+
+            show_loading();
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+       @ViewBag.Title
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteTestimonial", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.SiteId);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                 <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        SEO name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.SeoName, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Language</label>
+                    <div class="mws-form-item">
+                        <select name="LanguageCode">
+                            @foreach (var x in Languages)
+                            {
+                                <option value="@x.LanguageCode" @if (x.LanguageCode == Model.LanguageCode)
+                                                                {<text> selected</text>}>@x.LanguageName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Comment</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.Comment, new { @class = "large", @id = "ckeditorId" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Rate</label>
+                    <div class="mws-form-item">
+                        <select name="Rate" class="large">
+                            <option value="0">Very Bad</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Email</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Email, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Phone</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Phone, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Thumbnail</label>
+                    <div class="mws-form-item">
+                        <input type="file" name="FileUp" />
+                        @Html.HiddenFor(m => m.ThumbnailFilename)
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Is New</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="isNew" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.isNew)
+                                                                                                                                         {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

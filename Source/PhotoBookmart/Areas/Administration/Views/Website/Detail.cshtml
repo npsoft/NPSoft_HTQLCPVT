@@ -1,0 +1,44 @@
+﻿@model Website
+@{
+    ViewBag.Title = Model.Name + " control panel";
+}
+<div class="head">
+    <h3>
+        Manage website @Model.Name</h3>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn"><i class="icol-pencil">
+                </i>Edit</a> <a href="@Url.Action("Index", "WebsiteTopic")" class="btn" target=_blank>
+                    <i class="icol-html"></i>Manage Site Content</a> <a href="@Url.Action("Index", "WebsiteNav")"
+                    class="btn" target=_blank><i class="icol-layout-select"></i>Manage Site Navigation</a>
+                @*<a href="@Url.Action("Index", "WebsiteContactUs")" class="btn" target=_blank><i class="icol-comment">
+                </i>Contact Us</a>*@ <a href="@Url.Action("Index", "WebsiteTestimonial")" class="btn" target=_blank>
+                    <i class="icol-heart-half"></i>Testimonials</a> <a href="@Url.Action("Index", "WebsiteMaillinglist")" class="btn" target=_blank>
+                        <i class="icol-page-lightning"></i>Mailling List</a> <a href="#" class="btn dropdown-toggle"
+                            data-toggle="dropdown"><span class="caret"></span></a>
+                <ul class="dropdown-menu pull-right">
+                    <li><a href="@Url.Action("Index", "WebsiteMaillinglistTemplate")" target=_blank><i
+                        class="icol-disconnect"></i>Manage template</a></li>
+                    @* <li><a href="@Url.Action("Index", "WebsiteForm", new { site_id = Model.Id })" target=_blank>
+                        <i class="icol-disconnect"></i>Manage forms</a></li>*@
+                    <li><a href="@Url.Action("Index", "ProductCategory")" target=_blank><i class="icol-disconnect">
+                    </i>Manage Product Categories</a></li>
+                    <li><a href="@Url.Action("Index", "WebsiteBanners")" target=_blank><i class="icol-frame">
+                    </i>Sliders management</a></li>
+                    <li><a href="@Url.Action("Index", "WebsiteFlashHeader")" target=_blank><i class="icol-frame">
+                    </i>Flash Header management</a></li>
+                    <li><a href="@Url.Action("Index", "WebsiteSocial")" target=_blank><i class="icol-frame">
+                    </i>Social Accounts</a></li>
+                    <li><a href="@Url.Action("ContactUsInfo")" target=_blank><i class="icol-frame"></i>Contact
+                        Us info</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+@Html.Partial("Detail_Info", Model)
+@*@Html.Action("Detail_AnalyticChart", new { id = Model.Id })*@
+@*@Html.Partial("Detail_Language", Model)*@
+@Html.Partial("Detail_Group", Model)
+@Html.Partial("Detail_NewsCategory", Model)

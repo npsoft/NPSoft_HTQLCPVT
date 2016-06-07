@@ -1,0 +1,151 @@
+﻿@model List<Website>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a.delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Delete")?id=" + item_id, function () {
+                    $.get("@Url.Action("List")", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.disable").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to disable " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Disable")?id=" + item_id, function () {
+                    $.get("@Url.Action("List")", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.approve").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to approve " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Enable")?id=" + item_id, function () {
+                    $.get("@Url.Action("List")", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        // build table layout
+        if( $.fn.dataTable ) {
+            $("#ListTable").dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+
+        setTimeout(function () {
+            jQuery("#date_Create_column").trigger("click");
+        }, 300);
+    });
+
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Theme
+            </th>
+            <th>
+                Domain
+            </th>
+            <th>
+                SSL
+            </th>
+            @*<th>
+                Created By
+            </th>
+            <th id="date_Create_column">
+                Created On
+            </th>*@
+            <th width="100px">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="@Url.Action("Detail", new { id = item.Id })" class="black_color"><span>
+                            @item.Name
+                        </span></a>
+                    </td>
+                    <td>
+                        <span>
+                            @if (item.Status == 0)
+                            {
+                                <text>Waiting for approve</text>
+                            }
+                            else if (item.Status == 1)
+                            {
+                                <text>Running</text>
+                            }
+                            else if (item.Status == 2)
+                            {
+                                <text>Disabled</text>
+                            }
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.Theme</span>
+                    </td>
+                    <td>
+                        <span>@Html.Raw(String.Join("<br />", item.Domain))</span>
+                    </td>
+                    <td>
+                        <span> 
+                            <input type="checkbox" disabled="disabled"  @if (item.UseSSL) { <text> checked="checked"</text> } />
+                        </span>
+                    </td>
+                    @*<td>
+                        <span>@item.CreatedByUsername</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>*@
+                    <td>
+                        <span class="btn-group"><a  href="@Url.Action("Edit", new { id = item.Id })" class="btn btn-small" title="Edit @item.Name">
+                            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small delete" item_id="@item.Id" item_name="@item.Name" title="Delete @item.Name" >
+                                <i class="icon-trash"></i></a><a  href="@Url.Action("Detail", new { id = item.Id })" class="btn btn-small"
+                                        title="Detail of @item.Name"><i class="icon-wordpress"></i></a></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

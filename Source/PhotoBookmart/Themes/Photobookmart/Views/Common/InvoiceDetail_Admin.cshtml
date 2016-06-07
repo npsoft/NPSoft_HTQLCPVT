@@ -1,0 +1,383 @@
+﻿@model Order
+@{
+    // This view is used by the send invocie to email or to generate the invoice to pdf
+    Layout = null;
+    Model.LoadAddress(0);
+    Model.LoadAddress(1);
+    Model.LoadProductInfo();
+}
+<div>
+    Hi Administrator,
+    <br />
+    You have new order. Please check the order detail as below:</div>
+<table style="width: 800px; border-collapse: collapse; border-spacing: 0; font-size: 12px;
+    font-family: dotum; margin: 0px auto" align="center" class="order_invoice">
+    <tbody>
+        @*<tr>
+            <td style="text-align: left; height: 30px">
+                <h1 style="color: #494949; font-family: verdana; font-size: 36px; font-weight: normal;
+                    letter-spacing: -1px; margin: 0">
+                    INVOICE</h1>
+            </td>
+            <td style="text-align: right; height: 30px">
+            </td>
+        </tr>*@
+        <tr>
+            <td style="padding-right: 10px; padding-bottom: 0px" width="50%" valign="top">
+                <dl style="border: 1px solid #ddd; margin-bottom: 0px">
+                    <dt style="font-weight: bold">@*To :*@</dt>
+                    <dd style="margin: 0; color: #FFF; background-color: #6f6f6f; border-bottom: 1px solid #ddd;
+                        padding: 12px 0 7px 80px; font-size: 18px; font-weight: bold;">
+                        @Model.BillingAddressModel.FirstName @Model.BillingAddressModel.LastName &nbsp;
+                    </dd>
+                    <dd style="margin: 0; line-height: 24px; padding: 5px 0 5px 80px; color: #858585">
+                        <div>
+                            @Model.BillingAddressModel.Address</div>
+                        <div>
+                            @Model.BillingAddressModel.City</div>
+                        <div>
+                            @Model.BillingAddressModel.ZipPostalCode</div>
+                        <div>
+                            @Model.BillingAddressModel.GetCountryName()</div>
+                        <div>
+                            @Model.BillingAddressModel.PhoneNumber / @Model.BillingAddressModel.Email</div>
+                    </dd>
+                </dl>
+            </td>
+            <td style="vertical-align: top" width="50%" valign="top">
+                @*<dl style="border: 1px solid #ddd">
+                    <dt style="font-weight: bold">From :</dt>
+                    <dd style="margin: 0; border-bottom: 1px solid #dddddd; font-weight: bold; min-height: 37px;
+                        line-height: 37px; padding: 0 0 0 70px; background-color: #6f6f6f; font-size: 18px;
+                        color: #FFF;">
+                        <span class="il">Photobookmart</span> Berhad</dd>
+                    <dd style="margin: 0; line-height: 24px; padding: 5px 0 5px 80px; color: #858585">
+                        No 16 ( Grd Floor )<br />
+                        Jalan 6/116B Kuchai Entrepreneur’s Park<br />
+                        Off Jalan Kuchai Lama 58200<br>
+                        Kuala Lumpur, Malaysia<br>
+                        Telephone: +6 03 7984 8818<br />
+                    </dd>
+                </dl>*@
+                <table style="border-top: 2px solid #848484; color: #858585; margin-top: 10px; width: 100%">
+                    <colgroup>
+                        <col style="width: 90px">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; padding: 5px 12px;
+                                text-align: left; background-color: #fcfcfc">
+                                Order Number.
+                            </th>
+                            <td style="background-color: #fcfcfc; font-weight: bold; text-decoration: underline;
+                                border-bottom: 1px solid #dddddd; padding: 5px 12px; text-align: left">
+                                @Model.Order_Number
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; padding: 5px 12px;
+                                text-align: left; background-color: #fcfcfc">
+                                Date
+                            </th>
+                            <td style="background-color: #fcfcfc; font-weight: bold; text-decoration: underline;
+                                border-bottom: 1px solid #dddddd; padding: 5px 12px; text-align: left">
+                                @Model.CreatedOn.ToLongDateString()
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        @*<tr>
+            <td colspan="2">
+                <p style="background-color: #f7f7f7; border: 1px solid #dddddd; color: #858585; min-height: 39px;
+                    line-height: 39px; margin: 0px 0 0px; padding-left: 25px">
+                    We are pleased to offer the under-mentioned goods/services as per conditions and
+                    details described as follows.</p>
+            </td>
+        </tr>*@
+        <tr>
+            <td colspan="2">
+                <table style="border-bottom: 1px solid #cfcfcf; border-top: 2px solid #858585; width: 800px;
+                    border-collapse: collapse; border-spacing: 0">
+                    <colgroup>
+                        <col style="width: 360px;">
+                        <col style="width: 120px;">
+                        <col style="width: 120px;">
+                        <col style="width: 200px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th style="width: 360px; background-color: #fbfbfb; border-bottom: 1px solid #cfcfcf;
+                                padding: 10px 0">
+                                Description
+                            </th>
+                            <th style="width: 120px; background-color: #fbfbfb; border-bottom: 1px solid #cfcfcf;
+                                padding: 10px 0">
+                                Qty
+                            </th>
+                            <th style="width: 120px; background-color: #fbfbfb; border-bottom: 1px solid #cfcfcf;
+                                padding: 10px 0">
+                                Units
+                            </th>
+                            <th style="width: 200px; background-color: #fbfbfb; border-bottom: 1px solid #cfcfcf;
+                                padding: 10px 0">
+                                Cost
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody style="color: #858585; text-align: center">
+                        @* First line for the product name *@
+                        <tr>
+                            <td style="width: 360px; padding: 5px 0; border-bottom: 1px solid #ddd">
+                                @Model.ProductModel.Name
+                            </td>
+                            <td style="width: 120px; padding: 5px 0; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                @Model.ProductModel.Pages (pages)
+                            </td>
+                            <td style="width: 120px; text-align: right; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                @Model.Product_Price.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                            </td>
+                            <td style="width: 200px; text-align: right; font-weight: bold; border-bottom: 1px solid #dddddd;
+                                border-left: 1px solid #dddddd">
+                                @Model.Product_Price.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                            </td>
+                        </tr>
+                        @foreach (var opt in Model.Product_OptionsModel)
+                        {
+                            double opt_total = opt.Option_Quantity * opt.Price;
+                            <tr>
+                                <td style="padding: 5px 0; border-bottom: 1px solid #ddd">
+                                    @opt.Option_Name
+                                </td>
+                                <td style="padding: 5px 0; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                    @opt.Option_Quantity
+                                </td>
+                                <td style="text-align: right; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                    @opt.Price.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                </td>
+                                <td style="text-align: right; font-weight: bold; border-bottom: 1px solid #dddddd;
+                                    border-left: 1px solid #dddddd">
+                                    @opt_total.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                </td>
+                            </tr>
+                        }
+                        @* Shipping *@
+                        <tr>
+                            <td style="padding: 5px 0; border-bottom: 1px solid #ddd">
+                                Shipping
+                            </td>
+                            <td style="padding: 5px 0; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                1
+                            </td>
+                            <td style="text-align: right; border-bottom: 1px solid #dddddd; border-left: 1px solid #dddddd">
+                                @Model.Shipping_DisplayPrice.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                            </td>
+                            <td style="text-align: right; font-weight: bold; border-bottom: 1px solid #dddddd;
+                                border-left: 1px solid #dddddd">
+                                @Model.Shipping_DisplayPrice.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                            </td>
+                        </tr>
+                        @* end of shipping *@
+                        <tr>
+                            <td colspan="4" style="padding: 10px 20px; text-align: right; background-color: #f9f9f9;
+                                color: #858585; line-height: 18px">
+                                <table border="0" style="width: 800px;">
+                                    <tr>
+                                        <td style="text-align: right; width: 650px;">
+                                            Sub total:
+                                        </td>
+                                        <td style="text-align: left; width: 150px;">
+                                            @Model.Bill_SubTotal.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: right; width: 650px;">
+                                            Quantity:
+                                        </td>
+                                        <td style="text-align: left; width: 150px;">
+                                            @Model.Quantity
+                                        </td>
+                                    </tr>
+                                    @if (Model.isUseCoupon)
+                                    {
+                                        var coupon_discount_formated = Model.Coupon_TotalDiscount.ToMoneyFormated(Model.Shipping_DisplayPriceSign);
+                                        if (!string.IsNullOrEmpty(Model.Coupon_DiscountDisplay) && Model.Coupon_DiscountDisplay != coupon_discount_formated)
+                                        {
+                                            coupon_discount_formated = Model.Coupon_DiscountDisplay;
+                                        }
+                                        <tr>
+                                            <td style="text-align: right; width: 650px;">
+                                                Discount:
+                                            </td>
+                                            <td style="text-align: left; width: 150px;">
+                                                @coupon_discount_formated
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: right;">
+                                                Coupon used:
+                                            </td>
+                                            <td style="text-align: left;">
+                                                @Model.Coupon_Code
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td style="text-align: right; width: 650px;">
+                                            Grand total:
+                                        </td>
+                                        <td style="text-align: left; width: 150px;">
+                                            @Model.Bill_GrandTotal.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: right;">
+                                            GST:
+                                        </td>
+                                        <td style="text-align: left;">
+                                            @Model.Bill_GST.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: right;">
+                                            <strong>Total</strong>:
+                                        </td>
+                                        <td style="text-align: left;">
+                                            @Model.Bill_Total.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding: 20px 0 0">
+                <table style="border-top: 2px solid #6f6f6f; width: 100%; border-collapse: collapse;
+                    border-spacing: 0">
+                    <colgroup>
+                        <col style="width: 205px">
+                        <col>
+                    </colgroup>
+                    <tbody>
+                        @*<tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Origin
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                MALAYSIA
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Packing
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                Standard Packing
+                            </td>
+                        </tr>*@
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Shipment
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                by @Model.Shipping_Method
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Ship-to
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                @Model.ShippingAddressModel.FirstName @Model.ShippingAddressModel.LastName / @Model.ShippingAddressModel.Company
+                                / @Model.ShippingAddressModel.PhoneNumber
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Address
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                @Model.ShippingAddressModel.Address, @Model.ShippingAddressModel.City, @Model.ShippingAddressModel.GetCountryName(),
+                                @Model.ShippingAddressModel.ZipPostalCode
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Order Status
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                @Model.StatusEnum
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Note
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left">
+                                @Model.ShippingNote
+                            </td>
+                        </tr>
+                        <tr>
+                            <th style="border-bottom: 1px solid #dddddd; border-right: 1px solid #dddddd; color: #595959;
+                                padding: 5px 0 5px 20px; text-align: left">
+                                Payment
+                            </th>
+                            <td style="border-bottom: 1px solid #dddddd; color: #858585; padding: 5px 0 5px 20px;
+                                text-align: left" class="order_detail_paymenticons">
+                                @if (Model.Payment_isPaid)
+                                {
+                                    <span>Done by @Model.PaymentMethod</span>
+                                }
+                                else
+                                {
+                                    <span>Not Paid (@Model.PaymentMethod)</span>
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        @*<tr>
+            <td colspan="2">
+                <div style="background-color: #f8f8f8; border-bottom: 1px solid #dddddd; overflow: hidden;
+                    padding: 5px 0">
+                    <div style="color: #595959; float: left; line-height: 24px; padding: 20px 20px 25px">
+                        Your faithfully,<br />
+                        For and on behalf of <span class="il">Photobookmart</span> Berhad
+                    </div>
+                    <div style="color: #858585; float: right; margin-right: 20px; text-align: center;
+                        width: 110px">
+                        <div style="background-color: #ffffff; border: 1px solid #dddddd; min-height: 83px;
+                            margin: 7px auto 10px; width: 83px">
+                        </div>
+                        Authorized Stamp
+                    </div>
+                </div>
+            </td>
+        </tr>*@
+    </tbody>
+</table>
+<br />
+<div>
+    Regards</div>
+<div>@CurrentWebsite.Name</div>

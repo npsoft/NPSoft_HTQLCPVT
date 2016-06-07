@@ -1,0 +1,507 @@
+﻿@model DoiTuong
+
+<form id="bien-dong-thay-doi-loai" name="bien-dong-thay-doi-loai" action="@Url.Action("BienDong_ThayDoiLoaiDoiTuong", "WebsiteProduct", new { })" method="post" enctype="multipart/form-data" class="mws-form">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="MucTroCapCoBan" value="" />
+    <div class="mws-form-inline">
+        <div class="mws-form-row">
+            <label class="mws-form-label">Loại</label>
+            <div class="mws-form-item">
+                <select name="MaLDT" class="mws-select2 large">
+                    <optgroup label="">
+                        <option value="">- - Chọn - -</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        <div data-con="MaLDT" data-val="01" class="hide">
+            <div class="mws-form-row">
+                <label class="mws-form-label">Thông tin cha</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type1_InfoFather" value="" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">Thông tin mẹ</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type1_InfoMother" value="" class="large" />
+                </div>
+            </div>
+        </div>
+        <div data-con="MaLDT" data-val="03" class="hide">
+            <div class="mws-form-row">
+                <div class="mws-panel mg-0">
+                    <div class="mws-panel-toolbar">
+                        <div class="btn-toolbar">
+                            <a href="javascript:void(0);" class="btn" data-action="add">
+                                <i class="icol-add"></i>Thêm mới
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mws-panel-body no-padding">
+                        <table class="mws-table" id="ListTable">
+                            <thead>
+                                <tr>
+                                    <th>Họ & Tên</th>
+                                    <th>Ngày sinh</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-con="MaLDT" data-val="04" class="hide">
+            <div class="mws-form-row">
+                <label class="mws-form-label">TT hôn nhân</label>
+                <div class="mws-form-item">
+                    <select class="mws-select2 large" name="MaLDT_Type4_MaritalStatus">
+                        <option value="">- - Chọn - -</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">Thông tin thêm</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type4_InfoAdditional" value="" class="large" />
+                </div>
+            </div>
+        </div>
+        <div data-con="MaLDT" data-val="05" class="hide">
+            <div class="mws-form-row">
+                <label class="mws-form-label">KN phục vụ</label>
+                <div class="mws-form-item">
+                    <select class="mws-select2 large" name="MaLDT_Type5_SelfServing">
+                        <option value="">- - Chọn - -</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">Người chăm sóc</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type5_Carer" value="" class="large" />
+                </div>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">Mức trợ cấp</label>
+            <div class="mws-form-item">
+                <input type="text" name="MucTC" value="" class="large currency" />
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">Ngày biến động</label>
+            <div class="mws-form-item">
+                <input type="text" name="NgayBienDong" class="large" />
+            </div>
+        </div>
+        <div class="mws-form-row align-r">
+            <button type="submit" class="btn btn-danger">Đồng ý</button>
+            <button type="button" class="btn" data-action="cancel">Hủy bỏ</button>
+        </div>
+    </div>
+</form>
+<div class="dialog" id="popup-maldt-children" title="">
+    @using (Html.BeginForm("", "", FormMethod.Get, new { @id = "", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <div id="mws-validate-error" class="mws-form-message error" style="display: none;"></div>
+        <div class="mws-form-block">
+            <input type="hidden" name="MaLDT_Row_Id" />
+            <input type="hidden" name="MaLDT_Id" />
+            <div class="mws-form-row">
+                <label class="mws-form-label">Họ & Tên</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type3_FullName" class="required large" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <div class="mws-form-cols">
+                    <div class="mws-form-col-4-8">
+                        <label class="mws-form-label">Giới tính</label>
+                        <div class="mws-form-item">
+                            <select name="MaLDT_Type3_Gender" class="mws-select2 large" data-init="">
+                                <option value="">- - Chọn - -</option>
+                                @foreach (var item in PhotoBookmart.Controllers.BaseController.Gender_GetAll())
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mws-form-col-4-8">
+                        <label class="mws-form-label">Ngày sinh</label>
+                        <div class="mws-form-item">
+                            <div class="row-fluid">
+                                <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Date" placeholder="Ngày" class="date-of-birth-date" /></div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Month" placeholder="Tháng" class="date-of-birth-month" /></div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Year" placeholder="Năm" class="date-of-birth-year" /></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">Nơi ở hiện nay</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type3_CurrAddr" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">Tình trạng đi học</label>
+                <div class="mws-form-item">
+                    <input type="text" name="MaLDT_Type3_StatusLearn" class="large" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    jQuery(document).ready(function ($) {
+        $.post(SVC_GETMUCTROCAPCOBANBYPARAMS, { MaHC: "@Model.MaHC.GetCodeProvince()" }, function (data) {
+            $("#bien-dong-thay-doi-loai [name='MucTroCapCoBan']").val(@if (Model.isHoNgheo.HasValue && Model.isHoNgheo.Value) {<text>data.TL11</text>} else {<text>data.TL02</text>});
+        });
+
+        $.post(SVC_GETALLMARITALSTATUSES, {}, function (data) {
+            RefillDataForSelect2({ $ddl: $("#bien-dong-thay-doi-loai [name='MaLDT_Type4_MaritalStatus']"), val: "", data: data, id: "IDTinhTrangHN", name: "TenTinhTrangHN" });
+        });
+
+        $.post(SVC_GETALLSELFSERVINGS, {}, function (data) {
+            RefillDataForSelect2({ $ddl: $("#bien-dong-thay-doi-loai [name='MaLDT_Type5_SelfServing']"), val: "", data: data, id: "IDKhaNangPV", name: "TenKhaNangPV" });
+        });
+
+        $.post(SVC_GETALLTYPESOBJ, {}, function (data) {
+            var opts = "";
+            data.forEach(function (group, index, array) {
+                opts += "<optgroup label='" + group.Key.MaLDT + " - " + group.Key.TenLDT + "'>";
+                group.Value.forEach(function (type, index, array) {
+                    opts += "<option value='" + type.MaLDT + "' data-heso='" + type.HeSo + "'>" + type.MaLDT + " - " + type.TenLDT + "</option>";
+                });
+                opts += "</optgroup>";
+            });
+            $("#bien-dong-thay-doi-loai [name='MaLDT']").append(opts);
+            $("#bien-dong-thay-doi-loai [name='MaLDT']").select2().select2("val", "");
+        });
+
+        setTimeout(function () {
+            $("#bien-dong-thay-doi-loai [name='MaLDT']").select2().select2("val", "");
+            $("#bien-dong-thay-doi-loai [name='MaLDT_Type4_MaritalStatus']").select2().select2("val", "");
+            $("#bien-dong-thay-doi-loai [name='MaLDT_Type5_SelfServing']").select2().select2("val", "");
+        }, 100);
+
+        $("#bien-dong-thay-doi-loai [name='MaLDT']").on("change", function (e) {
+            var val = $(this).val();
+            var type = val.substr(0, 2);
+            $("#bien-dong-thay-doi-loai [data-con='MaLDT']:not([data-val='" + type + "'])").addClass("hide");
+            $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='" + type + "']").removeClass("hide");
+            if (!IsNullOrEmpty(val)) {
+                var heso = parseFloat($(this).find("option:selected").attr("data-heso"));
+                var muctc = parseFloat($("#bien-dong-thay-doi-loai [name='MucTroCapCoBan']").val());
+                $("#bien-dong-thay-doi-loai [name='MucTC']").val(heso * muctc);
+            }
+        });
+
+        $("#bien-dong-thay-doi-loai input[type='text'].date-of-birth-year").spinner({
+            min: 1000,
+            max: 9999,
+            step: 1,
+            numberFormat: "n"
+        });
+
+        $("#bien-dong-thay-doi-loai input[type='text'].date-of-birth-month").spinner({
+            min: 1,
+            max: 12,
+            step: 1,
+            numberFormat: "n"
+        });
+
+        $("#bien-dong-thay-doi-loai input[type='text'].date-of-birth-date").spinner({
+            min: 1,
+            max: 31,
+            step: 1,
+            numberFormat: "n"
+        });
+
+        $("#bien-dong-thay-doi-loai input[type='text'].currency").spinner({
+            min: 0,
+            step: 100000.00,
+            numberFormat: "n"
+        });
+
+        $("#bien-dong-thay-doi-loai [name='NgayBienDong']").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy"
+        });
+
+        $("#bien-dong-thay-doi-loai [data-action='cancel']").click(function () {
+            $popup_bien_dong.dialog("close");
+        });
+
+        $("#bien-dong-thay-doi-loai").on("submit", function (e) {
+            var $frm = $(this);
+            var $ddl_MaLDT = $frm.find("[name='MaLDT']");
+            var $txt_MucTC = $frm.find("[name='MucTC']");
+            var $txt_NgayBienDong = $frm.find("[name='NgayBienDong']");
+            $txt_MucTC.val($.trim($txt_MucTC.val()));
+            $txt_NgayBienDong.val($.trim($txt_NgayBienDong.val()));
+
+            if (IsNullOrEmpty($ddl_MaLDT.val())) {
+                setTimeout(function () { $ddl_MaLDT.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn loại.");
+                return false;
+            }
+            var $txt_MaLDT_Type1_InfoFather = $frm.find("[name='MaLDT_Type1_InfoFather']");
+            var $txt_MaLDT_Type1_InfoMother = $frm.find("[name='MaLDT_Type1_InfoMother']");
+            var $trs_MaLDT_Children = $frm.find("[data-con='MaLDT'][data-val='03'] #ListTable tbody tr[row-id]");
+            var $ddl_MaLDT_Type4_MaritalStatus = $frm.find("[name='MaLDT_Type4_MaritalStatus']");
+            var $txt_MaLDT_Type4_InfoAdditional = $frm.find("[name='MaLDT_Type4_InfoAdditional']");
+            var $ddl_MaLDT_Type5_SelfServing = $frm.find("[name='MaLDT_Type5_SelfServing']");
+            var $txt_MaLDT_Type5_Carer = $frm.find("[name='MaLDT_Type5_Carer']");
+            $txt_MaLDT_Type1_InfoFather.val($.trim($txt_MaLDT_Type1_InfoFather.val()));
+            $txt_MaLDT_Type1_InfoMother.val($.trim($txt_MaLDT_Type1_InfoMother.val()));
+            $txt_MaLDT_Type4_InfoAdditional.val($.trim($txt_MaLDT_Type4_InfoAdditional.val()));
+            $txt_MaLDT_Type5_Carer.val($.trim($txt_MaLDT_Type5_Carer.val()));
+            if ($ddl_MaLDT.val().startsWith("01")) {
+                if (IsNullOrEmpty($txt_MaLDT_Type1_InfoFather.val())) {
+                    $txt_MaLDT_Type1_InfoFather.focus();
+                    notify_error("Lỗi", "Vui lòng nhập thông tin cha.");
+                    return false;
+                }
+                if (IsNullOrEmpty($txt_MaLDT_Type1_InfoMother.val())) {
+                    $txt_MaLDT_Type1_InfoMother.focus();
+                    notify_error("Lỗi", "Vui lòng nhập thông tin mẹ.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("03")) {
+                if ($trs_MaLDT_Children.length == 0) {
+                    $frm.find("[data-con='MaLDT'][data-val='03'] [data-action='add']").trigger("click");
+                    notify_error("Lỗi", "Vui lòng thêm thông tin » con.");
+                    return false;
+                } else if ($ddl_MaLDT.val().startsWith("0301") && $trs_MaLDT_Children.length != 1) {
+                    notify_error("Lỗi", "Loại 0301 giành cho đối tượng nuôi 1 con.");
+                    return false;
+                } else if ($ddl_MaLDT.val().startsWith("0302") && $trs_MaLDT_Children.length < 2) {
+                    $frm.find("[data-con='MaLDT'][data-val='03'] [data-action='add']").trigger("click");
+                    notify_error("Lỗi", "Loại 0302 giành cho đối tượng nuôi 2 con trở lên.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("04")) {
+                if (IsNullOrEmpty($ddl_MaLDT_Type4_MaritalStatus.val())) {
+                    setTimeout(function () { $ddl_MaLDT_Type4_MaritalStatus.select2("open"); }, 200);
+                    notify_error("Lỗi", "Vui lòng chọn tình trạng hôn nhân.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("05")) {
+                if (IsNullOrEmpty($ddl_MaLDT_Type5_SelfServing.val())) {
+                    setTimeout(function () { $ddl_MaLDT_Type5_SelfServing.select2("open"); }, 200);
+                    notify_error("Lỗi", "Vui lòng chọn khả năng phục vụ.");
+                    return false;
+                }
+            }
+            if (IsNullOrEmpty($txt_MucTC.val())) {
+                $txt_MucTC.focus();
+                notify_error("Lỗi", "Vui lòng nhập mức trợ cấp.");
+                return false;
+            }
+            var val_muc_tc = parseFloat($txt_MucTC.val());
+            if (isNaN(val_muc_tc) || val_muc_tc < 0) {
+                $txt_MucTC.focus();
+                notify_error("Lỗi", "Mức trợ cấp không đúng định dạng.");
+                return false;
+            }
+            if (IsNullOrEmpty($txt_NgayBienDong.val())) {
+                $txt_NgayBienDong.focus();
+                notify_error("Lỗi", "Vui lòng chọn ngày biến động.");
+                return false;
+            }
+            if (IsNullOrEmpty(ParseTime($txt_NgayBienDong.val()))) {
+                $txt_NgayBienDong.focus();
+                notify_error("Lỗi", "Ngày biến động không đúng định dạng.");
+                return false;
+            }
+            if ($ddl_MaLDT.val() == "@Model.MaLDT") {
+                setTimeout(function () { $ddl_MaLDT.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn loại mới.");
+                return false;
+            }
+            if (!CheckDateOfBirth_MaLDT({
+                year: "@Model.NamSinh",
+                month: "@Model.ThangSinh",
+                date: "@Model.NgaySinh",
+                type: $ddl_MaLDT.val()
+            })) {
+                setTimeout(function () { $ddl_MaLDT.select2("open"); }, 200);
+                notify_error("Lỗi", "Ngày sinh không phù hợp với loại.");
+                return false;
+            }
+
+            var data = $frm.serializeObject();
+            data.NgayBienDong = TimeForReq(ParseTime(data.NgayBienDong));
+            var dt_old = ParseTime("@Model.NgayHuong");
+            var dt_new = ParseTime(data.NgayBienDong);
+            dt_old = new Date(dt_old.getFullYear(), dt_old.getMonth() - 1, 1, 0, 0, 0, 0);
+            dt_new = new Date(dt_new.getFullYear(), dt_new.getMonth() - 1, 1, 0, 0, 0, 0);
+            if (dt_new <= dt_old) {
+                notify_error("Lỗi", "Tháng biến động phải lớn hơn tháng đang hưởng.");
+                $txt_NgayBienDong.focus();
+                return false;
+            }
+            data.MaLDT_Details = [];
+            if ($ddl_MaLDT.val().startsWith("01")) {
+                data.MaLDT_Details.push({
+                    Type1_InfoFather: $txt_MaLDT_Type1_InfoFather.val(),
+                    Type1_InfoMother: $txt_MaLDT_Type1_InfoMother.val()
+                });
+            } else if ($ddl_MaLDT.val().startsWith("03")) {
+                $trs_MaLDT_Children.each(function (index, element) {
+                    data.MaLDT_Details.push({
+                        Id: parseInt($(element).attr("data-id")),
+                        Type3_FullName: $(element).attr("data-full-name"),
+                        Type3_DateOfBirth: TimeForReq(ParseTime($(element).attr("data-date-of-birth"))),
+                        Type3_DateOfBirth_IsMonth: $(element).attr("data-date-of-birth-is-month") == "1" ? true : false,
+                        Type3_DateOfBirth_IsDate: $(element).attr("data-date-of-birth-is-date") == "1" ? true : false,
+                        Type3_Gender: $(element).attr("data-gender"),
+                        Type3_CurrAddr: $(element).attr("data-curr-addr"),
+                        Type3_StatusLearn: $(element).attr("data-status-learn")
+                    });
+                });
+            } else if ($ddl_MaLDT.val().startsWith("04")) {
+                data.MaLDT_Details.push({
+                    Type4_MaritalStatus: $ddl_MaLDT_Type4_MaritalStatus.val(),
+                    Type4_InfoAdditional: $txt_MaLDT_Type4_InfoAdditional.val()
+                });
+            } else if ($ddl_MaLDT.val().startsWith("05")) {
+                data.MaLDT_Details.push({
+                    Type5_SelfServing: $ddl_MaLDT_Type5_SelfServing.val(),
+                    Type5_Carer: $txt_MaLDT_Type5_Carer.val()
+                });
+            }
+            $.ajax({
+                url: $frm.attr("action"),
+                type: $frm.attr("method"),
+                data: JSON.stringify({ model: data }, null, 0),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result, textStatus, jqXHR) {
+                    if (result != null && result.Status == "error") {
+                        notify_error("Lỗi", result.Message);
+                    } else {
+                        notify_info("Thông báo", "Tạo biến động thành công.");
+                        $popup_bien_dong.dialog("close");
+                        Filter({});
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.warn("textStatus: " + textStatus + " | errorThrown: " + errorThrown);
+                }
+            });
+            return false;
+        });
+
+        $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='03']").on("click", "[data-action='add']", function (e) {
+            var $popup = $("#popup-maldt-children");
+            var $frm = $popup.find("form");
+
+            $frm.trigger("reset");
+            $frm.find("[name='MaLDT_Row_Id']").val(NewGuid());
+            $frm.find("[name='MaLDT_Id']").val(0);
+
+            $popup.dialog("option", "title", "Thêm mới » con");
+            $popup.dialog("open");
+        });
+
+        $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='03']").on("click", "[data-action='edit']", function (e) {
+            var $popup = $("#popup-maldt-children");
+            var $frm = $popup.find("form");
+            var $row = $(this).closest("tr[data-id]");
+
+            $frm.find("[name='MaLDT_Row_Id']").val($row.attr("row-id"));
+            $frm.find("[name='MaLDT_Id']").val($row.attr("data-id"));
+            $frm.find("[name='MaLDT_Type3_FullName']").val($row.attr("data-full-name"));
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Date']").val($row.attr("data-date-of-birth-is-date") == "1" ? $row.attr("data-date-of-birth").substr(0, 2) : "");
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Month']").val($row.attr("data-date-of-birth-is-month") == "1" ? $row.attr("data-date-of-birth").substr(3, 2) : "");
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Year']").val($row.attr("data-date-of-birth").substr(6, 4));
+            $frm.find("[name='MaLDT_Type3_Gender']").select2().select2("val", $row.attr("data-gender"));
+            $frm.find("[name='MaLDT_Type3_CurrAddr']").val($row.attr("data-curr-addr"));
+            $frm.find("[name='MaLDT_Type3_StatusLearn']").val($row.attr("data-status-learn"));
+
+            $popup.dialog("option", "title", "Chỉnh sửa » con");
+            $popup.dialog("open");
+        });
+
+        $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='03']").on("click", "[data-action='delete']", function (e) {
+            var $tbl = $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='03'] #ListTable");
+            $(this).closest("tr").remove();
+        });
+
+        $("#popup-maldt-children form").on("submit", function (e) {
+            var $frm = $(this);
+            var row_id = $frm.find("[name='MaLDT_Row_Id']").val();
+            var id = $frm.find("[name='MaLDT_Id']").val();
+            var $txt_full_name = $frm.find("[name='MaLDT_Type3_FullName']");
+            var $txt_date_of_birth_date = $frm.find("[name='MaLDT_Type3_DateOfBirth_Date']");
+            var $txt_date_of_birth_month = $frm.find("[name='MaLDT_Type3_DateOfBirth_Month']");
+            var $txt_date_of_birth_year = $frm.find("[name='MaLDT_Type3_DateOfBirth_Year']");
+            var $ddl_gender = $frm.find("[name='MaLDT_Type3_Gender']");
+            var $txt_curr_addr = $frm.find("[name='MaLDT_Type3_CurrAddr']");
+            var $txt_status_learn = $frm.find("[name='MaLDT_Type3_StatusLearn']");
+
+            if (IsNullOrEmpty($.trim($txt_full_name.val()))) {
+                notify_error("Lỗi", "Vui lòng nhập họ & tên.");
+                $txt_full_name.focus();
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_gender.val())) {
+                notify_error("Lỗi", "Vui lòng chọn giới tính.");
+                $ddl_gender.select2("open");
+                return false;
+            }
+            if (!CheckDateOfBirth({ $txt_year: $txt_date_of_birth_year, $txt_month: $txt_date_of_birth_month, $txt_date: $txt_date_of_birth_date })) {
+                return false;
+            }
+
+            var full_name = $.trim($txt_full_name.val());
+            var date_of_birth_is_date = !IsNullOrEmpty($txt_date_of_birth_date.val());
+            var date_of_birth_is_month = !IsNullOrEmpty($txt_date_of_birth_month.val());
+            var date_of_birth_val = (date_of_birth_is_date ? $txt_date_of_birth_date.val() : "01") + "/" + (date_of_birth_is_month ? $txt_date_of_birth_month.val() : "01") + "/" + $txt_date_of_birth_year.val();
+            var date_of_birth_txt = (date_of_birth_is_date ? $txt_date_of_birth_date.val() + "/": "") + (date_of_birth_is_month ? $txt_date_of_birth_month.val() + "/" : "") + $txt_date_of_birth_year.val();
+            var gender = $ddl_gender.val();
+            var curr_addr = $.trim($txt_curr_addr.val());
+            var status_learn = $.trim($txt_status_learn.val());
+
+            var $tbl = $("#bien-dong-thay-doi-loai [data-con='MaLDT'][data-val='03'] #ListTable");
+            var $old_tr = $tbl.find("tbody tr[row-id='{0}']".format(row_id));
+            var $new_tr = '<tr row-id="{0}"'.format(row_id) +
+                'data-id="{0}"'.format(id) +
+                'data-full-name="{0}"'.format(full_name) +
+                'data-date-of-birth="{0}"'.format(date_of_birth_val) +
+                'data-date-of-birth-is-month="{0}"'.format(date_of_birth_is_month ? 1 : 0) +
+                'data-date-of-birth-is-date="{0}"'.format(date_of_birth_is_date ? 1 : 0) +
+                'data-gender="{0}"'.format(gender) +
+                'data-curr-addr="{0}"'.format(curr_addr) +
+                'data-status-learn="{0}">'.format(status_learn) +
+                '<td><span>{0}</span></td>'.format(full_name) +
+                '<td class="align-r"><span>{0}</span></td>'.format(date_of_birth_txt) +
+                '<td class="no_padding align-c">' +
+                    '<span class="btn-group">' +
+                        '<a href="javascript:void(0);" class="btn btn-small" data-action="edit" title="Chỉnh sửa"><i class="icon-pencil"></i></a>' +
+                        '<a href="javascript:void(0);" class="btn btn-small" data-action="delete" title="Xóa bỏ"><i class="icon-trash"></i></a>' +
+                    '</span>' +
+                '</td>' +
+            '</tr>';
+
+            if ($old_tr.length > 0) {
+                $old_tr.replaceWith($new_tr);
+            } else {
+                $tbl.find("tbody").append($new_tr);
+            }
+            $("#popup-maldt-children").dialog("close");
+            return false;
+        });
+    });
+</script>

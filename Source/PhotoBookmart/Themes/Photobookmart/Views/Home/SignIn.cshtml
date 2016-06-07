@@ -1,0 +1,40 @@
+﻿@model LoginModel
+@{
+    ViewBag.Title = "Đăng nhập";
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout1.cshtml";
+}
+@using (Html.BeginForm("SignInSubmit", "Home", FormMethod.Post, new { @id = "frmSignIn", @class = "ab-form ab-signin" }))
+{
+    <div class="ab-title display-none">
+        <h2>
+            Sign In - @CurrentWebsite.Name</h2>
+    </div>
+    <div class="ab-hidden">
+        @Html.HiddenFor(m => m.RedirectTo)
+    </div>
+    <div>
+        <label>
+            Email<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.UserName, new { @class = "ab-textbox" })
+    </div>
+    <div>
+        <label>
+            Password<span class="ab-required">*</span></label>
+        @Html.PasswordFor(m => m.Pass, new { @class = "ab-textbox" })
+    </div>
+    <div>
+        <input type="checkbox" name="CheckRemember" @{ if (Model != null && Model.CheckRemember)
+                                                       { <text>checked="checked"</text> }
+                                                       else { } } value="true" />
+        <span>&nbsp;Remember me!</span>
+    </div>
+    <div>
+        <a rel="forgot-password" href="@Url.Action("ForgotPassword", "Home", new { })">Forgot
+            password?</a> <a rel="register" href="@Url.Action("Register", "Home", new { redirectTo = Model.RedirectTo })">
+                Create new account?</a>
+    </div>
+    <div class="ab-action align-right">
+        <input type="submit" value="Login" class="ab-submit" />
+        <input type="reset" value="Reset" class="ab-reset" />
+    </div>
+}

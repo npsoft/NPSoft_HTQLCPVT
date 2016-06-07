@@ -1,0 +1,34 @@
+﻿@model DoiTuongSearchModel
+@{ 
+    ViewBag.Title = "QL Đối tượng";
+}
+
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<div class="head">
+    <h3>Quản lý đối tượng</h3>
+</div>
+@Html.Partial("_Search")
+@Html.Partial("_Search_Quick")
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>
+            <i class="icon-table"></i>Danh sách đối tượng
+            <span data-action="search-advanced" class="float-right cursor-pointer">
+                <i class="icon-search"></i>Tìm kiếm nâng cao
+            </span>
+        </span>
+    </div>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <a rel="add-new" href="@Url.Action("Add", "WebsiteProduct", new { })" class="btn">
+                <i class="icol-add"></i>Thêm mới
+            </a>
+        </div>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List", new { Model })
+    </div>
+</div>
+<div class="dialog" style="display:none;" id="dialog-bien-dong" title="Tạo biến động"></div>
+<div class="dialog" style="display:none;" id="dialog-lich-su" title="Lịch sử biến động"></div>

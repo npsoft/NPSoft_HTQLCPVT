@@ -1,0 +1,62 @@
+﻿@{
+    Layout = null;
+}
+@* For Dialog Order Automated  Shipping *@
+<div class="dialog mws-panel-body" id="Order_Automated_Shipping_Dialog" style="display: none;"
+    title="">
+    @using (Html.BeginForm("AutomatedShipping", "Order", FormMethod.Post, new { @id = "Order_Automated_Shipping_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Order Number</label>
+                <div class="mws-form-item">
+                    <input type="text" name="Order_Number" class="large" />
+                    <span>Enter order number in 6 digits format</span>
+                </div>
+            </div>
+            <div class="mws-form-row large" id="Con_Shipping_Method">
+                <label class="mws-form-label">
+                    Shipping Method</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_Method" class="large mws-select2">
+                        @foreach (Enum_ShippingType e in (Enum_ShippingType[])Enum.GetValues(typeof(Enum_ShippingType)))
+                        {
+                            <option value="@e">@e.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row large" id="Con_Shipping_Status">
+                <label class="mws-form-label">
+                    Shipping Status</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_Status" id="Dialog_Shipping_Shipping_Status" class="large mws-select2">
+                        @foreach (Enum_ShippingStatus e in (Enum_ShippingStatus[])Enum.GetValues(typeof(Enum_ShippingStatus)))
+                        {
+                            <option value="@e">@e.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row" id="Con_Shipping_TrackingNumber">
+                <label class="mws-form-label">
+                    Tracking Number</label>
+                <div class="mws-form-item">
+                    <input type="text" name="Shipping_TrackingNumber" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row large" id="Con_Auto_Approve">
+                <label class="mws-form-label">
+                    &nbsp;</label>
+                <div class="mws-form-item">
+                    <input type="checkbox" name="Auto_Approve" value="true" />
+                    <span>Auto approve when update success</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script language="javascript" type="text/javascript">
+    
+</script>

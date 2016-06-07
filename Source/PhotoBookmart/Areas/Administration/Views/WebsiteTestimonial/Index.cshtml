@@ -1,0 +1,70 @@
+﻿@model Website
+@{
+    ViewBag.Title = "Manage Testimonials for " + Model.Name;
+    var langs = (List<Language>)ViewData["Langs"];
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+    <div>
+        <div class="grid_3">
+            <a type="button" class="btn" href="@Url.Action("Detail", "Website", new { id = Model.Id })" >
+                <i class="icol-arrow-left"></i>@Model.Name Detail</a> <a type="button" class="btn btn-primary"
+                   href="@Url.Action("Add")" id="nav_add_button">New Testimonials</a>
+        </div>
+        <div class="grid_3">
+            Language
+            <select class="large" id="Page_langId">
+                @foreach (var l in langs)
+                {
+                    <option value="@l.Id">@l.LanguageName</option>
+                }
+            </select>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div class="mws-panel grid_8 listuser">
+    @*<div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List", new { site_id = Model.Id })
+    </div>*@
+</div>
+<script type="text/javascript">
+    function PageTable_Reload() {
+        show_loading();
+        var lang_id = jQuery("#Page_langId").val();
+        if (lang_id ==null)
+        {
+            lang_id=0;
+        }
+         $.get("@Url.Action("List")"+"&lang_id="+lang_id, function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+    }
+
+    $(document).ready(function () {
+        PageTable_Reload();
+
+        jQuery("#Page_langId").change(function(){
+            PageTable_Reload();
+        });
+
+        jQuery("#nav_add_button").click(function(){
+            var lang_id=0;
+            if (jQuery("#Page_langId").val() !=null)
+            {
+                lang_id = jQuery("#Page_langId").val();
+            }
+            var url="@Url.Action("Add")"+"&lang_id="+lang_id;
+            window.location.href=url;
+            return false;
+        });
+    })
+
+</script>

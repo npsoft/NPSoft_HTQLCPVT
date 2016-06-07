@@ -1,0 +1,11 @@
+﻿Table Coupon
+- Add DiscountAmountDisplay double
+- Add DiscountAmountDisplayCurrencySign string
+
+Table Order
+- add Coupon_DiscountDisplay : string
+
+Table Coupon Instance
+
+Table Product
+- Add MyPhotoCreationId : int

@@ -1,0 +1,7 @@
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\bin\Debug\ElFinder.Net.dll
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\bin\Debug\ElFinder.Net.pdb
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\bin\Debug\Newtonsoft.Json.dll
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\bin\Debug\Newtonsoft.Json.xml
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\obj\Debug\ElFinder.Net.dll
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\obj\Debug\ElFinder.Net.pdb
+G:\NPSoft_HTQLNHCS\Common\ElFinder.Net\obj\Debug\ElFinder.Net.csprojResolveAssemblyReference.cache

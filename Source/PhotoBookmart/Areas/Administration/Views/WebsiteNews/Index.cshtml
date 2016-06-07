@@ -1,0 +1,21 @@
+﻿@model Site_News_Category
+@{    
+    ViewBag.Title = "News in " + Model.Name;
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+    <div>
+        <a type="button" href="@Url.Action("Detail", "Website")" class="btn">
+            <i class="icol-arrow-left"></i>&nbsp;Back</a> <a type="button" class="btn btn-primary"
+                href="@Url.Action("Add", new { cat_id = Model.Id })">Add News</a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List", new { cat_id = Model.Id })
+    </div>
+</div>

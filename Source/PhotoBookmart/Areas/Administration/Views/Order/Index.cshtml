@@ -1,0 +1,53 @@
+﻿@model OrderFilterModel
+@{
+    ViewBag.Title = "Orders Management";
+    var page = (int)ViewData["page"];
+    var u = CurrentUser;
+    var hasSpecialRole = u.HasRole(RoleEnum.OrderManagement) || u.HasRole(RoleEnum.Administrator);
+    
+    var hasAutomatedShippingRole = u.HasRole(RoleEnum.Administrator) || u.HasRole(RoleEnum.OrderManagement) || u.HasRole(RoleEnum.Shipping);
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<script  type="text/javascript" src="@Url.ContentArea("~/Content/scripts/OrderManagement.js")"></script>
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+</div>
+@Html.Partial("_SearchOrder")
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span id="order_page_title"><i class="icon-table"></i>
+            @if (hasSpecialRole)
+            { <text>Orders Management</text>}
+            else
+            { <text>Orders available for your works</text> }</span>
+    </div>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+               @* @if (hasSpecialRole || u.HasRole(RoleEnum.Shipping))
+                {
+                    <a href="javascript:void(0);" id="export_order_shipping" class="btn"><i class="icol-page-white-excel">
+                    </i>Export Orders</a>
+                }*@
+                <a type="button" class="btn btn-primary" id="orderpage_quicksearch" href="javascript:void(0)">
+                    Quick navigate</a>
+                @if (hasAutomatedShippingRole)
+                {
+                    <a href="javascript:void(0);" id="order_automated_shipping" class="btn btn-warning">
+                        Automated Shipping
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="mws-panel-body no-padding" id="OrderMan_Wrapper" data-url="@Url.Action("List")">
+        <div id="ListTable_wrapper" class="dataTables_wrapper  listuser" role="grid">
+            @Html.Action("List", new { page = page })
+        </div>
+    </div>
+</div>
+@if (hasAutomatedShippingRole)
+{
+    @Html.Partial("_OAutomatedShipping");
+}

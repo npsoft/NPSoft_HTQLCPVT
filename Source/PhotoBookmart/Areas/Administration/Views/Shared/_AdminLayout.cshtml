@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>@ViewBag.Title - HTQLNHCS</title>
+    <!-- Viewport Metatag -->
+    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta http-equiv="Cache-control" content="public">
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/jquery-1.8.3.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/Admin.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/jquery.dataTables.min.js")"></script>
+    <!-- Plugin Stylesheets first to ease overrides -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/colorpicker/colorpicker.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/custom-plugins/wizard/wizard.css")" media="screen">
+    <!-- Required Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/bootstrap/css/bootstrap.min.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/bootstrap/css/bootstrap-responsive.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/fonts/ptsans/stylesheet.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/fonts/icomoon/style.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/mws-style.min.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/icons/icol16.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/icons/icol32.css")" media="screen">
+    <!-- Demo Stylesheet -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/demo.css")" media="screen">
+    <!-- jQuery-UI Stylesheet -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/jui/css/jquery.ui.all.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/jui/jquery-ui.custom.css")" media="screen">
+    <!-- Theme Stylesheet -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/mws-theme.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/themer.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/pnotify.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/ibutton/jquery.ibutton.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/select2/select2.css")" media="screen">
+    <!-- For our custom CSS -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/stylesheet_common.css")" media="screen">
+</head>
+<body>
+    <!-- Header -->
+    <div id="mws-header" class="clearfix">
+        <!-- Logo Container -->
+        <div id="mws-logo-container">
+            <!-- Logo Wrapper, images put within this wrapper will always be vertically centered -->
+            <div id="mws-logo-wrap">
+               <img src="@Url.ContentArea("~/Content/admin_template/images/logo.png")">
+            </div>
+        </div>
+        <!-- User Tools (notifications, logout, profile, change password) -->
+        <div id="mws-user-tools" class="clearfix">
+            <!-- Notifications -->
+            @Html.Action("TopRight_NotificationArea", "Common")
+            <!-- Messages -->
+            @Html.Action("TopRight_Message", "Common")
+            <!-- User Information and functions section -->
+            @Html.Action("TopRight_UserInfo", "Common")
+        </div>
+    </div>
+    <!-- Start Main Wrapper -->
+    <div id="mws-wrapper">
+        <!-- Necessary markup, do not remove -->
+        <div id="mws-sidebar-stitch">
+        </div>
+        <div id="mws-sidebar-bg">
+        </div>
+        @Html.Action("Sidebar", "Common")
+        <!-- Main Container Start -->
+        <div id="mws-container" class="clearfix">
+            <!-- Inner Container Start -->
+            <div class="container">
+               @* @Html.Action("StatisticArea", "Common")*@
+                <!-- Main Body Start -->
+                @RenderBody()
+                <!-- Main Body End -->
+            </div>
+            <!-- Inner Container End -->
+            <!-- Footer -->
+            <div id="mws-footer">
+                Copyright &#169; NPSoft  @DateTime.Now.Year. All Rights Reserved.
+            </div>
+        </div>
+        <!-- Main Container End -->
+    </div>
+    <!-- Loading area -->
+    <div class="loading-box" style="position: fixed; top: 30%; left: 50%; background: #333;
+        padding: 20px; border-radius: 5px; opacity: 0.8; display: none; z-index: 9999;">
+        <img src="@Url.ContentArea("~/Content/admin_template/images/loader_wh.gif")">
+    </div>
+    <!-- JavaScript Plugins -->
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/jquery.mousewheel.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/jquery.placeholder.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/custom-plugins/fileinput.min.js")"></script>
+    <!-- jQuery-UI Dependent Scripts -->
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/js/jquery-ui-1.9.2.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/jquery-ui.custom.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/js/jquery.ui.touch-punch.min.js")"></script>
+    <!-- Plugin Scripts -->
+    <!--[if lt IE 9]>
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/excanvas.min.js")"></script>
+    <![endif]-->
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/flot/jquery.flot.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/flot/plugins/jquery.flot.tooltip.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/flot/plugins/jquery.flot.pie.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/flot/plugins/jquery.flot.stack.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/flot/plugins/jquery.flot.resize.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/colorpicker/colorpicker-min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/validate/jquery.validate-min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/custom-plugins/wizard/wizard.min.js")"></script>
+    <link href="@Url.ContentArea("~/Content/admin_template/jui/css/jquery.ui.timepicker.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/js/timepicker/jquery-ui-timepicker.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/js/timepicker/datetimepicker.js")"></script>
+    <!-- Core Script -->
+    <script src="@Url.ContentArea("~/Content/admin_template/bootstrap/js/bootstrap.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/js/core/mws.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/jquery.pnotify.min.js")" type="text/javascript"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/ibutton/jquery.ibutton.min.js")" type="text/javascript"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/select2/select2.min.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@Url.ContentArea("~/Content/ckeditor/ckeditor.js")" ></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/js/demo/demo.table.js")"></script>
+</body>
+</html>

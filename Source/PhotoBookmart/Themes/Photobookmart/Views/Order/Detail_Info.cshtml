@@ -1,0 +1,133 @@
+﻿@model Order
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li style="text-align: center;">
+                <img src="/barcode/@Model.Id" title="Barcode of order #@Model.Order_Number" />
+            </li>
+            <li>
+                <div class="title">
+                    Order Id</div>
+                <div class="text">@Model.Order_Number</div>
+            </li>
+            <li>
+                <div class="title">
+                    On</div>
+                <div class="text">@Model.CreatedOn</div>
+            </li>
+            <li>
+                <div class="title">
+                    Discount</div>
+                <div class="text">
+                    @Model.Coupon_TotalDiscount.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Sub total</div>
+                <div class="text">
+                    @Model.Bill_SubTotal.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Quantity</div>
+                <div class="text">
+                    @Model.Quantity
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Grand total</div>
+                <div class="text">
+                    @Model.Bill_GrandTotal.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                </div>
+            </li>
+            @if (Model.Bill_GST > 0)
+            {
+                <li>
+                    <div class="title">
+                        GST</div>
+                    <div class="text">
+                        @Model.Bill_GST.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                    </div>
+                </li>
+            }
+            <li>
+                <div class="title">
+                    Total</div>
+                <div class="text">
+                    @Model.Bill_Total.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Status</div>
+                @if (Model.StatusEnum == Enum_OrderStatus.Received)
+                {
+                    <div class="text">
+                        Waiting</div>
+                }
+                else if (Model.Status > (int)Enum_OrderStatus.Received && Model.Status < (int)Enum_OrderStatus.Shipping)
+                {
+                    <div class="text">
+                        Processing</div>
+                }
+                else if (Model.StatusEnum == Enum_OrderStatus.Shipping)
+                {
+                    <div class="text">
+                        Shipping</div>
+                }
+                else if (Model.StatusEnum == Enum_OrderStatus.Finished)
+                {
+                    <div class="text">
+                        Closed order</div>
+                }
+                else
+                {
+                    <div class="text">@Model.StatusEnum.DisplayName()</div>
+                }
+            </li>
+            <li>
+                <div class="title">
+                    Payment Status</div>
+                <div class="text">@Model.PaymentStatusEnum.DisplayName()</div>
+            </li>
+            <li>
+                <div class="title">
+                    Shipping Status</div>
+                <div class="text">@Model.Shipping_Status.DisplayName()</div>
+            </li>
+            <li>
+                <div class="title tt" title="Start using on">
+                    Customer</div>
+                <div class="text">
+                    @Model.Customer_Name
+                    (@Model.Customer_Username)
+                    <br />
+                    @Model.Customer_Email
+                    <br />
+                </div>
+            </li>
+            @if (Model.UploadFilesTicketStatus == Enum_UploadFilesTicketStatus.Default.ToString())
+            {
+                <li>
+                    <div class="title tt" style="width: 200px;">
+                        <strong>File Corrupt Upload </strong>
+                    </div>
+                    <div class="text">
+                        &nbsp;
+                    </div>
+                </li>
+                <li>
+                    @{
+                ViewDataDictionary viewData = new ViewDataDictionary();
+
+                viewData.Add("TicketId", (long)ViewData["TicketId"]);
+                    }
+                    @Html.Partial("_FileUpload", Model, viewData)
+                </li>
+            }
+        </ul>
+    </div>
+</div>

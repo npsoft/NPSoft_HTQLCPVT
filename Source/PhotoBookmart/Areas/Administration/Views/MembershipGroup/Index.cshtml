@@ -1,0 +1,81 @@
+﻿@model Site_MemberGroup
+@{    
+    ViewBag.Title = "Members in " + Model.Name;
+    var users = (List<ABUserAuth>)ViewData["Users"];
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+    <div>
+        <a type="button" href="@Url.Action("Detail", "Website")" class="btn btn-primary">
+            <i class="icol-arrow-left"></i>&nbsp;Back</a> <a type="button" class="btn btn-primary"
+                href="javascript:void(0)" id="groupmember_add">Add user</a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List", new { group_id = Model.Id })
+    </div>
+</div>
+@* For the dialog *@
+<div class="dialog mws-panel-body" id="Dialog_Form" style="display: none;" title="Add Topic">
+    @using (Html.BeginForm("Update", "MembershipGroup", FormMethod.Post, new { @id = "DForm", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="0" id="DF_Id" />
+        <input type="hidden" name="GroupId" value="@Model.Id" id="DF_GroupId" />
+        <div class="mws-form-block">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    User</label>
+                <div class="mws-form-item">
+                    <select name="UserId" id="DF_UserId">
+                        <option value="0">Please select user</option>
+                        @foreach (var x in users)
+                        {
+                            if (string.IsNullOrEmpty(x.FullName))
+                            {
+                            <option value="@x.Id">@x.UserName</option>
+                            }
+                            else
+                            {
+                            <option value="@x.Id">@x.FullName (@x.UserName)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#Dialog_Form").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Ok": function () {
+                    // ajax submit
+                    show_loading();
+                    jQuery("#DForm").trigger("submit");
+
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#groupmember_add").click(function () {
+
+            $("#Dialog_Form").dialog('option', 'title', 'Add user member');
+
+            $("#Dialog_Form").dialog('open')
+        });
+    })
+
+</script>

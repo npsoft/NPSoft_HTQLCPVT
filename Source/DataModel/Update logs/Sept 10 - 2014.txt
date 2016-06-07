@@ -1,0 +1,10 @@
+﻿Table Product
+- Add IsAllowCoverMaterialSelect: bool
+- Add Paper: text
+- Add Orientation: text
+
+table Product category
+- Add ShortCode: string
+
+table Order
+- Add CouponType: int

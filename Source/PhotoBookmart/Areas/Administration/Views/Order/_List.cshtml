@@ -1,0 +1,329 @@
+﻿@model List<Order>
+@{
+    var u = CurrentUser;
+    var hasSpecialRole = u.HasRole(RoleEnum.OrderManagement) || u.HasRole(RoleEnum.Administrator);
+    // for pagination
+    var pages = (int)ViewData["pages"];
+    var page = (int)ViewData["page"];
+    var total_items = (int)ViewData["total_items"];
+    string action_name = ViewData["action"].ToString();
+    RouteValueDictionary route = new RouteValueDictionary();
+    route.Add("area", "Administration");
+    var cats = Db.Select<Product_Category>();
+}
+<script type="text/javascript">
+    var actionName = "@action_name";
+
+    $(document).ready(function () {
+
+        Handler_Assign_Reset_Button();
+
+        if (actionName == "Search") {
+
+            $(".dataTables_paginate a:not([class*='paginate_button_disabled'])").on("click", function (e) {
+
+                var page = 0;
+
+                $this = $(this);
+
+                if ($this.hasClass("paginate_active")) {
+
+                    page = $this.text();
+
+                } else {
+
+                    var href = $this.attr("href");
+
+                    var posE = href.lastIndexOf("=");
+
+                    page = href.substr(posE + 1, href.length - posE);
+                }
+
+                $("form#Order_Search input[name='page']").val(page);
+
+                $("form#Order_Search").trigger("submit");
+
+                return false;
+            });
+        }
+    });
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th style="width: 50px;">
+                Order Number
+            </th>
+            @if (hasSpecialRole)
+            {
+                <th style="width: 30px;">
+                    <i class="icon-pie-chart-2"></i>
+                </th>
+            }
+            <th style="width: 80px;">
+                Status
+            </th>
+            <th>
+                Customer
+            </th>
+            <th>
+                Product
+            </th>
+            <th style="width: 50px;">
+                On
+            </th>
+            <th style="width: 70px;">
+                Total
+            </th>
+            @*<th style="width: 50px;">
+                Shipping Method
+            </th>*@
+            <th style="width: 50px;">
+                Payment Status
+            </th>
+            <th style="width: 50px;">
+                Use Coupon?
+            </th>
+            @*<th style="width: 50px;">
+                Payment Method
+            </th>*@
+            @if (hasSpecialRole)
+            {
+                <th>
+                    Working Staff
+                </th>
+                <th>
+                    Working Since
+                </th>
+            }
+            <th>
+                Action
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span>@item.Order_Number </span>
+                    </td>
+                    @if (hasSpecialRole)
+                    {
+                        <td>
+                            @((((double)item.Status + 1) / 10).ToString("0.##%"))
+                        </td>
+                    }
+                    <td>
+                        <span>@item.StatusEnum.DisplayName() </span>
+                    </td>
+                    <td>
+                        <span>@item.Customer_Name </span>
+                    </td>
+                    <td>
+                        <span>@item.Product_Name </span>
+                        @{
+                        var product = Db.Select<Product>(x => x.Where(m => m.Id == item.Product_Id).Limit(1)).FirstOrDefault();
+                        if (product != null)
+                        {
+                            <br />
+                            <span>@product.Size</span>
+                            var cat = cats.Where(x => x.Id == product.CatId).FirstOrDefault();
+                            if (cat != null)
+                            {
+                                <br />
+                                <span>@cat.ShortCode</span>
+                            }
+                        }
+                    }
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>
+                    <td>
+                        <span>@item.Bill_Total.ToMoneyFormated(item.Shipping_DisplayPriceSign) </span>
+                    </td>
+                    @*<td>
+                        <span>@item.Shipping_Method </span>
+                    </td>*@
+                    <td>
+                        <span>@item.PaymentStatusEnum.DisplayName()</span>
+                        @if (item.PaymentStatusEnum !=Enum_PaymentStatus.Pending)
+                        {
+                            <br />
+                            <span>@item.PaymentMethod.DisplayName()</span>
+                        }
+                    </td>
+                    <td>
+                        <span>@item.isUseCoupon</span>
+                    </td>
+                    @*<td>
+                        <span>@item.PaymentMethod </span>
+                    </td>*@
+                    @if (hasSpecialRole)
+                    {
+                        <td>
+                            @item.WorkingStaff_Name
+                        </td>
+                        <td>
+                            @if (item.WorkingStaff_Id > 0)
+                            {
+                                <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.WorkingStaff_On)</span>
+                            }
+                            else
+                            {
+                                <span>&nbsp;</span>
+                            }
+                        </td>
+                    }
+                    <td>
+                        <span class="btn-group">
+                            @if (item.FlagHistoryMessage == (int)Enum_FlagOrderMessage.NewMessageFromCustomer)
+                            {
+                                <a  href='javascript:void(0);' class="btn btn-small blink" rel="tooltip" item_id="@item.Id" title="Last message is from customer." style="color: #F067A5;">
+                                    <i class="icon-feather"></i></a>
+                            }
+                            
+                            @if (item.UploadFilesTicketStatus == Enum_UploadFilesTicketStatus.Default.ToString())
+                            {
+                                <a  href='javascript:void(0);' class="btn btn-small blink" rel="tooltip" item_id="@item.Id" title="File corrupted. Requested customer send file again">
+                                    <i class="icon-wrench"></i></a>
+                            }
+                            else
+                            if (item.UploadFilesTicketStatus == Enum_UploadFilesTicketStatus.Uploaded.ToString())
+                            {
+                                <a  href='javascript:void(0);' class="btn btn-small blink" rel="tooltip" item_id="@item.Id" title="Customer uploaded new file to replace old corrupted file. Waiting to decrypt the file.">
+                                    <i class="icon-tags"></i></a>
+                            }
+                            else
+                            if (item.UploadFilesTicketStatus == Enum_UploadFilesTicketStatus.DecryptedSuccess.ToString())
+                            {
+                                <a  href='javascript:void(0);' class="btn btn-small blink" rel="tooltip" item_id="@item.Id" title="New uploaded file is ready for approve.">
+                                    <i class="icon-bell-2"></i></a>
+                            }
+                            else
+                            if (item.UploadFilesTicketStatus == Enum_UploadFilesTicketStatus.DecryptedFailed.ToString())
+                            {
+                                <a  href='javascript:void(0);' class="btn btn-small blink" rel="tooltip" item_id="@item.Id" title="New uploaded file has been failed when decrypting.">
+                                    <i class="icon-blocked"></i></a>
+                            }
+                            
+                            @if (hasSpecialRole || item.WorkingStaff_Id == u.Id)
+                            {
+                                <a  href="@Url.Action("Detail", new { id = item.Id })"  rel="tooltip" class="btn btn-small viewdetail" item_id="@item.Id" onclick="viewdetail(this)" title="Detail @item.Order_Number">
+                                    <i class="icon-eye-open"></i></a>
+                            }
+                            @if (item.WorkingStaff_Id == 0)
+                            {
+                                <a  href='@Url.Action("Order_StaffOpenWork", new { id = item.Id })' class="btn btn-small btn_assign_order " rel="tooltip" item_id="@item.Id" title="Start working this order @item.Order_Number">
+                                    <i class="icon-link"></i></a>
+                            }
+                            @if (item.WorkingStaff_Id > 0 && hasSpecialRole)
+                            {
+                                <a  href='@Url.Action("Order_StaffResetWork", new { id = item.Id })' class="btn btn-small btn_reset_order" reload=1 rel="tooltip" item_id="@item.Id" title="Reset staff working status for  @item.Order_Number">
+                                    <i class="icon-unlink"></i></a>
+                            }
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>
+@Pagination(pages, page, "Order", action_name, total_items, 20, route)
+@*<div class="dialog mws-panel-body" id="Export_Order_Shipping_Dialog" style="display: none;">
+    @using (Html.BeginForm("ExportOrders", "Order", FormMethod.Post, new { @id = "Export_Order_Shipping_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Result</label>
+                <div class="mws-form-item">
+                    <select name="ExportResult" id="ExportResult" class="large">
+                        <option value="shipping" selected>Shipping</option>
+                        <option value="production_sheet">Production Sheet</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row" id="shipping_method_row">
+                <label class="mws-form-label">
+                    Shipping Method</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_Method" class="large">
+                        <option value="Other" disabled>Other</option>
+                        <option value="DHL" disabled>DHL</option>
+                        <option value="Aramex">Aramex</option>
+                        <option value="TNT">TNT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <label class="mws-form-label">
+                    Select Orders</label>
+                <div class="mws-form-item">
+                    <select name="Orders" id="export_shipping_orderslist" multiple="multiple" class="large mws-select2">
+                        @{
+        var Model2 = Model.GroupBy(x => (x.Shipping_Status)).OrderBy(x => (x.Key)).ToList();
+                        }
+                        @foreach (var s in Model2)
+                        {
+                            <optgroup label="@s.Key.DisplayName()">
+                                @foreach (var o in s ?? Enumerable.Empty<Order>())
+                                {
+                                    <option value="@o.Id">@o.Order_Number</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    }
+</div>*@
+@*<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#export_order_shipping").on("click", function (e) {
+            // reset the selected list
+            jQuery("#export_shipping_orderslist").select2("val", "");
+            //
+            $("#Export_Order_Shipping_Dialog").dialog("option", "title", "Export Orders");
+            $("#Export_Order_Shipping_Dialog").dialog("open");
+            $("#Export_Order_Shipping_Dialog").css("overflow", "hidden");
+            jQuery("#ExportResult").trigger("change");
+        });
+
+        jQuery("#ExportResult").change(function () {
+            if (jQuery(this).val() == "shipping") {
+                jQuery("#shipping_method_row").show();
+            }
+            else {
+                jQuery("#shipping_method_row").hide();
+            }
+        });
+
+        $("#Export_Order_Shipping_Dialog").dialog({
+
+            autoOpen: false,
+            modal: true,
+            width: 550,
+            buttons: {
+                "OK": function () {
+                    $("#Export_Order_Shipping_Form").submit();
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Export_Order_Shipping_Form").submit(function () {
+            $("#Export_Order_Shipping_Dialog").dialog("close");
+        });
+    })
+</script>*@
+@{
+    Db.Close();
+}

@@ -1,0 +1,135 @@
+﻿@model SMSTemplateModel
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit SMS template " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Add SMS Template";
+    }
+    var Countries = (List<Country>)ViewData["Countries"];
+
+    // for Order Fields
+    // get the list of all possible properties
+    Order order = new Order();
+    order.LoadAddress(0);
+    order.LoadAddress(1);
+    Dictionary<string, string> dic = order.GetPropertiesListOrValue(false, "#");
+    var billing = order.BillingAddressModel.GetPropertiesListOrValue(false, "#Billing_");
+    var shipping = order.BillingAddressModel.GetPropertiesListOrValue(false, "#Shipping_");
+    dic = dic.MergeDictionary(billing);
+    dic = dic.MergeDictionary(shipping);
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        // Handle predefine value change
+        jQuery("#Dialog_Email_Predefine_Value").change(function () {
+            var x = jQuery(this).val();
+            var tav = $('#Content').val();
+            var strPos = $('#Content')[0].selectionStart;
+            var front = (tav).substring(0, strPos);
+            var back = (tav).substring(strPos, tav.length);
+
+            $('#Content').val(front + x + back).focus();
+        });
+
+        jQuery("#UserForm").submit(function () {
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter » Name");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        <span>@ViewBag.Title</span>
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="mws-form-message error">
+                @ViewBag.Error
+            </div>
+        }
+        @using (Html.BeginForm("Update", "SMSTemplate", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        System Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.SystemName, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Predefined Value</label>
+                    <div class="mws-form-item">
+                        <select id="Dialog_Email_Predefine_Value" class="large mws-select2">
+                            <option value="--" selected>--- Please select ---</option>
+                            @foreach (var key in dic.Keys)
+                            { 
+                                <option value="@key">@dic[key]</option>
+                            }
+                        </select>
+                        <span>System will replace this predefined value by the correct value of the order before
+                            send sms to customer</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Content</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.Content, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Country</label>
+                    <div class="mws-form-item">
+                        <select name="CountryCode">
+                            @foreach (var x in Countries)
+                            {
+                                <option value="@x.Code" @if (x.Code == Model.CountryCode)
+                                                        {<text> selected</text>}>@x.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Flash SMS</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsFlash" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.IsFlash)
+                                                                                                                                   {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

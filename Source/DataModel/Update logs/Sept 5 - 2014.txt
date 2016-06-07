@@ -1,0 +1,11 @@
+﻿Table Country
+- Add ExchangeRate : double , default 1,  to convert the exchange rate from the base currency (the default currency)
+- Add Currency3Letter : string
+- Add Status : bool 
+- Add Domain: string
+
+Table Price
+- Add Value: double
+
+Table Coupon
+- Delete and create again

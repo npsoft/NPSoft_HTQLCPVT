@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "Translation Management";
+    List<Language> Langs = (List<Language>)ViewData["Langs"];
+
+    int? lang_id = (int?)ViewData["lang_id"];
+}
+<div class="head">
+    <h3>
+        Translation Management</h3>
+    <div>
+        <form id="Trans_Form" method=post action="@Url.Action("_Translation_List")" class="mws-form">
+        <div class="mws-panel grid_2 no_shadow" style="margin-bottom: 0px;">
+            <a type="button" id="add_translation" class="btn btn-primary" href="javascript:void(0)">
+                <span>Add Translation</span></a>
+        </div>
+        <div class="mws-panel grid_5 no_shadow" style="margin-bottom: 0px;">
+            Language&nbsp;<select id="Language" name="lang_id">
+                @foreach (var x in Langs)
+                {
+                    <option value="@x.Id" @if (lang_id.Value == x.Id)
+                                          { <text> selected </text> } >@x.LanguageName</option>
+                }
+            </select>
+        </div>
+        <div class="clear">
+        </div>
+        </form>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Translation</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("_Translation_List", new { lang_id = lang_id.Value })
+    </div>
+</div>
+<div class="dialog" id="b_popup_4" style="display: none;" title="Add translation">
+    @using (Html.BeginForm("_Translation_Update", "Language", FormMethod.Post, new { @id = "form-upload", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="id" value="0" id="Dialog_Id" />
+        <div class="mws-form-block">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Language</label>
+                <div class="mws-form-item">
+                    <select class="large" name="LangId" id="Dialog_Lang_Id">
+                        @foreach (var x in Langs)
+                        {
+                            <option value="@x.Id">@x.LanguageName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Key</label>
+                <div class="mws-form-item">
+                    <input type="text" class="large" name="Key" id="Dialog_Key" placeholder="Subject" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Translation</label>
+                <div class="mws-form-item">
+                    <textarea rows="3" class="large" name="Value" id="Dialog_Value"></textarea>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    function Translation_Form_Reload() {
+        var lang_id = jQuery("#Language").val();
+
+        show_loading();
+        $.post("@Url.Action("_Translation_List")", {
+            lang_id : lang_id,
+        }, function (data) {
+            $(".listuser").html("");
+            $(".listuser").html(data);
+            hide_loading();
+        });
+    }
+
+    $(document).ready(function () {
+        jQuery("#Language").change(function () {
+            Translation_Form_Reload();
+        });
+
+        jQuery("#form-upload").submit(function(){
+            return false; // force no submit
+        });
+
+        $("#b_popup_4").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Ok": function () {
+                    // form validate before submit
+                    if (jQuery("#Dialog_Key").val() == "") {
+                        alert("Please enter Translation Key");
+                        jQuery("#Dialog_Key").focus();
+                        return;
+                    }
+                    if (jQuery("#Dialog_Value").val() == "") {
+                        alert("Please enter Translation Content");
+                        jQuery("#Dialog_Value").focus();
+                        return;
+                    }
+
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#form-upload").attr("action"), jQuery("#form-upload").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            if (returnObj.Message != null) {
+                                notify_success("Success", returnObj.Message);
+                                // incase success, we need to reload the form
+                                Translation_Form_Reload();
+                            }
+                            else if (returnObj.RedirectUrl != null) {
+                                window.location.href = returnObj.RedirectUrl;
+                            }
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#add_translation").click(function () {
+            // reset old form content
+            jQuery("#Dialog_Id").val("");
+            jQuery("#Dialog_Lang_Id").val(jQuery("#Language").val());
+            jQuery("#Dialog_Key").val("");
+            jQuery("#Dialog_Value").val("");
+
+           $("#b_popup_4").dialog('option', 'title', 'Add Translation');
+
+            $("#b_popup_4").dialog('open')
+        });
+    })
+
+</script>

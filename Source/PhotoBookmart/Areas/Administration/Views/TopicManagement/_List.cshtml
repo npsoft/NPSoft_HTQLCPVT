@@ -1,0 +1,101 @@
+﻿@*@model CMS.Common.Helpers.PagedData<CMSApplication.Areas.Administration.Models.TopicModel>*@
+@model List<CMSApplication.Areas.Administration.Models.TopicModel>
+@using CMSLang.BackEnd;
+<script type="text/javascript">
+    $(document).ready(function () {
+        /*$(".page-number").live("click", function () {
+        var page = parseInt($(this).html());
+        $.get("/Administration/TopicManagement/List?&page=" + page, function (data) {
+        $(".list").html("");
+        $(".list").html(data);
+        });
+        });*/
+        $("a.delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.closest('tr').find('.spanName').html();
+            if (confirm("@CMSBE.Admin_TopicManagement_List_jQueryConfirm : " + NameItem + "")) {
+                var IdItem = $this.closest('tr').find('.Spanid').html();
+                $.get("/Administration/TopicManagement/Delete?Id=" + IdItem, function () {
+                    $.get("/Administration/TopicManagement/List?page=0", function (data) {
+                        $(".list").html("");
+                        $(".list").html(data);
+                    });
+                });
+            }
+        });
+
+
+        jQuery("#ListTable").dataTable({
+            "sPaginationType": "full_numbers",
+            "iDisplayLength": 30,
+            "bSortable": false,
+            "aLengthMenu": [30, 50, 100]
+        });
+    });
+
+</script>
+@if (Model.Count > 0)
+{
+    <table class="table" style="width:100%" id="ListTable">
+        <thead>
+            <th>
+                @CMSBE.Admin_TopicManagement_List_Title
+            </th>
+            <th>
+                @CMSBE.Admin_TopicManagement_List_SystemName
+            </th>
+            <th>
+                @CMSBE.Admin_TopicManagement_List_CanMapToMenu
+            </th>
+            <th >
+                @CMSBE.Admin_TopicManagement_List_Action
+            </th>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span class="Spanid" style="display: none;">@item.Id</span> 
+                        <span class="spanName">@item.Title
+                        </span>
+                    </td>
+                    <td>
+                        <span >@item.SystemName </span>
+                    </td>
+                    <td>
+                        <span>
+                        @item.CanMapToMenu.ToString()
+                        </span>
+                    </td>
+                    <td>
+                         <a href="@Url.Action("Edit", "TopicManagement", new { id = item.Id })" class="icon-pencil"></a>
+                        @* <a href="@Url.Action("EditTopicInLanguage", "TopicManagement", new { id = item.Id })" class="icon-globe topics_language" title="@CMSBE.Admin_TopicManagementController_List_TopicsInLanguageLink"></a>*@
+                         <a href="javascript:void(0)" class="icon-trash delete"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+@* <div class="dataTables_paginate paging_full_numbers" id="tSortable_2_paginate">
+        <span>
+        @for (int m = 1; m <= Model.NumberOfPages; m++)
+        {
+            if (m == Model.CurrentPage)
+            {
+                 <a href="javascript:void(0);" tabindex="0" class="paginate_active page-number-Current">@m</a>
+            }
+            else
+            {
+                    <a class="paginate_button page-number" href="javascript:void(0);" tabindex="0">@m</a>
+            }
+        }
+        </span>
+    </div>*@
+}
+else
+{
+    <h2>
+        @CMSBE.Admin_TopicManagement_List_HaveNoTopic.
+    </h2>
+}

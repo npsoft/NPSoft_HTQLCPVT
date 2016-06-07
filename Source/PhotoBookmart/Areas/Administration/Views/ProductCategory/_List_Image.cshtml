@@ -1,0 +1,161 @@
+﻿@model List<ProductCategoryImage>
+@{
+    var pcId = (long)ViewData["pcId"];
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        $("a.ab-delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Delete_Image")?id=" + item_id, function () {
+                    $.get("@Url.Action("List_Image", "ProductCategory", new { pcId = pcId })", function (data) {
+                        $(".list-product-category-image").html("");
+                        $(".list-product-category-image").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+        
+        $("a.ab-status").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_status = $(this).hasClass("ab-disable");
+            if (confirm("Are you sure to " + (item_status ? "disable" : "enable") + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Status_Image")?id=" + item_id + "&status=" + !item_status, function () {
+                    $.get("@Url.Action("List_Image", "ProductCategory", new { pcId = pcId })", function (data) {
+                        $(".list-product-category-image").html("");
+                        $(".list-product-category-image").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.ab-move").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_move = $(this).hasClass("ab-up");
+            if (confirm("Are you sure to move " + (item_move ? "up" : "down" ) + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Move_Image")?id=" + item_id + "&move=" + (item_move ? 1 : -1), function () {
+                    $.get("@Url.Action("List_Image", "ProductCategory", new { pcId = pcId })", function (data) {
+                        $(".list-product-category-image").html("");
+                        $(".list-product-category-image").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        if ($.fn.dataTable) {
+            $("#ListTable").dataTable({
+                "sDom": 'C<"">lfrtip',
+                "oColVis": {
+                    "buttonText": "<i class='icol-accept'></i> Change columns",
+                    "bRestore": false,
+                    "sSize": "css"
+                },
+                "aoColumnDefs": [
+                    { "bVisible": false, "aTargets": [] }
+                ],
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+
+        setTimeout(function () {
+            jQuery("#date_Create_column").trigger("click");
+        }, 500);
+    });
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>
+                Thumbnail
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Active
+            </th>
+            <th>
+                Created by
+            </th>
+            <th>
+                Created on
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var image_path = Url.Content("~/Content/img/noimage.gif");
+                if (!string.IsNullOrEmpty(item.Thumbnail))
+                {
+                    image_path = "/" + item.Thumbnail;
+                }
+                <tr>
+                    <td style="text-align: center;" class="table_td_img_thumb">
+                        <span>
+                            <img alt="@item.Name" src="@image_path" style="width:100%; height:35px; max-width:100px;"/></span>
+                    </td>
+                    <td>
+                        <span>@item.Name</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>
+                            <input type="checkbox" disabled="disabled" @{ if (item.IsActive)
+                                                                          {
+                                                                      <text>checked="checked"</text>
+                                                                          }
+                                                                          else
+                                                                          {
+                                                                          }}>
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.Get_CreatedBy_Name()</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn)</span>
+                    </td>
+                    <td style="text-align: center;" class="no_padding">
+                        <div class="btn-group">
+                            <a href="@Url.Action("Edit_Image", new { id = item.Id })" class="btn btn-small ab-edit" title="Edit for &raquo; @item.Name">
+                                <i class="icon-pencil"></i></a><a href="javascript:void(0)" class="btn btn-small ab-delete" item_id="@item.Id" item_name="@item.Name" title="Delete for &raquo; @item.Name">
+                                    <i class="icon-trash"></i></a>
+                            @if (item.IsActive)
+                            {
+                                <a href="javascript:void(0)" class="btn btn-small ab-status ab-disable" item_id="@item.Id" item_name="@item.Name" title="Disable for &raquo; @item.Name">
+                                    <i class="icon-eye-closed"></i></a>
+                            }
+                            else
+                            {
+                                <a href="javascript:void(0)" class="btn btn-small ab-status ab-enable" item_id="@item.Id" item_name="@item.Name" title="Enable for &raquo; @item.Name">
+                                    <i class="icon-eye-open"></i></a>
+                            }
+                            <a href="javascript:void(0)" class="btn btn-small ab-move ab-up" item_id="@item.Id" item_name="@item.Name" title="Move up for &raquo; @item.Name">
+                                <i class="icon-caret-up"></i></a><a href="javascript:void(0)" class="btn btn-small ab-move ab-down" item_id="@item.Id" item_name="@item.Name" title="Move down for &raquo; @item.Name">
+                                    <i class="icon-caret-down"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

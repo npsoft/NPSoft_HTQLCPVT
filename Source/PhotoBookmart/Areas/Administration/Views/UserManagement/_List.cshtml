@@ -1,0 +1,125 @@
+﻿@model List<PhotoBookmart.Areas.Administration.Models.UserModel>
+@{
+    int page = (int)ViewData["page"];
+    int pages = (int)ViewData["pages"];
+    int total_items = (int)ViewData["total_items"];
+    int items_per_page = (int)ViewData["items_per_page"];
+    string action_name = (string)ViewData["action"];
+    RouteValueDictionary route = new RouteValueDictionary();
+    route.Add("area", "Administration");
+}
+<script>
+    jQuery(document).ready(function ($) {
+        $(".dataTables_paginate.paging_full_numbers a.paginate_button:not(.paginate_button_disabled)").on("click", function (e) {
+            UpdateSearch({ page: parseInt(getUrlParameter("page", $(this).attr("href"))) });
+            return false;
+        });
+
+        $("a.delete").click(function () {
+            var $this = $(this);
+            var id = $this.attr("item-id");
+            var name = $this.attr("item-name");
+            if (confirm("Bạn chắc chắn muốn xóa tài khoản » " + name + "?")) {
+                show_loading();
+                $.post("/Administration/UserManagement/deleteUser", { id: id }, function (data) {
+                    hide_loading();
+                    UpdateSearch({ page: parseInt($(".dataTables_paginate.paging_full_numbers a.paginate_active").text()) });
+                });
+            }
+        });
+
+        $("a.disable").click(function () {
+            var $this = $(this);
+            var id = $this.attr("item-id");
+            var name = $this.attr("item-name");
+            if (confirm("Bạn chắc chắn muốn vô hiệu hóa tài khoản » " + name + "?")) {
+                show_loading();
+                $.post("@Url.Action("Disable")", { id: id }, function (data) {
+                    hide_loading();
+                    UpdateSearch({ page: parseInt($(".dataTables_paginate.paging_full_numbers a.paginate_active").text()) });
+                });
+            }
+        });
+
+        $("a.approve").click(function () {
+            var $this = $(this);
+            var id = $this.attr("item-id");
+            var name = $this.attr("item-name");
+            if (confirm("Bạn chắc chắn muốn kích hoạt tài khoản » " + name + "?")) {
+                show_loading();
+                $.post("@Url.Action("Enable")", { id: id }, function (data) {
+                    hide_loading();
+                    UpdateSearch({ page: parseInt($(".dataTables_paginate.paging_full_numbers a.paginate_active").text()) });
+                });
+            }
+        });
+    });
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>Hình</th>
+            <th>Tài khoản</th>
+            <th>Họ & Tên</th>
+            <th>Cấp</th>
+            <th>Tình trạng</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr user-mail="@item.Email">
+                    <td class="table_td_img_thumb" style="text-align:center;padding-left:0;padding-right:0;">
+                        <img alt="@item.FullName" src="@{ if (string.IsNullOrEmpty(item.Avatar)) {
+                                                            <text>/@Url.Content("Content/img/noimage.gif")</text>
+                                                        } else {
+                                                            <text>/@item.Avatar</text>
+                                                        } }" style="width:69px; height:31px;" />
+                    </td>
+                    <td>
+                        <span>@item.UserName</span>
+                    </td>
+                    <td>
+                        <span>@item.FullName</span>
+                    </td>
+                    <td>
+                        <span>@Html.Raw(String.Join("<br /> ", ABUserAuth.GetListDescRole(item.RoleName).ToArray()))</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@Html.CheckBox("Acitve", item.Status, new { disabled = "disabled" })</span>
+                    </td>
+                    <td style="text-align:center;" class="no_padding">
+                        <span class="btn-group">
+                            <a href="@Url.Action("Edit", "UserManagement", new { id = item.Id })" class="btn btn-small" title="Chỉnh sửa » @item.UserName">
+                                <i class="icol-pencil"></i>
+                            </a>
+                            <a href="javascript:void(0)" class="btn btn-small delete" item-id="@item.Id" item-name="@item.UserName" title="Xóa » @item.UserName">
+                                <i class="icol-cross"></i>
+                            </a>
+                            @if (item.Status)
+                            {
+                                <a href="javascript:void(0)" class="btn btn-small disable" item-id="@item.Id" item-name="@item.UserName" title="Vô hiệu hóa » @item.UserName">
+                                    <i class="icol-delete"></i>
+                                </a>
+                            }
+                            @if (!item.Status)
+                            {
+                                <a href="javascript:void(0)" class="btn btn-small approve" item-id="@item.Id" item-name="@item.UserName" title="Kích hoạt » @item.UserName">
+                                    <i class="icol-accept"></i>
+                                </a>
+                            }
+                            <!--TODO:...
+                            <a href="javascript:void(0)" class="btn btn-small popup_4" title="Send Email to User">
+                                <i class="icol-email"></i>
+                            </a>-->
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>
+@Pagination(pages, page, "UserManagement", action_name, total_items, items_per_page, route)

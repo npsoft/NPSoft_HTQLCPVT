@@ -1,0 +1,74 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.cshtml";
+}
+@section _ClassWrapper {
+class="template-page content twelve main_color alpha alpha units entry-content"
+}
+@section _TitleMain {
+    @RenderSection("_TitleMain", true)
+}
+@section _TrailLink {
+    @RenderSection("_TrailLink", true)
+}
+<div id="huge_slider">
+    <div id="contents">
+        <div id="contents2">
+            <div class="header">
+                <a class="logo" href="/" style="color: #fff">User Control Panel</a>
+            </div>
+            <div class="container">
+                <div class="one_fourth" style="margin: 0px;">
+                    @* Left Column *@
+                    <div class="ab-menu">
+                        <div class="breadLine">
+                            <div class="arrow">
+                            </div>
+                            <div class="adminControl active">
+                                Hi, @CurrentUser.UserName
+                            </div>
+                        </div>
+                        <div class="admin">
+                            <div class="image">
+                                <img src="@if (string.IsNullOrEmpty(CurrentUser.Nickname))
+                                          {<text>@Url.Content("~/Content/img/noimage.gif")</text>}
+                                          else
+                                          {<text>@Url.Content("/" + CurrentUser.Nickname)</text>}" class="img-polaroid" alt=""/>
+                            </div>
+                            <ul class="control">
+                                <li><span class="icon-comment"></span><a href="@Url.Action("ChangePass", "User", new { })">
+                                    Change Password</a></li>
+                                <li><span class="icon-cog"></span><a href="@Url.Action("Profile", "User", new { })">
+                                    Edit Profile</a></li>
+                                <li><span class="icon-share-alt"></span><a href="@Url.Action("SignOut", "Home", new { })">
+                                    Sign Out</a></li>
+                            </ul>
+                            <div class="info">
+                                <span></span>
+                            </div>
+                        </div>
+                        <ul class="navigation">
+                           @* <li><a href="@Url.Action("Index", "User", new { })"><span class="isw-grid"></span><span
+                                class="text">Dashboard</span> </a></li>*@
+                           @* <li><a href="@Url.Action("NewOrder", "Product")"><span class="isw-plus"></span><span class="text">New
+                                Order</span> </a></li>*@
+                            <li><a href="@Url.Action("Index", "Order")"><span class="isw-list"></span><span class="text">My
+                                Orders</span> </a></li>
+                        </ul>
+                        <div class="dr">
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="three_fourth ">
+                    <div class="ab-content">
+                        <div class="workplace">
+                            @RenderBody()
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clear">
+            </div>
+        </div>
+    </div>
+</div>

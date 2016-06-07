@@ -1,0 +1,28 @@
+﻿@model List<Product_Category>
+@{
+    var isSelected = (bool)ViewData["isSelected"];
+    var isDisabled = (bool)ViewData["isDisabled"];
+    var orgId = (long)ViewData["orgId"];
+    var ItemId = (long)ViewData["ItemId"];
+    var ParentId = (long)ViewData["ParentId"];
+    var deep = (int)ViewData["deep"];
+    var nav = Model.Where(m => m.ParentId == ParentId).OrderBy(m => m.OrderIndex);
+    var prefix = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;>&nbsp;&nbsp;", deep));
+}
+@foreach (var item in nav)
+{
+    isSelected = !isSelected && ItemId == item.Id;
+    
+    isDisabled = isDisabled || orgId == item.Id;
+    
+    <option value="@item.Id" @{ if (isSelected) { <text> selected="selected" </text> } }
+                             @{ if (isDisabled) { <text> disabled="disabled" </text> } }>@Html.Raw(prefix) @item.Name</option>
+    ViewDataDictionary vd = new ViewDataDictionary();
+    vd.Add("isSelected", isSelected);
+    vd.Add("isDisabled", isDisabled);
+    vd.Add("orgId", orgId);
+    vd.Add("ItemId", ItemId);
+    vd.Add("ParentId", item.Id);
+    vd.Add("deep", deep+1);
+    @Html.Partial("_ParentIdSubNavigation", Model, vd);
+}

@@ -1,0 +1,251 @@
+﻿@model OrderFilterModel
+@{
+    Layout = null;
+    var country = Db.Where<Country>(x => x.Status);
+    var options = Db.Where<Product_Option>(x => x.Status);
+    Db.Close();
+}
+@* For dialog Quick Search *@
+<div class="dialog mws-panel-body" id="Dialog_QuickSearch" style="display: none;"
+    title="Quick Navigate">
+    @using (Html.BeginForm("Order_QuickNavigate", "Order", FormMethod.Post, new { @id = "Dialog_QuickSearch_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Order Number</label>
+                <div class="mws-form-item">
+                    <input name="id" id="DialogQuickSearch_OrderId" value="0" class="large" />
+                    <span>Enter order number in 6 digits format</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@*@if ((User.IsInRole(RoleEnum.Administrator) || User.IsInRole(RoleEnum.OrderManagement) || User.IsInRole(RoleEnum.Received)))
+{*@
+<div class="mws-panel grid_8 mws-collapsible mws-collapsed" id="PanelOrderSearch"
+    style="display: none;">
+    <div class="mws-panel-header">
+        <span><i class="icon-calendar"></i>Search Orders</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Search", "Order", FormMethod.Post, new { enctype = "multipart/form-data", @id = "Order_Search", @class = "mws-form" }))
+        {
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Between And</label>
+                    <div class="mws-form-item">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(mbox => mbox.BetweenDate, new { @id = "date_begin" })
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(mbox => mbox.AndDate, new { @id = "date_end" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Order Condition</label>
+                    <div class="mws-form-item ">
+                        <select name="Condition" class="large">
+                            <option value="">No conditions</option>
+                            <option value="payment">Payment status - Show paid orders only</option>
+                            <option value="payment_unpaid">Payment status - Show pending payment orders only</option>
+                            <option value="new_message">New message - Show orders with customer message only</option>
+                            <option value="photobook_need_todelete">Photobook needs to be deleted (for Canceled, Refund or Finished)</option>
+                            <option value="order_with_file_corrupted">Order with file corrupted</option>
+                        </select>
+                    </div>
+                </div>
+                @if (User.IsInRole(RoleEnum.Administrator) || User.IsInRole(RoleEnum.OrderManagement))
+                {
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">
+                            Order Status</label>
+                        <div class="mws-form-item ">
+                            <select name="Status" id="Status" class="large">
+                                <option value="0">Any</option>
+                                <option value="1">In processing</option>
+                                <option value="5">Shipping</option>
+                                <option value="2">Finished</option>
+                                <option value="3">Canceled</option>
+                                <option value="4">Refund</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Coupon</label>
+                    <div class="mws-form-item ">
+                        <select name="Coupon" id="search_coupon_select" class="large">
+                            <option value="0">Any</option>
+                            <option value="1">Use coupon</option>
+                            <option value="2">Not use coupon</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="coupontype_row">
+                    <label class="mws-form-label">
+                        Coupon Type</label>
+                    <div class="mws-form-item ">
+                        <select name="CouponType" class="large">
+                            <option value="-1">Any</option>
+                            <option value="1">Groupon</option>
+                            <option value="0">Monthly Promotion</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Country / Currency</label>
+                    <div class="mws-form-item ">
+                        <select name="Currency" class="large">
+                            <option value="any">Any</option>
+                            @foreach (var x in country)
+                            {
+                                <option value="@x.CurrencyCode">@x.Name / @x.CurrencyCode / @x.Currency3Letter</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                @if (User.IsInRole(RoleEnum.Administrator) || User.IsInRole(RoleEnum.OrderManagement))
+                {
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">
+                            Staff Status</label>
+                        <div class="mws-form-item ">
+                            <select name="StaffStatus" id="StaffStatus" class="large">
+                                <option value="0">Any</option>
+                                <option value="1">Assigned to Staff, staff is working on</option>
+                                <option value="2">Free, waiting to assign to someone</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Filter by Options</label>
+                    <div class="mws-form-item">
+                        <select name="ProductOptions" id="ProductOptions" class="mws-select2 large" multiple="multiple">
+                            @foreach (var item in options)
+                            {
+                                <option value="@item.Id">@item.InternalName</option>
+                            }
+                        </select>
+                        <span>Filter the orders contains one of selected option. Leave blank to ignore filter</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Search Term</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(mbox => mbox.Search, new { @class = "large" })
+                        <span>Key in anything relative to the order in your mind</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Sort By</label>
+                    <div class="mws-form-item">
+                        <select name="SortBy" id="SortBy" class="large">
+                            <option value="lastupdate">Last Update</option>
+                            <option value="createon">Create Date</option>
+                            <option value="status">Order Status</option>
+                            <option value="paiddate">Paid Date</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Result Type</label>
+                    <div class="mws-form-item">
+                        <select name="ResultType" id="ResultType" class="large">
+                            <option value="0">HTML List</option>
+                            <option value="1">Excel File</option>
+                            <option value="2">Production sheeet</option>
+                            <option value="3">Shipping</option>
+                            <option value="4">Individual Sheet</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="shipping_method_row">
+                    <label class="mws-form-label">
+                        Shipping Method</label>
+                    <div class="mws-form-item">
+                        <select name="Shipping_Method" class="large">
+                            <option value="Other" disabled>Other</option>
+                            <option value="DHL" disabled>DHL</option>
+                            <option value="Aramex">Aramex</option>
+                            <option value="TNT">TNT</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: none;">
+                    <input type="hidden" name="page" value="1" />
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Search" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+            <!-- End Form -->
+        }
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#date_begin,#date_end').datetimepicker({
+            stepMinute: 5,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin") {
+                    $('#date_end').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        jQuery("#search_coupon_select").on("change", function () {
+            if (jQuery(this).val() == "1") {
+                jQuery("#coupontype_row").show();
+            }
+            else {
+                jQuery("#coupontype_row").hide();
+            }
+        }).trigger("change");
+
+        jQuery("#ResultType").change(function () {
+            if (jQuery(this).val() == "3") {
+                // show shipping method
+                jQuery("#shipping_method_row").show();
+                // set order status to shipping
+                jQuery("#Status").val("5");
+            }
+            else {
+                // if production sheet
+                if (jQuery(this).val() == "2") {
+                    // then set order status to processing
+                    jQuery("#Status").val("1");
+                }
+                // hide shipping method
+                jQuery("#shipping_method_row").hide();
+            }
+        }).trigger("change"); ;
+
+        jQuery("#Order_Search").find("input, select").change(function () {
+            jQuery("#Order_Search input[name='page']").val("1");
+        });
+    })
+
+</script>
+@*}*@

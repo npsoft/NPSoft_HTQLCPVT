@@ -1,0 +1,178 @@
+﻿@model Navigation
+@{  
+    var Langname = ViewData["LangName"].ToString();
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Navigation / " + Langname + " - " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Add Navigation / " + Langname;
+    }
+
+    // get list of Navigation recurrsive
+    var Navigations = Db.Where<Navigation>(m => (m.LanguageName == Model.LanguageName));
+    var Topics = Db.Where<SiteTopic>(m => (m.CanMapToMenu));
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        jQuery("#Menutype").change(function () {
+            var val = jQuery(this).val();
+            jQuery("#MenuType1").hide();
+            jQuery("#MenuType0").hide();
+            jQuery("#MenuType" + val).fadeIn();
+
+            if (jQuery("input[name='TopicId']:checked").length == 0) {
+                // select first input
+                jQuery("input[name='TopicId']:first").attr("checked", true)
+            }
+        }).trigger("change");
+
+        jQuery("#UserForm").submit(function () {
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter navigation name");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+            if (jQuery("#Menutype").val() == "0" && jQuery("#Link").val() == "") {
+                alert("Please enter external link");
+                jQuery("#Link").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null) {
+                        setTimeout(function () {
+                            window.location.href = returnObj.RedirectUrl;
+                        }, 1000);
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Index")" >
+            <i class="icol-arrow-left"></i>Navigation management</a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteNav", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.OrderMenu)
+            @Html.HiddenFor(m => m.LanguageName)
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Required login</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="RequireLogin" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.RequireLogin)
+                                                                                                                                        {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Parent Menu</label>
+                    <div class="mws-form-item">
+                        <select name="ParentId" id="ParentId" class="large mws-select2">
+                            <option value="0">[No Parent]</option>
+                            @foreach (var item in Navigations.Where(m => m.ParentId == 0).OrderBy(m => m.OrderMenu))
+                            {
+                               <option value="@item.Id" @if (item.Id == Model.ParentId)
+                                                        { <text> selected</text> }>@item.Name</option>
+                                                                               var vd = new ViewDataDictionary();
+                                                                               vd.Add("ItemId", Model.ParentId);
+                                                                               vd.Add("ParentId", item.Id);
+                                                                               vd.Add("deep", 1);
+                                @Html.Partial("_ParentIdSubNavigation", Navigations, vd);
+
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Menu Type</label>
+                    <div class="mws-form-item">
+                        <select name="Menutype" id="Menutype" class="large">
+                            <option value="0" @if (Model.Menutype == 0)
+                                              { <text> selected</text> }>Link to External URL</option>
+                            <option value="1" @if (Model.Menutype == 1)
+                                              { <text> selected</text> }>Link to Site topic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="MenuType0">
+                    <label class="mws-form-label">
+                        External Link</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Link, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row" id="MenuType1">
+                    <label class="mws-form-label">
+                        Select Topic</label>
+                    <div class="mws-form-item">
+                        <ul class="mws-form-list">
+                            @foreach (var item in Topics)
+                            {
+                                <li>
+                                    <input type="radio" name="TopicId" value="@item.Id" @if (item.Id == Model.TopicId)
+                                                                                        { <text> checked</text> } />
+                                    <label>@item.Name - @item.SystemName</label>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

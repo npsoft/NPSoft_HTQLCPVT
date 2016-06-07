@@ -1,0 +1,49 @@
+﻿@model Order
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li>
+                <div class="title">
+                    Use Coupon</div>
+                <div class="text">
+                    @if (Model.isUseCoupon)
+                    { <span>Yes</span> }
+                    else
+                    { <text>No</text>}</div>
+            </li>
+            @if (Model.isUseCoupon)
+            {
+@* <li>
+                    <div class="title">
+                        Total Discount</div>
+                    <div class="text">
+                        @Model.Coupon_TotalDiscount.ToMoneyFormated()</div>
+                </li>*@
+                <li>
+                    <div class="title">
+                        Total Discount</div>
+                    <div class="text">
+                        @Model.Coupon_DiscountDisplay</div>
+                </li>
+                <li>
+                    <div class="title">
+                        Coupon Code</div>
+                    <div class="text">
+                        @Model.Coupon_Code
+                    </div>
+                </li>
+                if (!string.IsNullOrEmpty(Model.Coupon_SecrectCode))
+                {
+                <li>
+                    <div class="title">
+                        Security Code</div>
+                    <div class="text">
+                        @Model.Coupon_SecrectCode
+                    </div>
+                </li>
+                }
+
+            }
+        </ul>
+    </div>
+</div>

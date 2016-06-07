@@ -1,0 +1,132 @@
+﻿@model Site_Banner
+@{  
+    var Langname = ViewData["LangName"].ToString();
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit banner / " + Langname;
+    }
+    else
+    {
+        ViewBag.Title = "Add banner / " + Langname;
+    }
+    var Languages = (List<Language>)ViewData["Langs"];
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        $('.mws-spinner').spinner();
+        CKEDITOR.replace('ckeditorId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+
+        jQuery("#UserForm").submit(function () {
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter » Link");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+
+            show_loading();
+
+            // and post
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @if (Model.Id > 0)
+        {
+            <text>Edit banner / @Langname</text>
+        }
+        else
+        {
+            <text>Add banner / @Langname</text>
+        }
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteBanners", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.BannerIndex);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Link</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Type</label>
+                    <div class="mws-form-item">
+                        <select name="BannerType">
+                            <option value=0 @if (Model.BannerType == 0)
+                                            {<text> selected</text>}>Image</option>
+                           @* <option value=1 @if (Model.BannerType == 1)
+                                            {<text> selected</text>}>Flash</option>
+                            <option value=2 @if (Model.BannerType == 2)
+                                            {<text> selected</text>}>Youtube</option>*@
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Thumbnail</label>
+                    <div class="mws-form-item">
+                        <input type="file" name="FileUp" />
+                        @Html.HiddenFor(m => m.FileName)
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Width</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Width, new { @class = "large mws-spinner" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Height</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Height, new { @class = "large mws-spinner" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Description</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.Description, new { @class = "large", @id = "ckeditorId" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Language</label>
+                    <div class="mws-form-item">
+                        <select name="LanguageCode">
+                            @foreach (var x in Languages)
+                            {
+                                <option value="@x.LanguageCode" @if (x.LanguageCode == Model.LanguageCode)
+                                                                {<text> selected</text>}>@x.LanguageName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

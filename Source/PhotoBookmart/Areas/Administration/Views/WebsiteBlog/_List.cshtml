@@ -1,0 +1,192 @@
+﻿@model List<Site_Blog>
+@{
+    var posts = Model.OrderBy(x => x.Order).ToList();
+    var cat_id = (int)ViewData["cat_id"];
+}
+<script>
+    $(document).ready(function () {
+
+        $("a.ab-delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Delete")?id=" + item_id, function () {
+                    $.get("@Html.Raw(Url.Action("List", new { cat_id = cat_id }))", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.ab-active").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_active = $(this).hasClass("ab-enable");
+            if (confirm("Are you sure to " + (item_active ? "enable" : "disable") + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("SetActivePost")?id=" + item_id + "&active=" + item_active, function () {
+                    $.get("@Html.Raw(Url.Action("List", new { cat_id = cat_id }))", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.ab-move").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_move = $(this).hasClass("ab-up");
+            if (confirm("Are you sure to move " + (item_move ? "up" : "down") + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("SetOrderPost")?id=" + item_id + "&move=" + (item_move ? 1 : -1), function () {
+                    $.get("@Html.Raw(Url.Action("List", new { cat_id = cat_id }))", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        if ($.fn.dataTable) {
+            $("#ListTable").dataTable({
+                "sDom": 'C<"">lfrtip',
+                "oColVis": {
+                    "buttonText": "<i class='icol-accept'></i> Change columns",
+                    "bRestore": false,
+                    "sSize": "css"
+                },
+                "aoColumnDefs": [
+                    { "bVisible": false, "aTargets": [2, 3, 6, 7, 9] } /* Seo name, Tag, Publish on, Un-Publish on, Created by */
+                ],
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+
+        setTimeout(function () {
+            jQuery("#date_Create_column").trigger("click");
+        }, 500);
+    });
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Seo name
+            </th>
+            <th>
+                Tag
+            </th>
+            <th>
+                Order
+            </th>
+            <th>
+                Publish
+            </th>
+            <th>
+                Publish on
+            </th>
+            <th>
+                Un-Publish on
+            </th>
+            <th>
+                Active
+            </th>
+            <th>
+                Created by
+            </th>
+            <th>
+                Created on
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in posts)
+            {
+                <tr>
+                    <td style="text-align:center;">
+                        <span>@item.Id</span>
+                    </td>
+                    <td style="width:250px;">
+                        <span>@{ if (item.Name != null && item.Name.Length > 35 ) { <text>@item.Name.Substring(0, 35)...</text> } else { <text>@item.Name</text> }}</span>
+                    </td>
+                    <td>
+                        <span>@item.SeoName</span>
+                    </td>
+                    <td>
+                        <span>@string.Join(", ", item.Tag)</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@item.Order</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@Html.CheckBox("PublishSchedule", item.PublishSchedule, new { disabled = "disabled" })</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.PublishOn)</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.UnPublishOn)</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@Html.CheckBox("IsAcitve", item.IsActive, new { disabled = "disabled" })</span>
+                    </td>
+                    <td>
+                        <span>@item.CreatedByUsername </span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span class="btn-group">
+                            <a item_id="@item.Id" item_name="@item.Name" rel="#" href="javascript:void(0);" class="btn btn-small ab-move ab-up" title="Move up for &raquo; @item.Name">
+                                <i class="icon-caret-up"></i>
+                            </a>
+                            <a item_id="@item.Id" item_name="@item.Name" href="@Url.Action("Edit", new { id = item.Id })" class="btn btn-small" title="Edit for &raquo; @item.Name">
+                                <i class="icon-pencil"></i>
+                            </a>
+                            <a item_id="@item.Id" item_name="@item.Name" href="javascript:void(0);" class="btn btn-small ab-delete" title="Delete for &raquo; @item.Name" >
+                                <i class="icon-trash"></i>
+                            </a>
+                            @if(item.IsActive)
+                            {
+                                <a item_id="@item.Id" item_name="@item.Name" href="javascript:void(0);" class="btn btn-small ab-active ab-disable" title="Disable for &raquo; @item.Name">
+                                    <i class="icon-eye-closed"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <a item_id="@item.Id" item_name="@item.Name" href="javascript:void(0);" class="btn btn-small ab-active ab-enable" title="Enable for &raquo; @item.Name">
+                                    <i class="icon-eye-open"></i>
+                                </a>
+                            }
+                            <a item_id="@item.Id" item_name="@item.Name" rel="#" href="javascript:void(0);" class="btn btn-small ab-move ab-down" title="Move down for &raquo; @item.Name">
+                                <i class="icon-caret-down"></i>
+                            </a>
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

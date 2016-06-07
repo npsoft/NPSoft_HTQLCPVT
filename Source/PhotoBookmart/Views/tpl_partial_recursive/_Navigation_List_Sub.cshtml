@@ -1,0 +1,102 @@
+﻿@model Navigation
+@{
+    var Navigation = (List<Navigation>)ViewData["Nav"];
+    var deep = (int)ViewData["deep"];
+    var Topics = (List<SiteTopic>)ViewData["Topics"];
+    if (Topics == null)
+    {
+        Topics = new List<SiteTopic>();
+    }
+    var SubMenu = Navigation.Where(m => (m.ParentId == Model.Id)).OrderBy(m => m.OrderMenu).ToList();
+}
+
+@if (deep == 0)
+{
+    <li @{ if (SubMenu.Count() != 0 || Model.Name == "Properties" || Model.Name == "Contact") { <text>class="dropdown"</text> } }>
+
+    @if (Model.Menutype == 0)
+    {
+        <a rel="#" href="@Model.Link">@Model.Name</a>
+    }
+    else
+    {
+        var topic = Topics.Where(m => (m.Id == Model.TopicId)).FirstOrDefault();
+        if (topic != null) { <a href="@Url.Action("TopicDetail", "Topic", new { id = topic.SystemName })">@Model.Name</a> }
+        else { <a href="#">@Model.Name</a> }
+    }
+
+    @if (SubMenu.Count != 0)
+    {
+        <div class="drop1">   
+			<div class="dropInner">
+                @foreach (var item in SubMenu)
+                {
+                    if (item.RequireLogin && !User.Identity.IsAuthenticated) { continue; }
+                    
+                    var vd = new ViewDataDictionary();
+
+                    vd.Add("Nav", Navigation);
+
+                    vd.Add("deep", deep + 1);
+
+                    vd.Add("Topics", Topics);
+
+                    @Html.Partial("_Navigation_List_Sub", item, vd);
+                }
+            </div>
+        </div>
+    }
+    
+    @if (Model.Name == "Properties") { @Html.Partial("_Properties") }
+    @if (Model.Name == "Contact") { @Html.Partial("_Properties.Agent") }
+    
+    </li>
+}
+else if (deep == 1)
+{
+    <div class="dropInner2">
+        @if (Model.Menutype == 0)
+        {
+            if (Model.Link != "#") { <a rel="@Model.Name" href="@Model.Link">@Model.Name</a><br/> }
+            else { <span>@Model.Name</span><br/> }
+        }
+        else
+        {
+            var topic = Topics.Where(m => (m.Id == Model.TopicId)).FirstOrDefault();
+            if (topic != null) { <a href="@Url.Action("TopicDetail", "Topic", new { id = topic.SystemName })">@Model.Name</a> }
+            else { <a href="#">@Model.Name</a> }<br/>
+        }
+        @if (SubMenu.Count != 0)
+        {
+            foreach (var item in SubMenu)
+            {
+                if (item.RequireLogin && !User.Identity.IsAuthenticated)
+                {
+                    continue;
+                }
+                var vd = new ViewDataDictionary();
+
+                vd.Add("Nav", Navigation);
+
+                vd.Add("deep", deep + 1);
+
+                vd.Add("Topics", Topics);
+
+                @Html.Partial("_Navigation_List_Sub", item, vd);
+            }
+         }
+    </div>
+}
+else
+{
+    if (Model.Menutype == 0)
+    {
+        <a rel="@Model.Name" href="@Model.Link">@Model.Name</a>
+    }
+    else
+    {
+        var topic = Topics.Where(m => (m.Id == Model.TopicId)).FirstOrDefault();
+        if (topic != null) { <a href="@Url.Action("TopicDetail", "Topic", new { id = topic.SystemName })">@Model.Name</a> }
+        else { <a href="#">@Model.Name</a> }
+    }
+}

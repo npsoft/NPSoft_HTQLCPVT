@@ -1,0 +1,37 @@
+﻿@model List<OrderReportModel>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Month</th>
+            <th>Day</th>
+            <th>Orders</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="text-align:center;">
+                        <span>@string.Format("{0:yyyy}", item.FromDate)</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@string.Format("{0:MMMM}", item.FromDate)</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@int.Parse(string.Format("{0:dd}", item.FromDate))</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@item.NumOrders</span>
+                    </td>
+                    <td style="text-align:center;">
+                        <span>@string.Format("{0} {1}", item.PriceSign, item.TotalMoney)</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

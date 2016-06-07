@@ -1,0 +1,166 @@
+﻿@model Order
+@{
+    Layout = null;
+    var country = Db.Select<Country>();
+    Db.Close();
+}
+@* Dialog Shipping Note *@
+<div class="dialog mws-panel-body" id="Dialog_Shipping_Note" style="display: none;"
+    title="Update shipping">
+    @using (Html.BeginForm("Shipping_UpdateNote", "Order", FormMethod.Post, new { @id = "Dialog_Shipping_Note_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="@Model.Id"  />
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Shipping Method</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_Method" class="large mws-select2">
+                        @foreach (Enum_ShippingType e in (Enum_ShippingType[])Enum.GetValues(typeof(Enum_ShippingType)))
+                        {
+                            <option value="@e" @if (Model.Shipping_Method == e)
+                                               {<text>selected</text>}>@e.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Shipping Status</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_Status" id="Dialog_Shipping_Shipping_Status" class="large mws-select2">
+                        @foreach (Enum_ShippingStatus e in (Enum_ShippingStatus[])Enum.GetValues(typeof(Enum_ShippingStatus)))
+                        {
+                            <option value="@e" @if (Model.Shipping_Status == e)
+                                               {<text>selected</text>}>@e.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row" id="Dialog_Shipping_TrackingNumber">
+                <label class="mws-form-label">
+                    Tracking Number</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(x => x.Shipping_TrackingNumber, new { @class = "large" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Weight (gram)</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(model => Model.TotalWeight, new { @class = "float-number large" })
+                </div>
+            </div>
+            <h4>
+                Shipping Fee</h4>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Shipping Real Price</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(x => x.Shipping_RealPrice, new { @class = "large float-number" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Shipping Display Price</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(x => x.Shipping_DisplayPrice, new { @class = "large float-number" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Shipping Currency Sign</label>
+                <div class="mws-form-item">
+                    <select name="Shipping_DisplayPriceSign" class="large mws-select2">
+                        @foreach (var c in country)
+                        {
+                            <option value="@c.CurrencyCode" @if (c.CurrencyCode == Model.Shipping_DisplayPriceSign){<text>selected</text>}>@c.CurrencyCode</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <h4>
+                Shipping note</h4>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Note</label>
+                <div class="mws-form-item">
+                    <textarea name="ShippingNote" class="large" style="height: 4em;">@Model.ShippingNote</textarea>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        setTimeout(function () {
+            jQuery("#Dialog_Shipping_Note").css("overflow", "hidden");
+            jQuery("#Dialog_Shipping_Shipping_Status").trigger("change");
+        }, 500);
+
+        jQuery("#Dialog_Shipping_Note_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        jQuery("#Dialog_Shipping_Shipping_Status").change(function () {
+            if (jQuery(this).val() != "Shipped") {
+                jQuery("#Dialog_Shipping_TrackingNumber").hide();
+            }
+            else {
+                jQuery("#Dialog_Shipping_TrackingNumber").show();
+            }
+        });
+
+        $("#Dialog_Shipping_Note").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 800,
+            buttons: {
+                "Ok": function () {
+                    if (jQuery("#Dialog_Shipping_Note_Form").find("input[name='ShippingNote']").val() == "") {
+                        alert("Please enter » Shipping Note  ");
+                        jQuery("#Dialog_Shipping_Note_Form").find("input[name='ShippingNote']").focus();
+                        return false;
+                    }
+
+                    if (jQuery("#Dialog_Shipping_Shipping_Status").val() == "Shipped" && jQuery("#Dialog_Shipping_Note_Form").find("input[name='Shipping_TrackingNumber']").val() == "") {
+                        alert("Please enter » Tracking Number  ");
+                        jQuery("#Dialog_Shipping_Note_Form").find("input[name='Shipping_TrackingNumber']").focus();
+                        return false;
+                    }
+
+
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#Dialog_Shipping_Note_Form").attr("action"), jQuery("#Dialog_Shipping_Note_Form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            window.location.href = window.location.href;
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Dialog_ShippingNote_handler").click(function () {
+            //$("#Dialog_Shipping_Note").dialog('option', 'title', 'Add security code');
+            $("#Dialog_Shipping_Note").dialog('open')
+        });
+    })
+
+</script>

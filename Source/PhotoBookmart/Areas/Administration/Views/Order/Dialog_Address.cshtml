@@ -1,0 +1,128 @@
+﻿@model Order
+@{
+    Layout = null;
+}
+@* Dialog Billing Address And Shipping Address *@
+<div class="dialog mws-panel-body" id="Dialog_Address" style="display: none;" title="Update Address">
+    @using (Html.BeginForm("Address_Update", "Order", FormMethod.Post, new { @id = "Dialog_Address_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <input type="hidden" name="OrderId" value="@Model.Id" />
+        <div class="mws-form-inline" id="Section_BillingAddress" default="1">
+            @Html.Partial("Dialog_Address_Detail", Model.BillingAddressModel)
+        </div>
+        <div class="mws-form-inline" id="Section_ShippingAddress" style="display: none;">
+            @Html.Partial("Dialog_Address_Detail", Model.ShippingAddressModel)
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        setTimeout(function () {
+            jQuery("#Dialog_Address").css("overflow", "hidden");
+        }, 500);
+
+        jQuery("#Dialog_Address_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        $("#Dialog_Address").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 800,
+            buttons: {
+                "Ok": function () {
+                    var obj = jQuery("#Dialog_Address_Form div[default=1]");
+
+                    if (obj.find("input[name='FirstName']").val() == "") {
+                        alert("Please enter » Fist Name  ");
+                        obj.find("input[name='FirstName']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='LastName']").val() == "") {
+                        alert("Please enter » Last Name  ");
+                        obj.find("input[name='LastName']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='Email']").val() == "") {
+                        alert("Please enter » Email  ");
+                        obj.find("input[name='Email']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='Country']").val() == "") {
+                        alert("Please enter » Country  ");
+                        obj.find("input[name='Country']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='City']").val() == "") {
+                        alert("Please enter » City  ");
+                        obj.find("input[name='City']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='Address']").val() == "") {
+                        alert("Please enter » Address  ");
+                        obj.find("input[name='Address']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='ZipPostalCode']").val() == "") {
+                        alert("Please enter » Zip / Postal Code  ");
+                        obj.find("input[name='ZipPostalCode']").focus();
+                        return false;
+                    }
+
+                    if (obj.find("input[name='PhoneNumber']").val() == "") {
+                        alert("Please enter » Phone number ");
+                        obj.find("input[name='PhoneNumber']").focus();
+                        return false;
+                    }
+
+                    // delete before submit to make sure only one
+                    jQuery("#Dialog_Address_Form div[default=0]").remove();
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#Dialog_Address_Form").attr("action"), jQuery("#Dialog_Address_Form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            window.location.href = window.location.href;
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Update_BillingAddress").click(function () {
+            $("#Dialog_Address").dialog('option', 'title', 'Update Billing Address');
+            jQuery("#Section_ShippingAddress").attr("default", 0).hide();
+            jQuery("#Section_BillingAddress").attr("default", 1).show();
+            $("#Dialog_Address").dialog('open')
+        });
+
+        $("#Update_ShippingAddress").click(function () {
+            $("#Dialog_Address").dialog('option', 'title', 'Update Shipping Address');
+            jQuery("#Section_BillingAddress").attr("default", 0).hide();
+            jQuery("#Section_ShippingAddress").attr("default", 1).show();
+            $("#Dialog_Address").dialog('open')
+        });
+    })
+
+</script>

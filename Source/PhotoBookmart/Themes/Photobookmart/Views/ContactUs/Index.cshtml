@@ -1,0 +1,180 @@
+﻿@model Site_ContactUs
+@{
+    ViewBag.Title = "Contact Us";
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Contact.cshtml";
+    var Config = (Site_ContactusConfig)ViewData["config"];
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentTheme("Content/css/jquery.qtip.min.css")" media="screen" />
+<script type="text/javascript" src="@Url.ContentTheme("Content/scripts/jquery.qtip.min.js")"></script>
+<div id="map-wrapper" @{ if (Config.IsHideMap || Config.Id == 0)
+                         {<text>class="display-none"</text>} }>
+    <div class="contactus_mapanchor" id="map">
+    </div>
+</div>
+<div class="container mv-20">
+    <div class="one_half" style="margin: 0px;">
+        <h3 class="col-title mb-20">
+            Contact Details
+        </h3>
+        <div class="white-bg padding-20">
+            @Html.Action("Embed", "Topic", new { id = ("contact_us_info_" + Config.LanguageCode).ToLower(), header = false, ignore_on_error = true })
+        </div>
+    </div>
+    <div class="one_half">
+        <h3 class="col-title mb-20">
+            Contact Us
+        </h3>
+        @using (Html.BeginForm("ContactSubmit", "ContactUs", FormMethod.Post, new { enctype = "multipart/form-data", @id = "contactForm", @class = "mws-form" }))
+        {
+            <div class="col-md-6 mb-20">
+                @Html.TextBoxFor(mbox => mbox.Name, new { @id = "senderName", @placeholder = "Name", @class = "requiredField form-control" })
+            </div>
+            <div class="col-md-6 mb-20">
+                @Html.TextBoxFor(mbox => mbox.Email, new { @id = "senderEmail", @placeholder = "Email", @class = "requiredField email form-control" })
+            </div>
+            <div class="col-md-6 mb-20">
+                @Html.TextBoxFor(mbox => mbox.Phone, new { @id = "senderPhone", @placeholder = "Phone", @class = "form-control" })
+            </div>
+            <div class="col-md-6 mb-20">
+                @Html.TextBoxFor(mbox => mbox.Website, new { @id = "senderWeb", @placeholder = "Website", @class = "form-control" })
+            </div>
+            <div class="col-md-12 mb-20">
+                @Html.TextAreaFor(mbox => mbox.Comment, new { @id = "message", @placeholder = "Message", @class = "requiredField form-control", @rows = "8" })
+            </div>
+            <div class="col-md-12 mb-20">
+                @Html.Raw(Html.GenerateCaptcha())
+            </div>
+            <div class="col-md-12 mb-20">
+                <input type="submit" name="sendMessage" value="Send Email" class="btn btn-primary submit">
+            </div>
+            <span></span>
+        }
+    </div>
+</div>
+<div class="clear">
+</div>
+<script language="javascript">
+    jQuery(document).ready(function () {
+
+        // For contact form
+        jQuery("#contactForm").submit(function () {
+            // validate
+            if (jQuery("#senderName").val() == "") {
+                alert("Please enter your name");
+                jQuery("#senderName").focus();
+                return false;
+            }
+
+            if (jQuery("#senderEmail").val() == "") {
+                alert("Please enter your email");
+                jQuery("#senderEmail").focus()
+                return false;
+            }
+
+            if (jQuery("#message").val() == "") {
+                alert("Please enter your message");
+                jQuery("#message").focus()
+                return false;
+            }
+
+            if (jQuery("#recaptcha_response_field").val() == "") {
+                alert("Please enter your captcha");
+                jQuery("#recaptcha_response_field").focus();
+                return false;
+            }
+            
+            if (!/^([a-zA-Z0-9_\.\-])+\@@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(jQuery("#senderEmail").val())) {
+                alert("Email is not valid");
+                jQuery("#senderEmail").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        alert(returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    alert(returnObj.Message);
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+
+        // For contact detail
+        jQuery(".contact_us_representative > li").prepend("<i class='fa fa-sun-o'></i>&nbsp;").click(function(){
+            var x=jQuery(this).find(".contact_detail2");
+            if (x.css("display") == "block")
+            {
+                x.fadeOut();
+            }
+            else{
+                x.fadeIn();
+            }
+        }).each(function(){
+                jQuery(this).tooltipster({
+                position: 'top-left',
+                content: $('<ul class="contact-details" style="display: block;">'+jQuery(this).find("ul").html()+'</ul>')
+            });
+        });
+
+        //Google Maps
+        var $map = jQuery('#map');
+        if ($map.length) {
+            $map.gMap({
+                control: false,
+                scrollwheel: true,
+                @if (Config.Id > 0)
+                {
+                    <text>
+                    zoom: 15,
+                    latitude:@Config.Center_Lat,
+                    longitude: @Config.Center_Lng,
+                    @if (!string.IsNullOrEmpty(Config.Address))
+                    {
+                        <text>address: '@Config.Address',</text>
+                    }
+                    @if (!string.IsNullOrEmpty(Config.Address) || !string.IsNullOrEmpty(Config.Info))
+                    {
+                    <text>
+                        markers: [
+				            {   key: 'office_marker',
+                                'address': '@Config.Address',
+                                latitude:@Config.Coor_Lat,
+                                longitude: @Config.Coor_Lng,
+                                @if (!string.IsNullOrEmpty(Config.Info))
+                                {
+                                    <text>'html':'@Html.Raw(Config.Info)',</text>
+                                }
+                                'popup':true
+                            }
+			            ]
+                    </text>
+                    }
+                </text>
+                }
+                else
+                {
+                    @* Default coordiate *@
+                    <text>
+                        zoom: 5,
+                        latitude:37.996163,
+                        longitude: -99.711914
+                    </text>
+                }
+            });
+        }
+        //Google Maps End
+
+        
+    });
+</script>

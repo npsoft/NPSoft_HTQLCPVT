@@ -1,0 +1,107 @@
+﻿@model List<DoiTuong>
+
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>Họ & Tên</th>
+            <th>Ngày sinh</th>
+            <th>Giới tính</th>
+            <th>Loại</th>
+            <th>Tình trạng</th>
+            <th>TT (duyệt)</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model ?? Enumerable.Empty<DoiTuong>())
+        {
+            <tr data-id="@item.Id" data-name="@item.HoTen">
+                <td style="text-align:left;">
+                    <span>@item.HoTen</span>
+                </td>
+                <td style="text-align:right;">
+                    <span>@item.ToStringNgaySinh()</span>
+                </td>
+                <td style="text-align:center;">
+                    <span>@item.GioiTinh.GetGender()</span>
+                </td>
+                <td style="text-align:left;">
+                    <span>@item.MaLDT_Name</span>
+                </td>
+                <td style="text-align:left;">
+                    <span>@item.TinhTrang_Name</span>
+                </td>
+                <td style="text-align:center;">
+                    <input type="checkbox" @if (item.IsDuyet) { <text>checked="checked"</text> } disabled="disabled">
+                </td>
+                <td style="text-align: center;" class="no_padding">
+                    <span class="btn-group">
+                        <a href="#" class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                        <ul class="dropdown-menu pull-right" style="text-align: left;">
+                            @*@if (item.CanView)
+                            {
+                            <li>
+                                <a rel="detail" href="@Url.Action("Detail", "WebsiteProduct", new { id = item.Id })" title="Xem chi tiết" target="_blank">
+                                    <i class="icon-eye-open"></i>&nbsp;Xem chi tiết
+                                </a>
+                            </li>
+                            }*@
+                            @if (item.CanApprove)
+                            {
+                                <li>
+                                    <a rel="approve" href="javascript:void(0);" title="Duyệt" data-action="approve">
+                                        <i class="icon-ok"></i>&nbsp;Duyệt
+                                    </a>
+                                </li>
+                            }
+                            @if (item.CanDelete)
+                            {
+                                <li>
+                                    <a rel="delete" href="javascript:void(0);" title="Xóa bỏ" data-action="delete">
+                                        <i class="icon-trash"></i>&nbsp;&nbsp;Xóa bỏ
+                                    </a>
+                                </li>
+                            }
+                            @if (item.CanEdit)
+                            {
+                            <li>
+                                <a rel="edit" href="@Url.Action("Edit", "WebsiteProduct", new { id = item.Id })" title="Chỉnh sửa" target="_blank">
+                                    <i class="icon-pencil"></i>&nbsp;Chỉnh sửa
+                                </a>
+                            </li>
+                            }
+                            @if (item.CanBienDong)
+                            {
+                                <li>
+                                    <a rel="bien-dong" href="javascript:void(0);" title="Tạo biến động" data-action="bien-dong">
+                                        <i class="icon-stats-up"></i>&nbsp;Tạo biến động
+                                    </a>
+                                </li>
+                            }
+                            <li>
+                                <a rel="lich-su" href="javascript:void(0);" title="Lịch sử biến động" data-action="lich-su">
+                                    <i class="icon-list-2"></i>&nbsp;Lịch sử biến động
+                                </a>
+                            </li>
+                        </ul>
+                    </span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+    int distance = 5;
+    int currPage = (int)ViewData["CurrPage"];
+    int pageSize = (int)ViewData["PageSize"];
+    int totalItem = (int)ViewData["TotalItem"];
+    int totalPage = (int)ViewData["TotalPage"];
+
+    var viewData = new ViewDataDictionary();
+    viewData.Add("Distance", distance);
+    viewData.Add("CurrPage", currPage);
+    viewData.Add("PageSize", pageSize);
+    viewData.Add("TotalItem", totalItem);
+    viewData.Add("TotalPage", totalPage);
+    @Html.Partial("_PagerTable", viewData);
+}

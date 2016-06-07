@@ -1,0 +1,77 @@
+﻿@model List<Settings>
+@{  
+    int distance = 5;    
+    int currPage = (int)ViewData["CurrPage"];
+    int pageSize = (int)ViewData["PageSize"];
+    int totalItem = (int)ViewData["TotalItem"];
+    int totalPage = (int)ViewData["TotalPage"];
+}
+
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>Tỉnh</th>
+            <th>Huyện</th>
+            <th>Thiết lập</th>
+            <th>Giá trị</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model ?? Enumerable.Empty<Settings>())
+    {
+        <tr data-id="@item.Id" data-desc="@item.Desc">
+            <td style="text-align:left;">
+                <span>@item.Name_Province</span>
+            </td>
+            <td style="text-align:left;">
+                <span>@item.Name_District</span>
+            </td>
+            <td style="text-align:left;">
+                <span>@(((Enum_Settings_Key)Enum.Parse(typeof(Enum_Settings_Key), item.Key)).DisplayName())</span>
+            </td>
+            <td style="text-align:left;">
+                <span>@item.Value</span>
+            </td>
+            <td style="text-align: center;" class="no_padding">
+                <span class="btn-group">
+                    <a href="#" class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                    <ul class="dropdown-menu pull-right" style="text-align: left;">
+                        <li>
+                            <a href="javascript:void(0);" class="np-view" title="Xem mô tả" data-id="@item.Id">
+                                <i class="icon-eye-open"></i>&nbsp;Xem mô tả
+                            </a>
+                        </li>
+                        @if (item.CanEdit)
+                        {
+                        <li>
+                            <a href="@Url.Action("Edit", "Settings", new { id = item.Id })" title="Chỉnh sửa" target="_parent">
+                                <i class="icon-pencil"></i>&nbsp;Chỉnh sửa
+                            </a>
+                        </li>
+                        }
+                        @if (item.CanDelete)
+                        {
+                        <li>
+                            <a href="javascript:void(0);" class="np-delete" title="Xóa bỏ" data-id="@item.Id">
+                                <i class="icon-trash"></i>&nbsp;&nbsp;Xóa bỏ
+                            </a>
+                        </li>
+                        }
+                    </ul>
+                </span>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@{
+    var viewData = new ViewDataDictionary();
+    viewData.Add("Distance", distance);
+    viewData.Add("CurrPage", currPage);
+    viewData.Add("PageSize", pageSize);
+    viewData.Add("TotalItem", totalItem);
+    viewData.Add("TotalPage", totalPage);
+    @Html.Partial("_PagerTable", viewData);
+}

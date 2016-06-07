@@ -1,0 +1,39 @@
+﻿@{
+    Layout = null;
+
+    var user_count = Db.Count<ABUserAuth>(m => m.ActiveStatus);
+    //var new_testimonial = Db.Count<Site_Testimonial>(m => m.isNew );
+    var new_contactus = Db.Count<Site_ContactUs>(m => m.IsNew);
+    var exception_count = Db.Count<Exceptions>(m => m.ExceptionOn >= DateTime.Now.AddDays(-1));
+}
+@*<!-- Statistics Button Container -->
+<div class="mws-stat-container clearfix">
+    <!-- Statistic Item -->
+    <a class="mws-stat" href="#">
+        <!-- Statistic Icon (edit to change icon) -->
+        <span class="mws-stat-icon icol32-building"></span>
+        <!-- Statistic Content -->
+        <span class="mws-stat-content"><span class="mws-stat-title">New Testimonials</span> <span
+            class="mws-stat-value">@new_testimonial.ToString("000")</span> </span></a><a class="mws-stat" href="#">
+                <!-- Statistic Icon (edit to change icon) -->
+                <span class="mws-stat-icon icol32-sport"></span>
+                <!-- Statistic Content -->
+                <span class="mws-stat-content"><span class="mws-stat-title">New Contact Messages</span> <span
+                    class="mws-stat-value down">@new_contactus.ToString("000")</span> </span></a><a class="mws-stat" href="#">
+                        <!-- Statistic Icon (edit to change icon) -->
+                        <span class="mws-stat-icon icol32-walk"></span>
+                        <!-- Statistic Content -->
+                        <span class="mws-stat-content"><span class="mws-stat-title">Users Account</span>
+                            <span class="mws-stat-value">@user_count.ToString("000")</span> </span></a><a class="mws-stat" href="#">
+                                <!-- Statistic Icon (edit to change icon) -->
+                                <span class="mws-stat-icon icol32-bug"></span>
+                                <!-- Statistic Content -->
+                                <span class="mws-stat-content"><span class="mws-stat-title">Last 2 days Exception</span> <span
+                                    class="mws-stat-value up">@exception_count</span> </span></a>*@
+    @*<a class="mws-stat" href="#">
+        <!-- Statistic Icon (edit to change icon) -->
+        <span class="mws-stat-icon icol32-car"></span>
+        <!-- Statistic Content -->
+        <span class="mws-stat-content"><span class="mws-stat-title">Cars Repaired</span> <span
+            class="mws-stat-value">77</span> </span></a>*@
+</div>

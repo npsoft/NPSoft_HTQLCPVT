@@ -1,0 +1,629 @@
+.head
+{
+    margin-bottom: 10px;
+}
+
+.disable_item
+{
+    color: #CCC;
+}
+
+/* Homepage Distributor Selection */
+
+.homepage_distributor_select
+{
+}
+
+.homepage_distributor_select label
+{
+    color: #FFF;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.homepage_distributor_select select
+{
+    width: 100%;
+}
+
+#mws-navigation .label
+{
+    font-weight: bold;
+    color: #FFF;
+    width: 100%;
+}
+
+#mws-navigation .label a
+{
+    color: Yellow;
+}
+
+/* End Homepage Distributor Selection */
+.no_margin_left
+{
+    margin-left: 0px !important;
+}
+
+.no_padding
+{
+    padding: 0px !important;
+}
+
+.no_shadow
+{
+    box-shadow: none;
+}
+
+.ui-dialog .ui-dialog-titlebar
+{
+    color: #FFF;
+}
+
+.black_color, .black_color:hover
+{
+    color: #000;
+}
+
+.form_special_message
+{
+    margin-bottom: 0;
+    border-width: 0 0 1px 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    background-color: #fef0b1;
+    border-color: #ddca76;
+    color: #a98b15;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid #d2d2d2;
+    padding: 15px 8px 15px 45px;
+    position: relative;
+    vertical-align: middle;
+    background-position: 12px 12px;
+    background-repeat: no-repeat;
+    margin-bottom: 12px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+
+/* Website Detail uCard */
+.ucard
+{
+    border-top: 1px solid #CCC;
+    position: relative;
+    background: transparent;
+    border: 0px;
+}
+.block, .block-fluid
+{
+    border-top: 0px;
+    background-color: #F9F9F9;
+    -moz-border-bottom-left-radius: 3px;
+    -moz-border-bottom-right-radius: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+    -o-border-bottom-left-radius: 3px;
+    -o-border-bottom-right-radius: 3px;
+    -ms-border-bottom-left-radius: 3px;
+    -ms-border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+ul.rows
+{
+    margin: 0px;
+}
+ul.rows li
+{
+    padding: 8px 0px;
+    position: relative;
+    border: 1px solid #D9D9D9;
+    border-top-color: #FFF;
+    background-color: #F9F9F9;
+    list-style: none;
+}
+ul.rows li .title
+{
+    width: 120px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    color: #999;
+}
+ul.rows li .text
+{
+    margin-left: 120px;
+}
+
+
+ul.rows li:nth-child(2n)
+{
+    background-color: #F2F2F2;
+}
+/* End of Website Detail uCard */
+
+
+/* For Order page */
+.ucard a.editor
+{
+    color: #000;
+    cursor: pointer;
+    float: right;
+    margin-right: 15px;
+}
+
+.ucard a.editor:after
+{
+    clear: both;
+}
+
+#payment_updatestatus
+{
+    overflow: hidden;
+}
+
+#panel_history .mws-panel-body
+{
+    height: 100%;
+}
+#panel_history .mws-panel-body > div
+{
+    min-height: 500px;
+    padding: 15px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+/* End of order page */
+
+
+.btn-toolbar [class^="icol-"], .btn-toolbar [class*=" icol-"]
+{
+    margin-right: 5px;
+}
+
+/* For thumbnail in table */
+.table_td_img_thumb img
+{
+    padding: 5px;
+    max-width: 70px;
+    height: auto;
+    background: #345;
+}
+
+/* end For thumbnail in table */
+
+/* For chat history 
+style from http://flatfull.com/themes/scale/chat.html
+*/
+.chat-list
+{
+    margin-bottom: 35px;
+}
+.chat-item + .chat-item
+{
+    margin-top: 15px;
+    display: block;
+}
+
+.chat-item:before, .chat-item:after
+{
+    content: " ";
+    display: table;
+}
+.thumb-sm
+{
+    width: 55px;
+    display: inline-block;
+}
+.avatar
+{
+    position: relative;
+    display: block;
+    border-radius: 500px;
+    white-space: nowrap;
+}
+.chat-item .pull-left
+{
+    float: left !important;
+}
+
+.thumb img, .thumb-xs img, .thumb-sm img, .thumb-md img, .thumb-lg img, .thumb-btn img
+{
+    height: auto;
+    max-width: 100%;
+    vertical-align: middle;
+}
+.avatar img
+{
+    border-radius: 500px;
+    width: 100%;
+}
+
+.chat-item .chat-body
+{
+    position: relative;
+    margin-left: 70px;
+    min-height: 30px;
+    display: block;
+}
+.chat-item .chat-body .panel
+{
+    margin: 0 -1px;
+}
+.m-b-none
+{
+    margin-bottom: 0;
+}
+.b-light
+{
+    border-color: #e1e6ef;
+}
+.text-sm
+{
+    font-size: 12px;
+}
+
+.panel
+{
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid #E8EBEA;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+
+.panel-body
+{
+    padding: 15px;
+}
+
+.panel-body:before
+{
+    display: table;
+    content: " ";
+}
+
+.chat-item .arrow
+{
+    top: 20px;
+}
+.arrow.left
+{
+    top: 50%;
+    left: -8px;
+    margin-top: -8px;
+    border-left-width: 0;
+    border-right-color: #eee;
+    border-right-color: rgba(0,0,0,0.1);
+}
+.arrow, .arrow:after
+{
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+}
+.arrow
+{
+    border-width: 8px;
+    z-index: 10;
+}
+
+.arrow.left:after
+{
+    content: " ";
+    left: 1px;
+    border-left-width: 0;
+    border-right-color: #fff;
+    bottom: -7px;
+}
+.arrow:after
+{
+    border-width: 7px;
+    content: "";
+}
+.arrow, .arrow:after
+{
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+}
+
+.text-muted
+{
+    color: #a1a8ac;
+}
+
+.arrow.right
+{
+    top: 50%;
+    right: -8px;
+    margin-top: -8px;
+    border-right-width: 0;
+    border-left-color: #eee;
+    /*border-left-color: rgba(0,0,0,0.1);*/
+}
+
+.pull-right
+{
+    float: right !important;
+}
+
+.bg-light.dk, .bg-light .dk
+{
+    background-color: #e9edf4;
+}
+
+.chat-item.right .chat-body
+{
+    margin-left: 0;
+    margin-right: 70px;
+}
+
+.chat_list_footer
+{
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.chat_list_footer .input-sm
+{
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    display: table-cell;
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 100%;
+    margin-bottom: 0;
+    border-radius: 500px;
+    height: 30px;
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.input-group
+{
+    position: relative;
+    display: table;
+    border-collapse: separate;
+    width: 100%;
+}
+
+.input-group-btn
+{
+    position: relative;
+    font-size: 0;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: table-cell;
+    width: 180px;
+    padding-left: 10px;
+}
+
+
+
+/* End of chat history */
+
+#Excel_Import
+{
+    overflow: hidden !important;
+}
+
+/* Sta: Redefine mws */
+.ui-datepicker {
+    z-index: 1002 !important;
+}
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+    min-height: 20px;
+    width: 48%;
+}
+.ibutton-container {
+    vertical-align: middle;
+}
+.mws-tabs .ui-tabs-nav .ui-state-disabled {
+    display: none;
+}
+.mws-select2.select2-4-8 {
+    width: 49%;
+}
+/* End: Redefine mws */
+
+/* Sta: Common Define */
+.ellipses {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.table {
+    display: table !important;
+}
+.table-row {
+    display: table-row !important;
+}
+.table-cell {
+    display: table-cell !important;
+}
+.img-16x16 {
+    height: 16px;
+    width: 16px;
+}
+.img-w-16 {
+    width: 16px;
+}
+.align-l {
+    text-align: left;
+}
+.align-c {
+    text-align: center;
+}
+.align-r {
+    text-align: right;
+}
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+.mg-0 {
+    margin: 0;
+}
+.mgb-10 {
+    margin-bottom: 10px;
+}
+.padd-t-4 {
+    padding-top: 4px;
+}
+.min-height-0 {
+    min-height: 0 !important;
+}
+.overflow-auto {
+    overflow: auto;
+}
+.display-none {
+    display: none !important;
+}
+.display-inline-block {
+    display: inline-block !important;
+}
+.pos-relative {
+    position: relative;
+}
+.pos-absolute-bottom {
+    position: absolute;
+    bottom: 0;
+    min-height: 0 !important;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.k-grid-header .k-header > .k-grid-filter {
+    margin-right: -0.25em;
+}
+.k-grid-header .k-header > .k-link {
+    color: #333;
+}
+.k-grid-header .k-header > .k-link:hover {
+    text-decoration: underline;
+}
+/* End: Common Define */
+
+/* Sta: For ~/View/WebsiteProduct/Index.cshtml */
+.search-quick .large {
+    width: 100%;
+}
+#PanelOrderSearch {
+    margin-bottom: 10px;
+}
+#PanelOrderSearch .mws-form-row {
+    padding: 10px;
+}
+#PanelOrderSearch .mws-form-row .mws-form-label {
+    width: 100px !important;
+    text-align: right;
+}
+#PanelOrderSearch .mws-form-row .mws-form-item {
+    margin-left: 116px !important;
+}
+#dialog-bien-dong {
+    padding: 15px 10px 0 10px;
+}
+#dialog-bien-dong .bien-dong-common hr {
+    margin: 0;
+}
+#dialog-bien-dong .bien-dong-common .mws-form {
+    padding: 5px 0;
+}
+#dialog-bien-dong .bien-dong-common .mws-form-row {
+    padding: 5px;
+}
+#dialog-bien-dong .bien-dong-common .mws-form-row .mws-form-label {
+    width: 75px !important;
+    padding: 0;
+    text-align: right;
+}
+#dialog-bien-dong .bien-dong-common .mws-form-row .mws-form-item {
+    margin-left: 80px !important;
+}
+#dialog-bien-dong .bien-dong-primary .ui-accordion-content {
+    padding: 0.5em 0.5em;
+}
+#dialog-bien-dong .bien-dong-primary .ui-accordion-content .mws-form-row {
+    padding: 5px;
+}
+#dialog-bien-dong .bien-dong-primary .ui-accordion-content .mws-form-label {
+    width: 100px !important;
+    text-align: right;
+}
+#dialog-bien-dong .bien-dong-primary .ui-accordion-content .mws-form-item {
+    margin-left: 110px !important;
+}
+/* End: For ~/View/WebsiteProduct/Index.cshtml */
+
+/* Sta: For ~/Views/WebsiteProduct/Add.cshtml */
+form[id="obj-info-common"] .ui-tabs-panel {
+    padding: 0;
+}
+form[id="obj-info-common"] .mws-form-row {
+    padding: 10px;
+}
+form[id="obj-info-common"] .mws-form-row .mws-form-label {
+    width: 100px !important;
+    text-align: right;
+}
+form[id="obj-info-common"] .mws-form-row .mws-form-item {
+    margin-left: 116px !important;
+}
+form[id="obj-info-common"] .decrease-10px .mws-form-label {
+    width: 90px !important;
+}
+form[id="obj-info-common"] .decrease-10px .mws-form-item {
+    margin-left: 106px !important;
+}
+/* End: For ~/Views/WebsiteProduct/Add.cshtml */
+
+/* Sta: For ~/Views/OrderReport/Index.cshtml */
+#BaoCao_DSChiTraTroCap .mws-form-row {
+    padding: 10px;
+}
+#BaoCao_DSChiTraTroCap .mws-form-row .mws-form-row {
+    padding: 0;
+}
+#BaoCao_DSChiTraTroCap .mws-form-row .mws-form-label {
+    width: 100px;
+    text-align: right;
+}
+#BaoCao_DSChiTraTroCap .mws-form-row .mws-form-label ~ .mws-form-item {
+    margin-left: 116px !important;
+}
+#BaoCao_DSChiTraTroCap .mws-form-row .mws-panel {
+    margin: 0;
+}
+#BaoCao_DSChiTraTroCap .listuser .dataTables_length,
+#BaoCao_DSChiTraTroCap .listuser .dataTables_filter,
+#BaoCao_DSChiTraTroCap .listuser .dataTables_paginate {
+    display: none;
+}
+#BaoCao_DSChiTraTroCap .table {
+    padding: 5px 10px;
+}
+#BaoCao_DSChiTraTroCap .table .table-cell {
+    vertical-align: middle;
+}
+#BaoCao_DSChiTraTroCap .table [data-action="check-uncheck-all"] ~ span {
+    font-size: 13px;
+    padding-left: 5px;
+}
+/* End: For ~/Views/OrderReport/Index.cshtml */

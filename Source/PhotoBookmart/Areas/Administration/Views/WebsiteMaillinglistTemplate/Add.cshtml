@@ -1,0 +1,146 @@
+﻿@model Site_MaillingListTemplate
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Mailling List Template " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Create Mailling List Template";
+    }
+}
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+        CKEDITOR.replace('MaillinglistBody', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        jQuery("span.label").click(function () {
+            var x = jQuery(this).attr("tag");
+            CKEDITOR.instances.MaillinglistBody.insertText(x);
+        });
+
+        jQuery("#UserForm").submit(function () {
+            // validate
+            jQuery("#MaillinglistBody").val(CKEDITOR.instances.MaillinglistBody.getData());
+
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                        $("form input:text").val('');
+                        $("form input:password").val('');
+                        $("form textarea").val('');
+                    }
+                    else if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteMaillinglistTemplate", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        System Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Systemname, new { @class = "large" })
+                    </div>
+                </div>
+                @Html.Partial("Tokens", new { area = "Administration" })
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Title</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Title, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Body</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Body, new { @class = "large", @id = "MaillinglistBody" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Public template</label>
+                    <div class="mws-form-item">
+                        <input type="checkbox" name="IsPublic" value="true" class="ibutton" data-label-on="Yes" data-label-off="No" @if (Model.IsPublic)
+                                                                                                                                    { <text> checked="checked" </text> }>
+                        <br />
+                        <span>if yes, then you can use this template to send out the mailling list, if no, then
+                            for internal use only</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Template for Order</label>
+                    <div class="mws-form-item">
+                        <input type="checkbox" name="IsForOrder" value="true" class="ibutton" data-label-on="Yes" data-label-off="No" @if (Model.IsForOrder)
+                                                                                                                                      { <text> checked="checked" </text> }>
+                        <br />
+                        <span>This template will be used for Order Processing only</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Categories</label>
+                    <div class="mws-form-item">
+                        <select name="CategoryName" class="large mws-select2">
+                            @foreach (Enum_MaillingList_Categories e in (Enum_MaillingList_Categories[])Enum.GetValues(typeof(Enum_MaillingList_Categories)))
+                            {
+                                <option value="@e" @if (e == Model.CategoryName)
+                                                   {<text>selected</text>}>@e.DisplayName()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

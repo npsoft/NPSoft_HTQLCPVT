@@ -1,0 +1,290 @@
+﻿@model Site_Form_DataType
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Form Datatype - " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Add Form Datatype";
+    }
+}
+@Html.Partial("_LoadCodeMirror")
+<script type="text/javascript">
+var NetCodeDefaultValue;
+var NetCodeValidation;
+var JSCodeValidation;
+var RazorRender;
+    jQuery(document).ready(function () {
+        NetCodeDefaultValue = CodeMirror.fromTextArea(document.getElementById("NetCodeDefaultValue"), {
+            lineNumbers: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }, 
+            mode : "text/x-csharp",
+            autoCloseBrackets: true,
+            autoCloseTags: true,
+            autoFormatOnStart: true,
+            autoFormatOnUncomment: true,
+            continueComments: true,
+            enableCodeFolding: true,
+            enableCodeFormatting: true,
+            enableSearchTools: true,
+            highlightActiveLine: true,
+            highlightMatches: true,
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+            showTrailingSpace: true,
+            theme: 'neat'
+        });
+
+         NetCodeValidation = CodeMirror.fromTextArea(document.getElementById("NetCodeValidation"), {
+            lineNumbers: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }, 
+            mode : "text/x-csharp",
+            autoCloseBrackets: true,
+            autoCloseTags: true,
+            autoFormatOnStart: true,
+            autoFormatOnUncomment: true,
+            continueComments: true,
+            enableCodeFolding: true,
+            enableCodeFormatting: true,
+            enableSearchTools: true,
+            highlightActiveLine: true,
+            highlightMatches: true,
+            lineNumbers: true,
+            lineWrapping: true,
+            showTrailingSpace: true,
+            matchBrackets: true,
+            theme: 'neat'
+        });
+
+         JSCodeValidation = CodeMirror.fromTextArea(document.getElementById("JSCodeValidation"), {
+            lineNumbers: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }, 
+            mode : "text/javascript",
+            autoCloseBrackets: true,
+            autoCloseTags: true,
+            autoFormatOnStart: true,
+            autoFormatOnUncomment: true,
+            continueComments: true,
+            enableCodeFolding: true,
+            enableCodeFormatting: true,
+            enableSearchTools: true,
+            highlightActiveLine: true,
+            highlightMatches: true,
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+        });
+
+         RazorRender = CodeMirror.fromTextArea(document.getElementById("RazorRender"), {
+            lineNumbers: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }, 
+            mode : "htmlmixed",
+            autoCloseBrackets: true,
+            autoCloseTags: true,
+            autoFormatOnStart: true,
+            autoFormatOnUncomment: true,
+            continueComments: true,
+            enableCodeFolding: true,
+            enableCodeFormatting: true,
+            enableSearchTools: true,
+            highlightActiveLine: true,
+            highlightMatches: true,
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+            onBlur: function(){RazorRender.save()}
+        });
+
+
+        jQuery("#NetDefaultValueTest").click(function(){
+            show_loading();
+            jQuery.post("@Url.Action("ValidateCodeDefaultValue")", {
+                code: NetCodeDefaultValue.getValue()
+             }, function (returnObj) {
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+
+        jQuery("#NetValidationValueTest").click(function(){
+            show_loading();
+            var inp_value=jQuery("#NetValidationInputValue").val();
+            jQuery.post("@Url.Action("ValidateCodeValidation")", {
+                code: NetCodeValidation.getValue(),
+                input_value: inp_value
+             }, function (returnObj) {
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+
+
+        jQuery("#UserForm").submit(function () {
+            // validate
+            if (jQuery("#ThemeName").val() == "") {
+                alert("Please enter Theme name");
+                jQuery("#ThemeName").focus();
+                return false;
+            }
+            show_loading();
+
+            // update data
+//            jQuery("#NetCodeDefaultValue").val(CKEDITOR.instances.NetCodeDefaultValue.getData());
+//            jQuery("#NetCodeValidation").val(CKEDITOR.instances.NetCodeValidation.getData());
+//            jQuery("#JSCodeValidation").val(CKEDITOR.instances.JSCodeValidation.getData());
+            
+            jQuery("#NetCodeDefaultValue").val(NetCodeDefaultValue.getValue());
+            jQuery("#NetCodeValidation").val(NetCodeValidation.getValue());
+            jQuery("#JSCodeValidation").val(JSCodeValidation.getValue());
+            jQuery("#RazorRender").val(RazorRender.getValue());
+           
+           // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                        $("form input:text").val('');
+                        $("form input:password").val('');
+                        $("form textarea").val('');
+                    }
+                    else if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteFormDataType", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            <div class="mws-form-block">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Default Value</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.DefaultValue, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Allow null</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="AllowNull" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.AllowNull)
+                                                                                                                                             {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        .Net Code Default Value</label>
+                    <div class="mws-form-item">
+                        <div>
+                            <button type="button" class="btn" id="NetDefaultValueTest">
+                                <i class="icon-cogs"></i>&nbsp;Build Code</button>
+                        </div>
+                        <code>public object NetDefaultValue() {</code>
+                        @Html.TextAreaFor(m => m.NetCodeDefaultValue, new { @class = "large" })
+                        <code>}</code>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        .Net Code Validation</label>
+                    <div class="mws-form-item">
+                        <div>
+                            <span>Input value</span> <input type="text" id="NetValidationInputValue" />
+                            <button type="button" class="btn" id="NetValidationValueTest">
+                                <i class="icon-cogs"></i>&nbsp;Build Code</button>
+                        </div>
+                        <code>public bool NetValidation(params object[] Parameters) {</code>
+                        @Html.TextAreaFor(m => m.NetCodeValidation, new { @class = "large" })
+                        <code>}</code>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Javascript Validation</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.JSCodeValidation, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Razor Render</label>
+                    <div class="mws-form-item">
+                        <code>
+                            Model<br />
+                           - Name: Control Input Name, in string<br />
+                            - Value: Default Value, in string<br />
+                            - Allow_Null: True or False<br />
+                        </code>
+                        @Html.TextAreaFor(m => m.RazorRender, new { @class = "large" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

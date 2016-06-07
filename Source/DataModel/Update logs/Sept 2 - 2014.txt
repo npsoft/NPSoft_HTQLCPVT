@@ -1,0 +1,15 @@
+﻿Table CouponPromo
+- Add DiscountAmountDisplay double
+- Add DiscountAmountDisplayCurrencySign string
+
+Table AddressModel
+- Add State: string
+
+Table Product
+- Add Weight: double
+
+Table ProductOption
+- Add Weight: double
+
+Table Order
+- Add TotalWeight: double

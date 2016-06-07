@@ -1,0 +1,24 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.UserModel
+@{
+    Layout = null;
+    if (Model == null || string.IsNullOrEmpty(Model.Avatar)){
+        Model.Avatar = "Content/img/noimage.gif";
+    }
+}
+<div id="mws-user-info" class="mws-inset">
+    <!-- User Photo -->
+    <div id="mws-user-photo">
+        <img src="/@Model.Avatar" alt="@Model.UserName photo">
+    </div>
+    <!-- Username and Functions -->
+    <div id="mws-user-functions">
+        <div id="mws-username">
+            Hello, @Model.FirstName @Model.LastName (@Model.UserName)
+        </div>
+        <ul>
+            @*<li><a href="#">Profile</a></li>*@
+            <li><a href="@Url.Action("ChangePassword", "UserManagement")">Change Password</a></li>
+            <li><a href="@Url.Action("Logoff","Login")">Logout</a></li>
+        </ul>
+    </div>
+</div>

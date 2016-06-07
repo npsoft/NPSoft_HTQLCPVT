@@ -1,0 +1,31 @@
+﻿@{
+    Layout = null;
+
+    var banners = Db.Select<Site_Banner>(x => x.Where(y => (y.Status)))
+                    .OrderBy(x => (x.BannerIndex))
+                    .ToList();
+}
+<div id='slideshow_big' class='slideshow_color container_wrap dark_bg_color'>
+    <span class='top_stripe_shadow'></span>
+    <div class='container'>
+        <div class='slideshow_container dynamic_element dynamic_el_1 stretch_full slide_container_big'>
+        <span class='bottom_shadow'>
+            <img src='/Themes/Photobookmart/Content/images/layout/big_shadow.png' title='' alt='' />
+        </span>
+        <ul class='slideshow preloading fx_slider' data-autorotation='true' data-autorotation-timer='6' data-transition='fx'>
+        @for (int i = 0; i < banners.Count; i++)
+        {
+            var item = banners[i];
+            <li data-animation='random' data-caption='@item.Description' class='featured caption_bottom caption_bottom_framed caption_framed withCaption'>
+                <div class='slideshow_media_wrap'>
+                    <a href='@item.Name'>
+                        <img src='@{ if (string.IsNullOrEmpty(item.FileName)) {<text>@Url.Content("~/Content/img/noimage.gif")</text>}
+                                        else {<text>/@item.FileName</text>}}' title='' alt='' data-imgw='' data-imgh='' />
+                    </a>
+                </div>
+            </li>
+        }
+        </ul>
+        </div>
+    </div>
+</div>

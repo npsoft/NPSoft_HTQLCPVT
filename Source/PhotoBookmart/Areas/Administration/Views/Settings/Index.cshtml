@@ -1,0 +1,213 @@
+﻿@{
+    ViewBag.Title = "QL Thiết lập";
+    int page = (int)ViewData["CurrPage"];
+    string code_province = CurrentUser.MaHC.GetCodeProvince();
+    string code_district = CurrentUser.MaHC.GetCodeDistrict();
+}
+
+<link rel="stylesheet" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<style>
+    .filters .mws-select2 {
+        font-size: 13px;
+        margin: auto 10px;
+        width: 200px;
+    }
+</style>
+<script>
+    var $ddl_setting_scope, $ddl_setting, $ddl_province, $ddl_district, $popup_view, $list;
+    var url_GetSettingScopesForFilter = "@Url.Action("GetSettingScopesForFilter", "Settings")";
+    var url_GetProvincesForFilter = "@Url.Action("GetProvincesForFilter", "Settings")";
+    var url_GetDistrictsForFilter = "@Url.Action("GetDistrictsForFilter", "Settings")";
+    var url_List = "@Url.Action("List", "Settings")";
+    var url_Delete = "@Url.Action("Delete", "Settings")";
+
+    jQuery(document).ready(function ($) {
+        $ddl_setting_scope = $("#ddl-setting-scope");
+        $ddl_setting = $("#ddl-setting");
+        $ddl_province = $("#ddl-province");
+        $ddl_district = $("#ddl-district");
+        $popup_view = $("#popup-view");
+        $list = $(".WDTB_RB_Settings");
+
+        UpdSearch({ SettingScope: "", Setting: "", Province: "@code_province", District: "@code_district", Page: 1 });
+
+        $.post(url_GetSettingScopesForFilter, function (data) {
+            var opts = "";
+            data.forEach(function (element, index, array) {
+                opts += "<option value='" + element.Id + "'>" + element.Name + "</option>";
+            });
+            $ddl_setting_scope.append(opts);
+            $ddl_setting_scope.select2().select2("val", "");
+            $ddl_setting.select2().select2("val", "");
+        });
+
+        $ddl_setting_scope.on("change", function (e) {
+            $ddl_setting.children(":nth-child(n + 2)").remove();
+            $ddl_setting.select2().select2("val", "");
+            var data = { Scope: $ddl_setting_scope.val() };
+            if (data.Scope != "") {
+                $.post(SVC_GETSETTINGSBYSCOPE, data, function (data) {
+                    var opts = "";
+                    data.forEach(function (element, index, array) {
+                        opts += "<option value='" + element.Id + "'>" + element.Name + "</option>"
+                    });
+                    $ddl_setting.append(opts);
+                });
+            }
+            UpdSearch({ Page: 1 });
+        });
+
+        $ddl_setting.on("open", function (e) {
+            if ($ddl_setting_scope.val() == "") {
+                notify_info("Thông báo", "Vui lòng chọn phạm vi trước.");
+                $ddl_setting_scope.select2("open");
+                return false;
+            }
+        });
+
+        $.post(url_GetProvincesForFilter, function (data) {
+            var opts = ""
+            data.forEach(function (element, index, array) {
+                opts += "<option value='" + element.MaHC + "'>" + element.TenHC + "</option>";
+            });
+            $ddl_province.append(opts);
+            $ddl_province.select2().select2("val", "@code_province");
+            @if (!string.IsNullOrEmpty(code_province)) {
+                @: var data = { MaHC: "@code_province" };
+                @: $.post(url_GetDistrictsForFilter, data, function (data) {
+                    @: var opts = "";
+                    @: data.forEach(function (element, indexer, array) {
+                    @:      opts += "<option value='" + element.MaHC + "'>" + element.TenHC + "</option>";
+                    @: });
+                    @: $ddl_district.append(opts);
+                    @: $ddl_district.select2().select2("val", "@code_district");
+                @: });
+            } else {
+                @: $ddl_district.select2().select2("val", "@code_district");
+            }
+        });
+
+        $ddl_province.on("change", function (e) {
+            $ddl_district.children(":nth-child(n + 2)").remove();
+            $ddl_district.select2().select2("val", "");
+            var data = { MaHC: $ddl_province.val() };
+            if (data.MaHC != "") {
+                $.post(url_GetDistrictsForFilter, data, function (data) {
+                    var opts = "";
+                    data.forEach(function (element, index, array) {
+                        opts += "<option value='" + element.MaHC + "'>" + element.TenHC + "</option>";
+                    });
+                    $ddl_district.append(opts);
+                });
+            }
+            UpdSearch({ Page: 1 });
+        });
+
+        $ddl_district.on("open", function (e) {
+            if ($ddl_province.val() == "") {
+                notify_info("Thông báo", "Vui lòng chọn tỉnh trước.");
+                $ddl_province.select2("open");
+                return false;
+            }
+        });
+
+        $ddl_setting.add($ddl_district).on("change", function (e) {
+            UpdSearch({ Page: 1 });
+        });
+
+        $list.on("click", ".np-view", function (e) {
+            var id = $(this).attr("data-id");
+            var desc = $list.find("#ListTable tbody tr[data-id='" + id + "']").attr("data-desc");
+            $popup_view.find("[name='desc']").val(desc);
+            $popup_view.dialog("open");
+        });
+
+        $list.on("click", ".np-delete", function (e) {
+            var id = $(this).attr("data-id");
+            if (confirm("Bạn chắc chắn muốn xóa thiết lập này?")) {
+                $.post(url_Delete, { Id: id }, function (data) {
+                    if (data == null) {
+                        notify_info("Thông báo", "Xóa thiết lập thành công.");
+                    } else {
+                        notify_error("Lỗi", data.Message);
+                    }
+                    UpdSearch({});
+                });
+            }
+        });
+
+        $popup_view.dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Đóng lại": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
+
+    function UpdSearch(_data) {
+        var data = {
+            SettingScope: typeof _data.SettingScope !== "undefined" ? _data.SettingScope : $ddl_setting_scope.val(),
+            Setting: typeof _data.SettingScope !== "undefined" ? _data.Setting : $ddl_setting.val(),
+            Province: typeof _data.Province !== "undefined" ? _data.Province : $ddl_province.val(),
+            District: typeof _data.District !== "undefined" ? _data.District : $ddl_district.val(),
+            Page: typeof _data.Page !== "undefined" ? _data.Page : parseInt($(".dataTables_paginate .paginate_active").text())
+        };
+        $.post(url_List, data, function (data) {
+            $list.html(data);
+        });
+    };
+
+    function Paging(page) {
+        UpdSearch({ Page: page });
+    };
+</script>
+
+<div class="head">
+    <h3>Quản lý thiết lập</h3>
+    <div class="filters">
+        <select name="ddl-setting-scope" id="ddl-setting-scope" class="mws-select2">
+            <option value="">- - Chọn phạm vi - -</option>
+        </select>
+        <select name="ddl-setting" id="ddl-setting" class="mws-select2">
+            <option value="">- - Chọn thiết lập - -</option>
+        </select>
+        <select name="ddl-province" id="ddl-province" class="mws-select2">
+            <option value="">- - Chọn tỉnh - -</option>
+        </select>
+        <select name="ddl-district" id="ddl-district" class="mws-select2">
+            <option value="">- - Chọn huyện - -</option>
+        </select>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Danh sách thiết lập</span>
+    </div>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            @if ((RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]) != RoleEnum.Village)
+            {
+            <a href="@Url.Action("Add", "Settings", new { })" id="add-rb-setting" class="btn">
+                <i class="icol-add"></i>Thêm mới
+            </a>
+            }
+        </div>
+    </div>
+    <div class="mws-panel-body no-padding WDTB_RB_Settings"></div>
+</div>
+<div class="dialog" id="popup-view" style="display:none;" title="Mô tả">
+    <form id="" name="" action="" method="" enctype="multipart/form-data" class="mws-form">
+        <div class="mws-form-block">
+            <div class="mws-form-row">
+                <div class="mws-form-item">
+                    <textarea rows="3" name="desc" disabled="disabled" class="large"></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

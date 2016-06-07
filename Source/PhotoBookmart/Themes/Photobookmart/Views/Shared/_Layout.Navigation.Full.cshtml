@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.cshtml";
+}
+
+@section _ClassWrapper {
+    class="template-page content twelve main_color alpha alpha units entry-content"
+}
+
+@section _TitleMain {
+    @RenderSection("_TitleMain", true)
+}
+
+@section _TrailLink {
+    @RenderSection("_TrailLink", true)
+}
+
+@RenderBody()

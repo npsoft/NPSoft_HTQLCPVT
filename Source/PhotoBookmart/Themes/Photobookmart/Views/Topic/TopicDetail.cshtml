@@ -1,0 +1,44 @@
+﻿@model TopicDetail
+@{
+    if (Model.ContextLanguageDetail.LayoutType == 0)
+    {
+        Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.Full.cshtml";
+    }
+    else if (Model.ContextLanguageDetail.LayoutType == 1)
+    {
+        Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.Sidebar.cshtml";
+    }
+
+    if (Model.ContextLanguageDetail != null)
+    {
+        ViewBag.Title = Model.ContextLanguageDetail.MetaTitle;
+        ViewBag.Keywords = Model.ContextLanguageDetail.MetaKeywords;
+        ViewBag.Description = Model.ContextLanguageDetail.MetaDescription;
+    }
+    else
+    {
+        ViewBag.Title = Model.Name;
+    }
+}
+@section _TitleMain {
+    <a href='@Url.Action("TopicDetail", "Topic", new { id = Model.SystemName })' rel='contact-us' title='Permanent Link: @Model.Name'>@Model.Name</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">@Model.Name</span>
+}
+@if (Model.ContextLanguageDetail != null)
+{
+    
+    @Html.Raw(Model.ContextLanguageDetail.Body)
+
+}
+else
+{
+
+    if (!string.IsNullOrEmpty(Model.Name))
+    {
+        
+    @Model.Name
+    }
+}

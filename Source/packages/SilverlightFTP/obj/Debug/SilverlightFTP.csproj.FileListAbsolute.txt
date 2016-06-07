@@ -1,0 +1,4 @@
+G:\samuel_photobookmark\packages\SilverlightFTP\obj\Debug\SilverlightFTP.csprojResolveAssemblyReference.cache
+G:\samuel_photobookmark\packages\SilverlightFTP\obj\Debug\App.g.cs
+G:\samuel_photobookmark\packages\SilverlightFTP\obj\Debug\MainPage.g.cs
+G:\samuel_photobookmark\packages\SilverlightFTP\obj\Debug\SilverlightFTP.g.resources

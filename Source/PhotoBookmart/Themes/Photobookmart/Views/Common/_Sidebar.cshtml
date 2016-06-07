@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+
+    var styles = Db.Select<Product_Category>(x => x.Where(y => y.Status && (!y.IsRequireLogin || User.Identity.IsAuthenticated)))
+        .OrderBy(x => (x.OrderIndex))
+        .ToList();
+}
+<div class='sidebar sidebar_right four units'>
+    <div class='inner_sidebar extralight-border'>
+        <div id="text-11" class="widget widget_text">
+            <h3 class="widgettitle">
+                <span class='widget_first'></span>
+            </h3>
+            <div class="textwidget">
+                <table>
+                    @for (int i = 0; i < styles.Count; i++)
+                    {
+                        var item = styles[i];
+                        <tr valign="top">
+                            <td>
+                                <a title="@item.Name" href="@Url.Action("Detail", "Style", new { id = item.SeoName })">
+                                    <img style="margin-top:3px; margin-right:6px; margin-bottom:30px;" align="left"
+                                src="@{if (string.IsNullOrEmpty(item.Filename))
+                                       {<text>@Url.Content("~/Content/img/noimage.gif")</text>}
+                                       else
+                                       {<text>@Url.Content("~/" + @item.Filename)</text>}}"
+                                title="@item.Name" alt="" class="img-36x36" />
+                                </a><a title="@item.Name" href="@Url.Action("Detail", "Style", new { id = item.SeoName })"><strong>@item.Name</strong>
+                                </a>
+                                <br />@item.DescShort
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+            <span class="seperator extralight-border"></span>
+        </div>
+        <div id="search-2" class="widget widget_search">
+            <h3 class="widgettitle">
+                <span class='widget_first'></span>
+            </h3>
+            <form action="#" id="searchform" method="get">
+            @*<div>
+                <input type="submit" value="" id="searchsubmit" class="button" />
+                <input type="text" id="s" name="s" value="search site" />
+            </div>*@
+            </form>
+            <!-- end searchform-->
+            <span class="seperator extralight-border"></span>
+        </div>
+    </div>
+    <span class='sidebar_bg_top sidebar_bg'></span><span class='sidebar_bg_bottom sidebar_bg'>
+    </span><span class='sidebar_bg_center sidebar_bg'></span>
+</div>

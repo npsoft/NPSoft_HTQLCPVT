@@ -1,0 +1,211 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.UserModel
+@{  
+    ViewBag.Title = Model.Id > 0 ? "CS người dùng" : "TM người dùng";
+    List<ListModel> roles_lower = (List<ListModel>)ViewData["RolesLower"];
+}
+<script>
+    jQuery(document).ready(function ($) {
+        $("#user_role_select").on("change", function (e) {
+            $.post("/UserManagement/GetDMHCByRole", { role: $(this).val() }, function (data) {
+                var $ddl = $("#MaHC");
+                var opts = "";
+                data.Data.forEach(function (element, index, array) {
+                    opts += "<option value='" + element.MaHC + "'>" + element.TenDayDu + "</option>";
+                });
+                $ddl.html(opts);
+                $ddl.children("[value='" + $ddl.attr("data-old-id") + "']").attr("selected", "selected");
+                if ($ddl.children("[selected='selected']").length == 0) {
+                    $ddl.children(":first-child").attr("selected", "selected");
+                }
+                $ddl.trigger("change");
+            });
+        });
+        setTimeout("$('#user_role_select').trigger('change')", 100);
+
+        $("#User_Save").click(function () {
+            $("#UserForm").trigger("submit");
+        });
+
+        $("#UserForm").submit(function () {
+            if ($("#UserName").val() == "") {
+                notify_error("Lỗi", "Vui lòng nhập tài khoản.");
+                $("#UserName").focus();
+                return false;
+            }
+            if ($("#Email").val() == "") {
+                notify_error("Lỗi", "Vui lòng nhập email.");
+                $("#Email").focus();
+                return false;
+            }
+            if ($("#FullName").val() == "") {
+                notify_error("Lỗi", "Vui lòng nhập họ & tên.");
+                $("#FullName").focus();
+                return false;
+            }
+        });
+    });
+</script>
+<div class="head">
+    <h3>@{ if (Model.Id > 0) { <text>Chỉnh sửa người dùng - @Model.UserName</text> } else { <text>Thêm mới người dùng</text> }}</h3>
+</div>
+<div class="mws-panel">
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a rel="#" href="@Url.Action("Index", new { })" class="btn">
+                    <i class="icol-arrow-left"></i>Quay lại
+                </a>
+                <a rel="#" href="javascript:void(0);" id="User_Save" class="btn">
+                    <i class="icol-disk"></i>Lưu lại
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mws-tabs">
+        <ul>
+            <li><a href="#tab-info1">Thông tin chính</a></li>
+            <li><a href="#tab-info2">Thông tin phụ</a></li>
+        </ul>
+        @using (Html.BeginForm("UpdateUser", "UserManagement", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form", @autocomplete = "off" }))
+        {
+            <div id="tab-info1">
+                @Html.HiddenFor(m => m.Id)
+                @if (ViewBag.Error != null)
+                {
+                <div class="mws-form-message error">@ViewBag.Error</div>
+                }
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Cấp</label>
+                        <div class="mws-form-item">
+                            <select name="rolesId" id="user_role_select" class="mws-select2 large">
+                                <optgroup label="">
+                                    @foreach (ListModel role in roles_lower)
+                                    {
+                                        <option value="@role.Id" @{ if (Model.rolesId.Contains(role.Id)) { <text> selected="selected" </text>  } }>@role.Name</option>
+                                    }
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Đơn vị</label>
+                        <div class="mws-form-item">
+                            <select name="MaHC" id="MaHC" data-old-id="@Model.MaHC" class="mws-select2 large"></select>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Tài khoản</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.UserName, new { @class = "large" })
+                        </div>
+                    </div>
+                    @if (Model.Id > 0)
+                    {
+                    <div class="form_special_message">
+                        <label class="mws-form-label">Tài khoản (mới)</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.NameAddUser, new { @class = "large" })
+                        </div>
+                    </div>
+                    }
+                    @if (Model.Id <= 0)
+                    {
+                    <div class="mws-form-row ">
+                        <label class="mws-form-label">Mật khẩu</label>
+                        <div class="mws-form-item">
+                            @Html.PasswordFor(model => Model.Password, new { @class = "large" })
+                        </div>
+                    </div>
+                    }
+                    @if (Model.Id > 0)
+                    {
+                    <div class="form_special_message">
+                        <label class="mws-form-label">Mật khẩu (mới)</label>
+                        <div class="mws-form-item">
+                            @Html.PasswordFor(model => Model.PassNews, new { @class = "large", @autocomplete = "off", })
+                        </div>
+                    </div>
+                    }
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Email</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Email, new { @class = "large" })
+                        </div>
+                    </div>
+                    @if (Model.Id > 0)
+                    {
+                        <div class="form_special_message">
+                            <label class="mws-form-label">Email (mới)</label>
+                            <div class="mws-form-item">
+                                @Html.TextBoxFor(model => Model.EmailChange, new { @class = "large" })
+                            </div>
+                        </div>
+                    }
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Họ & Tên</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.FullName, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Tình trạng</label>
+                        <div class="mws-form-item">
+                            <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                              { <text> checked="checked" </text>    }>
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="submit" value="Lưu lại" class="btn btn-danger">
+                        <input type="reset" value="Làm mới" class="btn">
+                    </div>
+                </div>
+            </div>
+            <div id="tab-info2">
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Hình</label>
+                        <div class="mws-form-item">
+                            <input type="file" name="FileUp" />
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Giới tính</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => Model.Gender, PhotoBookmart.Controllers.BaseController.Gender_GetAll(), "- - Chọn - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Ngày sinh</label>
+                        <div class="mws-form-item">
+                            @if (Model.BirthDate.HasValue)
+                            {
+                                <input type="text" name="BirthDate" id="BirthDate" class="mws-datepicker large" readonly="readonly" value="@string.Format("{0:MM/dd/yyyy}", Model.BirthDate.Value)" />
+                            }
+                            else
+                            {
+                                <input type="text" name="BirthDate" id="BirthDate" class="mws-datepicker large" readonly="readonly" />
+                            }
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Địa chỉ</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Address, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Điện thoại</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Phone, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="submit" value="Lưu lại" class="btn btn-danger">
+                        <input type="reset" value="Làm mới" class="btn ">
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

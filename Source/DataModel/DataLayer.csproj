@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D35BA3CD-A6CF-4C2A-A15D-F6256C4FA69C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ABSoft.DataLayer</RootNamespace>
+    <AssemblyName>ABSoft.DataLayer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ServiceStack, Version=3.9.71.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\ServiceStack.3.9.71\lib\net35\ServiceStack.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\packages\ServiceStack.Common.3.9.71\lib\net35\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.OrmLite">
+      <HintPath>..\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.ServiceInterface">
+      <HintPath>..\packages\ServiceStack.3.9.71\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\IgnoreWhenGenerateList.cs" />
+    <Compile Include="DatabaseType.cs" />
+    <Compile Include="Models\BasicModelBase.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_HanhChinh.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_DangKhuyetTat.cs" />
+    <Compile Include="Models\MMO\MMO_Imgs.cs" />
+    <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Models\Orders\Address.cs" />
+    <Compile Include="Models\Orders\Order_ProductionJobSheet.cs" />
+    <Compile Include="Models\Orders\Order_UploadFilesTicket.cs" />
+    <Compile Include="Models\Orders\PaymentPaypalConfig.cs" />
+    <Compile Include="Models\Orders\Order_History.cs" />
+    <Compile Include="Models\Orders\Order_ProductOptionUsing.cs" />
+    <Compile Include="Models\Orders\Order.cs" />
+    <Compile Include="Models\DoiTuong\DoiTuong_BienDong.cs" />
+    <Compile Include="Models\DoiTuong\DoiTuong_LoaiDoiTuong_CT.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_KhaNangPhucVu.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_LoaiDT.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_TinhTrangDT.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_MucDoKhuyetTat.cs" />
+    <Compile Include="Models\DoiTuong\DoiTuong.cs" />
+    <Compile Include="Models\DoiTuong\ProductCategory.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_TinhTrangHonNhan.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_DanToc.cs" />
+    <Compile Include="Models\Sites\SiteFlashHeader.cs" />
+    <Compile Include="Models\Sites\MemberGroup.cs" />
+    <Compile Include="Models\Sites\MemberGroupDetail.cs" />
+    <Compile Include="Models\Sites\SiteBlog.cs" />
+    <Compile Include="Models\Sites\SiteBlogCategory.cs" />
+    <Compile Include="Models\Sites\SiteNews.cs" />
+    <Compile Include="Models\Sites\SiteNewsCategory.cs" />
+    <Compile Include="Models\Sites\SiteNewsletter.cs" />
+    <Compile Include="Models\Sites\Navigation.cs" />
+    <Compile Include="Models\Sites\SiteBanner.cs" />
+    <Compile Include="Models\Sites\SiteContactUs.cs" />
+    <Compile Include="Models\Sites\SiteContactusConfig.cs" />
+    <Compile Include="Models\Sites\SiteMaillingListTemplate.cs" />
+    <Compile Include="Models\Sites\Sites.cs" />
+    <Compile Include="Models\Sites\SiteSetting.cs" />
+    <Compile Include="Models\Sites\SiteSocialsSettings.cs" />
+    <Compile Include="Models\Sites\SiteTestimonial.cs" />
+    <Compile Include="Models\Sites\Site_Lang_Dis.cs" />
+    <Compile Include="Models\Sites\TopicLanguage.cs" />
+    <Compile Include="Models\Sites\Topics.cs" />
+    <Compile Include="Models\SMS\SMSTemplate.cs" />
+    <Compile Include="Models\DanhMuc\DanhMuc_DiaChi.cs" />
+    <Compile Include="Models\System\Exceptions.cs" />
+    <Compile Include="Models\System\Languages.cs" />
+    <Compile Include="Models\System\Lang_Translation.cs" />
+    <Compile Include="Models\System\MailQueue.cs" />
+    <Compile Include="Models\System\Settings.cs" />
+    <Compile Include="Models\System\Themes.cs" />
+    <Compile Include="Models\Users_Management\ABUserAuth.cs" />
+    <Compile Include="Models\Users_Management\PermissionsByRole.cs" />
+    <Compile Include="Models\Users_Management\UsersActivation.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtension.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\VMCWebCommon\VMCWebCommon.csproj">
+      <Project>{8aee642d-cf1d-4a6a-bcb2-5e3ca2b00d0e}</Project>
+      <Name>VMCWebCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Update logs\Aug 21 - 2014.txt" />
+    <Content Include="Update logs\Oct 12.txt" />
+    <Content Include="Update logs\Oct 20.txt" />
+    <Content Include="Update logs\Sept 15 - 2014.txt" />
+    <Content Include="Update logs\Sept 10 - 2014.txt" />
+    <Content Include="Update logs\Sept 9 - 2014.txt" />
+    <Content Include="Update logs\Sept 5 - 2014.txt" />
+    <Content Include="Update logs\Sept 2 - 2014.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

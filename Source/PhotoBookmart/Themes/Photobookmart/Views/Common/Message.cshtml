@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.Sidebar.cshtml";
+
+    ViewBag.Title = "Message";
+}
+@section _TitleMain {
+    <a href='javascript:void(0);' rel='message' title='Permanent Link: Message'>Message</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">Message</span>
+}
+<p class="ab-message">@Html.Raw(ViewBag.Message)&nbsp;Please click <a rel="redirect-to" href="@Html.Raw(ViewBag.RedirectTo)">here</a> to continue!</p>

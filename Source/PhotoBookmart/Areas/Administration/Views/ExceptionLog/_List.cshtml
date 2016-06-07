@@ -1,0 +1,95 @@
+﻿@model List<Exceptions>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        // build table layout
+        if ($.fn.dataTable) {
+            $("#ListTable").dataTable({
+                "bSort": true,
+                "sDom": 'C<"">lfrtip',
+                "oColVis": {
+                    "buttonText": "<i class='icol-accept'></i> Change columns",
+                    "bRestore": false,
+                    "sSize": "css"
+                },
+                "aoColumnDefs": [
+			        { "bVisible": false, "aTargets": [2, 3, 4, 5] }
+		         ],
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+    });
+
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>
+                Host
+            </th>
+            <th>
+                Message
+            </th>
+            <th>
+                Method
+            </th>
+            <th>
+                Code
+            </th>
+            <th>
+                User
+            </th>
+            <th>
+                User IP
+            </th>
+            <th>
+                Id
+            </th>
+            <th>
+                On
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span>@item.ServerHost </span>
+                    </td>
+                    <td>
+                        <span>@item.EmailTitle </span>
+                    </td>
+                    <td>
+                        <span>@item.ContextHttpMethod </span>
+                    </td>
+                    <td>
+                        <span>@item.ContextHttpCode </span>
+                    </td>
+                    <td>
+                        <span>@item.UserName (id = @item.UserId) </span>
+                    </td>
+                    <td>
+                        <span>@item.UserIp </span>
+                    </td>
+                    <td>
+                        <span>@item.Id </span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.ExceptionOn) </span>
+                    </td>
+                    <td>
+                        <span class="btn-group"><a  href="javascript:void(0)" class="btn btn-small viewdetail" item_id="@item.Id" onclick="viewdetail(this)" title="View Detail Exception @item.Id">
+                            <i class="icon-eye-open"></i></a></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

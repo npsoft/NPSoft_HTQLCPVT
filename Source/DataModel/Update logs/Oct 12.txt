@@ -1,0 +1,5 @@
+﻿Table Order
+- add FlagHistoryMessage : int
+
+Table Order_History
+- add IsCustomer: bool

@@ -1,0 +1,319 @@
+﻿@model Site_ContactusConfig
+@{  
+    var countries = (List<Country>)ViewData["Countries"];
+    var country = countries.Where(m => m.Code == Model.LanguageCode).FirstOrDefault();
+    ViewBag.Title = "Update contact us information in " + country.Name;
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        
+        CKEDITOR.replace('ckeditorId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        CKEDITOR.replace('InfoAtFooter', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        @*jQuery("#IsHideMap").on("change", function () {
+            if (jQuery(this).is(":checked")) {
+                jQuery("#MapRow, #AllowRoutingRow").show();
+            }else {
+                jQuery("#MapRow, #AllowRoutingRow").hide();
+            }
+        }).trigger("change");*@
+
+        jQuery("#UserForm").submit(function () {
+            jQuery("#ckeditorId").val(CKEDITOR.instances.ckeditorId.getData());
+            jQuery("#InfoAtFooter").val(CKEDITOR.instances.InfoAtFooter.getData());
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null) {
+                        setTimeout(function () {
+                            window.location.href = returnObj.RedirectUrl;
+                        }, 1000);
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <div class="grid_3">
+            <a type="button"  class="btn" href="@Url.Action("Detail", "Website", new { id = 1 })" >
+                <i class="icol-arrow-left"></i>Detail @CurrentWebsite.Name</a>
+        </div>
+        <div class="grid_3">
+            Please Select Country
+            <select class="large" id="Page_langId">
+                @foreach (var c in countries)
+                {
+                    <option value="@c.Id" @if (c.Code == Model.LanguageCode){<text>selected</text>}>@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("ContactUsInfoUpdate", "Website", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="LanguageCode" value="@Model.LanguageCode" />
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Address</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Address, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Info</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.Info, new { @class = "large", @id = "ckeditorId" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Info in footer</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.InfoAtFooter, new { @class = "large" })
+                    </div>
+                </div>
+                @Html.HiddenFor(mbox => mbox.Coor_Lat, new { @id = "Coordinate_Lat" })
+                @Html.HiddenFor(mbox => mbox.Coor_Lng, new { @id = "Coordinate_Lng" })
+                @Html.HiddenFor(mbox => mbox.Center_Lat, new { @id = "Center_Lat" })
+                @Html.HiddenFor(mbox => mbox.Center_Lng, new { @id = "Center_Lng" })
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Hide Map</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsHideMap" id="IsHideMap" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.IsHideMap){<text>checked="checked"</text>} />
+                    </div>
+                </div>
+                <div class="mws-form-row" id="MapRow">
+                    <label class="mws-form-label">
+                        Select on Map</label>
+                    <div class="mws-form-item">
+                        <span>Blue is center point, Red is your office location.<br />
+                            Drag and Drop Blue marker to new location as you wish.</span>
+                        <div id="map-canvas">
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row" id="AllowRoutingRow">
+                    <label class="mws-form-label">
+                        Allow Routing</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="AllowRouting" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.AllowRouting)
+                                                                                                                                                {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>
+@* For Google Map *@
+<style type="text/css">
+    #map-canvas
+    {
+        height: 600px;
+    }
+    #map-canvas img
+    {
+        max-width: inherit;
+    }
+</style>
+<script language="javascript">
+    var map;
+    var geocodeTimer;
+    var geocodeTimer2;
+    var cor_lat = @Model.Coor_Lat;
+    var cor_lng = @Model.Coor_Lng;
+    var _markerArr = [];
+    var marker;
+</script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&language=en"></script>
+<script type="text/javascript">
+    function init() {
+        var mapDiv = document.getElementById('map-canvas');
+        var center_point = new google.maps.LatLng(cor_lat, cor_lng);
+        var zoom_level = 6;
+        if (cor_lat == 0 && cor_lng == 0) {
+            center_point = new google.maps.LatLng(39.639538, -101.351624);  
+            zoom_level = 5;
+        }
+        map = new google.maps.Map(mapDiv, {
+            center: center_point,
+            zoom: zoom_level,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+        google.maps.event.addListener(map, 'click', function (e) {
+            placeMarker(e.latLng, map);
+        });
+
+        if (!(cor_lat == 0 && cor_lng == 0))
+            placeMarker(new google.maps.LatLng(cor_lat, cor_lng), map);
+
+        var c_loc= new google.maps.LatLng(jQuery("#Center_Lat").val(),  jQuery("#Center_Lng").val());
+        marker = new google.maps.Marker({
+            position: c_loc,
+            map: map,
+            title: 'Map Center Point. Please drag me!',
+            draggable: true,
+            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        });
+
+        google.maps.event.addListener(marker, 'dragend', function (marker) {
+            var latLng = marker.latLng;
+            jQuery("#Center_Lat").val(latLng.lat());
+            jQuery("#Center_Lng").val(latLng.lng());
+        });
+
+        jQuery("#Address").change(function () {
+            var addr = jQuery("#Address").val();
+            updateAddress(addr);
+        });
+
+        jQuery("#Page_langId").change(function () {
+            // reload page when language change
+            var url = "@Url.Action("ContactUsInfo", new { })"+"?country_code="+jQuery(this).val();
+            window.location.href=url;
+        });
+    }
+
+    google.maps.event.addDomListener(window, 'load', init);
+
+
+    function updateAddress(addr) {
+        if (geocodeTimer2) {
+            window.clearTimeout(geocodeTimer2);
+        }
+
+        // Throttle the geo query so we don't hit the limit
+        geocodeTimer2 = window.setTimeout(function () {
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 'address': addr }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+
+                    var searchLoc = results[0].geometry.location;
+                    var lat = results[0].geometry.location.lat();
+                    var lng = results[0].geometry.location.lng();
+                    var latlng = new google.maps.LatLng(lat, lng);
+
+                    map.setZoom(16);
+                    placeMarker(latlng, map);
+                }
+            });
+        }, 200);
+    }
+
+
+    function updatePosition(position) {
+        if (geocodeTimer) {
+            window.clearTimeout(geocodeTimer);
+        }
+
+        // Throttle the geo query so we don't hit the limit
+        geocodeTimer = window.setTimeout(function () {
+            reverseGeocodePosition(position);
+        }, 200);
+    }
+
+    function placeMarker(position, map, no_update) {
+        if (no_update != true) {
+            ////// For Geo Code
+            updatePosition(position);
+            ////// For Geo Code
+        }
+        for (var i = 0; i < _markerArr.length; i++) {
+            if (_markerArr[i].placeMarkeerPoint != undefined)
+                _markerArr[i].setMap(null);
+        }
+        _markerArr = [];
+        var marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            placeMarkeerPoint: "1"
+        });
+        _markerArr.push(marker);
+        map.panTo(position);
+        _latlng = position;
+    }
+
+    function array_contains(da, item) {
+        for (var i = 0; i < da.length; i++)
+            if (da[i] == item) {
+                return true;
+            }
+        return false;
+    }
+
+    function get_address_token(ac, token) {
+        for (var i = 0; i < ac.length; i++) {
+            if (array_contains(ac[i].types, token)) {
+                if (ac[i].long_name != null) {
+                    return ac[i].long_name;
+                }
+                else {
+                    return ac[i].short_name;
+                }
+            }
+        }
+        return "";
+    }
+
+    function reverseGeocodePosition(pos) {
+
+        jQuery("#Coordinate_Lat").val(pos.lat());
+        jQuery("#Coordinate_Lng").val(pos.lng());
+
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'latLng': pos }, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                if (results[0]) {
+                    var address = results[0].formatted_address
+                    jQuery("#Address").val(address);
+                    return;
+                }
+            }
+            // set to unknown
+            jQuery("#Address").val("");
+        });
+    }
+
+</script>

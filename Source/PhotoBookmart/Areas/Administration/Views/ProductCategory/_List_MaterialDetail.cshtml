@@ -1,0 +1,220 @@
+﻿@model List<ProductCategoryMaterialDetail>
+@{
+    var materialId = (long)ViewData["materialId"];
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        $("a.ab-delete-material-detail").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Delete_MaterialDetail", "ProductCategory")?id=" + item_id, function () {
+                    $.get("@Url.Action("List_MaterialDetail", "ProductCategory", new { materialId = materialId })", function (data) {
+                        $(".list-product-category-material-detail").html("");
+                        $(".list-product-category-material-detail").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+        
+        $("a.ab-status-material-detail").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_status = $(this).hasClass("ab-disable");
+            if (confirm("Are you sure to " + (item_status ? "disable" : "enable") + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Active_MaterialDetail", "ProductCategory")?id=" + item_id + "&active=" + !item_status, function () {
+                    $.get("@Url.Action("List_MaterialDetail", "ProductCategory", new { materialId = materialId })", function (data) {
+                        $(".list-product-category-material-detail").html("");
+                        $(".list-product-category-material-detail").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.ab-presentive-material-detail").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_presentive = $(this).hasClass("ab-hide");
+            if (confirm("Are you sure to " + (item_presentive ? "hide" : "show") + " presentive » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Presentive_MaterialDetail", "ProductCategory")?id=" + item_id + "&isPresentive=" + !item_presentive, function () {
+                    $.get("@Url.Action("List_MaterialDetail", new { materialId = materialId })", function (data) {
+                        $(".list-product-category-material-detail").html("");
+                        $(".list-product-category-material-detail").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        $("a.ab-move-material-detail").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            var item_move = $(this).hasClass("ab-up");
+            if (confirm("Are you sure to move " + (item_move ? "up" : "down" ) + " » " + NameItem + "?")) {
+                show_loading();
+                $.get("@Url.Action("Move_MaterialDetail", "ProductCategory")?id=" + item_id + "&move=" + (item_move ? 1 : -1), function () {
+                    $.get("@Url.Action("List_MaterialDetail", "ProductCategory", new { materialId = materialId })", function (data) {
+                        $(".list-product-category-naterial-detail").html("");
+                        $(".list-product-category-material-detail").html(data);
+                        hide_loading();
+                    });
+                });
+            }
+        });
+
+        if ($.fn.dataTable) {
+            $("#ListTable-Material-Detail").dataTable({
+                "sDom": 'C<"">lfrtip',
+                "oColVis": {
+                    "buttonText": "<i class='icol-accept'></i> Change columns",
+                    "bRestore": false,
+                    "sSize": "css"
+                },
+                "aoColumnDefs": [
+                    { "bVisible": false, "aTargets": [0, 7, 8, 9] }
+                ],
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+
+        setTimeout(function () {
+            jQuery("#date_Create_column_Material_Detail").trigger("click");
+        }, 500);
+    });
+</script>
+<table class="mws-table" id="ListTable-Material-Detail">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Thumbnail</th>
+            <th>Name</th>
+            <th>Order</th>
+            <th>Active</th>
+            <th>Presentive</th>
+            <th>Created by</th>
+            <th>Created on</th>
+            <th>Last updated by</th>
+            <th>last updated on</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td style="text-align:center;">
+                <span>@item.Id</span>
+            </td>
+            <td style="text-align:center;" class="table_td_img_thumb">
+                <span><img alt="@item.Name" src="@{ if (string.IsNullOrEmpty(item.Thumbnail)){
+                                                  <text>@Url.Content("~/Content/img/noimage.gif")</text>
+                                              } else {
+                                                  <text>/@item.Thumbnail</text>
+                                              }}" style="width:100%; height:35px; max-width:100px;"/></span>
+            </td>
+            <td>
+                <span>@item.Name</span>
+            </td>
+            <td style="text-align:center;">
+                <span>@item.Order</span>
+            </td>
+            <td style="text-align:center;">
+                <span>
+                    <input type="checkbox" disabled="disabled" @{ if (item.IsActive) {
+                                                                      <text>checked="checked"</text>
+                                                                  } else {
+                                                                  }}>
+                </span>
+            </td>
+            <td style="text-align:center;">
+                <span>
+                    <input type="checkbox" disabled="disabled" @{ if (item.IsPresentive) {
+                                                                      <text>checked="checked"</text>
+                                                                  } else {
+                                                                  }}>
+                </span>
+            </td>
+            <td>
+                <span>@item.GetCreatedByName()</span>
+            </td>
+            <td style="text-align:center;">
+                <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn)</span>
+            </td>
+            <td>
+                <span>@item.GetLastUpdatedByName()</span>
+            </td>
+            <td style="text-align:center;">
+                <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.LastUpdatedOn)</span>
+            </td>
+            <td style="text-align:center;" class="no_padding">
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit_MaterialDetail", new { id = item.Id })" class="btn btn-small ab-edit-material-detail" title="Edit for &raquo; @item.Name">
+                        <i class="icon-pencil"></i>
+                    </a>
+                    <a href="javascript:void(0)" class="btn btn-small ab-delete-material-detail" item_id="@item.Id" item_name="@item.Name" title="Delete for &raquo; @item.Name">
+                        <i class="icon-trash"></i>
+                    </a>
+                    <a href="#" class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+                        &nbsp;<i class="icon-caret-down"></i>&nbsp;
+                    </a>
+                    <ul class="dropdown-menu pull-right" style="text-align:left;">
+                        <li>
+                            @if (item.IsActive)
+                            {
+                                <a href="javascript:void(0)" class="ab-status-material-detail ab-disable" item_id="@item.Id" item_name="@item.Name" title="Disable for &raquo; @item.Name">
+                                    <i class="icon-eye-closed"></i>&nbsp;Disable for &raquo; @item.Name
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="javascript:void(0)" class="ab-status-material-detail ab-enable" item_id="@item.Id" item_name="@item.Name" title="Enable for &raquo; @item.Name">
+                                    <i class="icon-eye-open"></i>&nbsp;Enable for &raquo; @item.Name
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @if (item.IsPresentive)
+                            {
+                                <a href="javascript:void(0)" class="ab-presentive-material-detail ab-hide" item_id="@item.Id" item_name="@item.Name" title="Hide presentive for &raquo; @item.Name">
+                                    <i class="icon-thumbs-down"></i>&nbsp;Hide presentive for &raquo; @item.Name
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="javascript:void(0)" class="ab-presentive-material-detail ab-show" item_id="@item.Id" item_name="@item.Name" title="Show presentive for &raquo; @item.Name">
+                                    <i class="icon-thumbs-up"></i>&nbsp;Show presentive for &raquo; @item.Name
+                                </a>
+                            }
+                    
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" class="ab-move-material-detail ab-up" item_id="@item.Id" item_name="@item.Name" title="Move up for &raquo; @item.Name">
+                                <i class="icon-caret-up"></i>&nbsp;&nbsp;Move up for &raquo; @item.Name
+                            </a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" class="ab-move-material-detail ab-down" item_id="@item.Id" item_name="@item.Name" title="Move down for &raquo; @item.Name">
+                                <i class="icon-caret-down"></i>&nbsp;&nbsp;Move down for &raquo; @item.Name
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+    }
+</table>

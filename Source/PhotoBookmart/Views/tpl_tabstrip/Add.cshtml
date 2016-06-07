@@ -1,0 +1,307 @@
+﻿@model ListingProperty
+@{
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Listing";
+    }
+    else
+    {
+        ViewBag.Title = "New Listing";
+    }
+}
+<script>
+    jQuery(document).ready(function () {
+
+        jQuery("#User_Save").click(function () {
+
+            jQuery("#UserForm").trigger("submit");
+        });
+
+        CKEDITOR.replace('Other_Description', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        $('.mws-spinner-decimal').spinner({
+            step: 1,
+            numberFormat: "n"
+        });
+
+        jQuery("#UserForm").submit(function () {
+            
+            jQuery("#Other_Description").val(CKEDITOR.instances.Other_Description.getData());
+
+            if (jQuery("#Info_Title").val() == null || jQuery("#Info_Title").val() == "") {
+                alert("Please enter field » Title.");
+                ChangeTab("#tab-info1");
+                jQuery("#Info_Title").focus();
+                return false;
+            }
+        });
+    });
+
+    function ChangeTab(href) {
+        jQuery(".mws-tabs a[href='" + href + "']").trigger("click");
+    };
+</script>
+<div class="head">
+    @Html.Partial("_Top.Listings")
+    <h3>@ViewBag.Title@{ if (Model.Id > 0) { <text> - @Model.Info_Title</text> }}</h3>
+</div>
+<div class="mws-panel">
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a rel="#" href="@Url.Action("Index", new { })" class="btn">
+                    <i class="icol-arrow-left"></i>Back
+                </a>
+                <a rel="#" href="javascript:void(0);" id="User_Save" class="btn">
+                    <i class="icol-disk"></i>Save All
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mws-tabs">
+        <ul>
+            <li>
+                <a href="#tab-info1">Assignment</a>
+            </li>
+            <li>
+                <a href="#tab-info2">Location</a>
+            </li>
+            <li>
+                <a href="#tab-info3">Information</a>
+            </li>
+            <li>
+                <a href="#tab-info4">Others</a>
+            </li>
+        </ul>
+        @using (Html.BeginForm("Update", "Listings", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            <div id="tab-info1">
+                @Html.HiddenFor(m => m.Id)
+                @if (ViewBag.Error != null)
+                {
+                    <div class="mws-form-message error">
+                        @ViewBag.Error
+                    </div>
+                }
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Title</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_Title, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">SEO</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.SEO, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">PDF File</label>
+                        <div class="mws-form-item">
+                            <input type="file" name="Assign_File" />
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Agent</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => m.Assign_User, C4CChurchReality.Controllers.RBVMCController.Listing_Agent_GetAll_SL(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Type</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => m.Assign_Type, C4CChurchReality.Controllers.RBVMCController.Listing_Type_GetAll_SL(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Category</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => m.Assign_Category, C4CChurchReality.Controllers.RBVMCController.Listing_Property_GetAll_SL(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Status 1</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => m.Status1, C4CChurchReality.Controllers.RBVMCController.Listing_Status1_GetAll_SL(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Status 2</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => m.Status2, C4CChurchReality.Controllers.RBVMCController.Listing_Status2_GetAll_SL(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Active</label>
+                        <div class="mws-form-item">
+                            <input class="ibutton" name="Other_Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Other_Status) { <text> checked="checked" </text>        }>
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="button" value="Next" class="btn btn-danger" onclick="javascript: ChangeTab('#tab-info2');" />
+                        <input type="reset" value="Reset" class="btn" />
+                    </div>
+                </div>
+            </div>
+            <div id="tab-info2">
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">City</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Locate_City, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">State</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => Model.Locate_State, C4CChurchReality.Controllers.RBVMCController.State_GetAll(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">ZipCode</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Locate_ZipCode, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Address</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Locate_Addr, new { @class = "large" })
+                            <a href="javascript:void(0)" id="map_search" class="btn" style="margin-top: 10px;"><i
+                            class="icon-map-marker"></i>&nbsp;Search my address on map</a>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Latitude</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Locate_Latitude, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Longtitude</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Locate_Longitude, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Select on Map</label>
+                        <div class="mws-form-item">
+                            <div id="map-canvas"></div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Zoom</label>
+                        <div class="mws-form-item">
+                            @Html.DropDownListFor(m => Model.Locate_Zoom, C4CChurchReality.Controllers.RBVMCController.Zoom_GetAll(), "- - Select - -", new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Description</label>
+                        <div class="mws-form-item">
+                            @Html.TextAreaFor(model => Model.Locate_Description, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="button" value="Next" class="btn btn-danger" onclick="javascript: ChangeTab('#tab-info3');">
+                        <input type="reset" value="Reset" class="btn ">
+                    </div>
+                </div>
+            </div>
+            <div id="tab-info3">
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Year Built</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_YearBuild, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Price/Rent</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_PriceRent, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Square Footage</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_SquareFootage, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Acreage</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_Acreage, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Seating</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_Seating, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Parking</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Info_Parking, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="button" value="Next" class="btn btn-danger" onclick="javascript: ChangeTab('#tab-info4')">
+                        <input type="reset" value="Reset" class="btn ">
+                    </div>
+                </div>
+            </div>
+            <div id="tab-info4">
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Featured</label>
+                        <div class="mws-form-item">
+                            <input class="ibutton" name="Other_Featured" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Other_Featured) { <text> checked="checked" </text>      }>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Featured Item Order</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Other_FeaturedItemOrder, new { @class = "mws-spinner-decimal large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Listing SRI</label>
+                        <div class="mws-form-item">
+                            <input class="ibutton" name="Other_ListingSRI" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Other_ListingSRI) { <text> checked="checked" </text>      }>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Description</label>
+                        <div class="mws-form-item">
+                            @Html.TextAreaFor(model => Model.Other_Description, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <input type="submit" value="Submit" class="btn btn-danger">
+                        <input type="reset" value="Reset" class="btn ">
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    jQuery(document).ready(function(){
+        jQuery(".mws-tabs").tabs({
+            activate: function (event, ui) {
+                var active = $(this).tabs('option', 'active');
+                if (active == 1) {
+                    if (isLoadFirst) {
+                        init();
+                        isLoadFirst = false;
+                    }
+                }
+            }
+        });
+    });
+</script>

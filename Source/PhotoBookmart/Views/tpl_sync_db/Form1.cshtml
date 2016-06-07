@@ -1,0 +1,888 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using ServiceStack.OrmLite.SqlServer;
+using ServiceStack.OrmLite;
+using ChurchDbRestorer.Models;
+using ABSoft.DataLayer.Models.Users_Management;
+using ServiceStack.Common;
+using ServiceStack.ServiceInterface.Auth;
+using ABSoft.DataLayer.Models.Sites;
+using ABSoft.DataLayer.Models.Listings;
+using ABSoft.DataLayer.Models.SyncIdRelative;
+
+namespace ChurchRestorter
+{
+    public partial class Form1 : Form
+    {
+        IDbConnection Db;
+        IDbConnection Db_Original;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        #region Functions
+        bool ConnectDB(string db_name)
+        {
+            SqlServerOrmLiteDialectProvider dialect = SqlServerOrmLiteDialectProvider.Instance;
+            dialect.UseUnicode = true;
+            dialect.UseDatetime2(true);
+            dialect.StringColumnDefinition = "nvarchar(MAX)";
+            dialect.StringLengthColumnDefinitionFormat = dialect.StringColumnDefinition;
+            dialect.StringLengthNonUnicodeColumnDefinitionFormat = dialect.StringColumnDefinition;
+            dialect.StringLengthUnicodeColumnDefinitionFormat = dialect.StringColumnDefinition;
+            string cs = this.tOriginalCS.Text;
+            if (db_name == "new_db")
+            {
+                cs = this.tCS.Text;
+            }
+            var ret = new OrmLiteConnectionFactory(cs, dialect);
+            ret.AutoDisposeConnection = true;
+            try
+            {
+                if (db_name == "new_db")
+                {
+                    this.Db = ret.OpenDbConnection();
+                }
+                else
+                {
+                    this.Db_Original = ret.OpenDbConnection();
+                }
+                UpdateInfo("Connect to db " + db_name + " success");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                UpdateInfo("Can not connect to database " + db_name + ". Excpetion = " + ex.Message);
+                return false;
+            }
+        }
+
+        void UpdateInfo(string st)
+        {
+            ListViewItem item = new ListViewItem(st);
+            item.SubItems.Add(st);
+            lResult.Items.Insert(0, item);
+            Application.DoEvents();
+        }
+        #endregion
+
+        private string GetNewStateFromOrgState(string state)
+        {
+            switch (state)
+            {
+                case "CO":
+                    return "Colorado";
+
+                case "TX":
+                    return "Texas";
+
+                case "WA":
+                    return "Washington";
+
+                default: return null;
+            }
+        }
+
+        private Listings GetOrgListingFromOrgProject(string project)
+        {
+            return Db_Original.Select<Listings>(x => x.Where(y => (y.Title == project)).Limit(1)).FirstOrDefault();
+        }
+
+        private ListingProperty GetOldListingFormOrgListing(string title)
+        {
+            return Db.Select<ListingProperty>(x => x.Where(y => (y.Info_Title == title)).Limit(1)).FirstOrDefault();
+        }
+
+        private string ToLowerCase(string val)
+        {
+            return val != null ? val.ToLower() : null;
+        }
+
+        private int? Assign_User_From_UserID(int? userId, string sellerEmail = null)
+        {
+            string email = null;
+            if (userId.HasValue)
+            {
+                var orgUser = Db_Original.Select<Users>(x => x.Where(y => y.ID == userId.Value).Limit(1)).FirstOrDefault();
+                if (orgUser != null)
+                {
+                    email = orgUser.Email;
+                }
+            }
+            if (string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(sellerEmail))
+            {
+                email = sellerEmail;
+            }
+            if (string.IsNullOrEmpty(email))
+            {
+                return null;
+            }
+            var agent = Db.Select<ABUserAuth>(x => x.Where(y =>
+                y.ActiveStatus &&
+                y.Roles.Contains(RoleEnum.Agent.ToString()) &&
+                y.Email.ToLower() == email.ToLower()).Limit(1)).FirstOrDefault();
+            if (agent != null)
+            {
+                return agent.Id;
+            }
+            return null;
+        }
+
+        private int? Assign_Category_From_CollectionID(int collectionId)
+        {
+            var collection = Db_Original.Select<Collections>(x => x.Where(y => y.ID == collectionId).Limit(1)).FirstOrDefault();
+            string collectionName = collection != null ? collection.Description : null;
+
+            string categoryName = null;
+            switch (collectionName)
+            {
+                case "Dallas":
+                    categoryName = "Dallas - Ft. Worth";
+                    break;
+                case "Ft. Worth":
+                    categoryName = "Dallas - Ft. Worth";
+                    break;
+                case "Denver/Front Range":
+                    categoryName = "Denver/Front Range";
+                    break;
+                case "Houston":
+                    categoryName = "Houston";
+                    break;
+                case "Austin":
+                    categoryName = "Austin";
+                    break;
+                case "Seattle/Tacoma":
+                    categoryName = "Seattle/Tacoma";
+                    break;
+                case "Other":
+                    categoryName = "Other";
+                    break;
+                case "San Antonio":
+                    categoryName = "San Antonio";
+                    break;
+                case "East Texas":
+                    categoryName = "East Texas";
+                    break;
+                default:
+                    categoryName = "Other";
+                    break;
+            }
+
+            var category = Db.Select<ListingCategory>(x => x.Where(y => y.Name.ToLower() == categoryName.ToLower()).Limit(1)).FirstOrDefault();
+            if (category != null)
+            {
+                return category.Id;
+            }
+            return null;
+        }
+
+        private int? Assign_Type_From_PropertyType(int propertyTypeId)
+        {
+            var propertyType = Db_Original.Select<PropertyTypes>(x => x.Where(y => y.ID == propertyTypeId).Limit(1)).FirstOrDefault();
+            string propertyTypeName = propertyType != null ? propertyType.Description : null;
+
+            string listingPropertyTypeName = null;
+            switch (propertyTypeName)
+            {
+                case "Church":
+                    listingPropertyTypeName = "Church";
+                    break;
+                case "Church/School":
+                    listingPropertyTypeName = "Church/School";
+                    break;
+                case "School":
+                    listingPropertyTypeName = "School";
+                    break;
+                case "Land":
+                    listingPropertyTypeName = "Land";
+                    break;
+                case "For Lease":
+                    listingPropertyTypeName = "For Lease";
+                    break;
+                case "Monastery/Seminary":
+                    listingPropertyTypeName = "Monastery/Seminary";
+                    break;
+                case "Properties for Conversion":
+                    listingPropertyTypeName = "Properties for Conversion";
+                    break;
+                case "Retreat Center/Camp":
+                    listingPropertyTypeName = "Retreat Center/Camp";
+                    break;
+                case "Other":
+                    listingPropertyTypeName = "Other";
+                    break;
+                default:
+                    listingPropertyTypeName = "Other";
+                    break;
+            }
+
+            var listingPropertyType = Db.Select<ListingPropertyType>(x => x.Where(y => (y.Name.ToLower() == listingPropertyTypeName.ToLower())).Limit(1)).FirstOrDefault();
+            if (listingPropertyType != null)
+            {
+                return listingPropertyType.Id;
+            }
+            return null;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (ConnectDB("original") && ConnectDB("new_db"))
+            {
+                var countTitles = Db_Original.Count<Titles>();
+
+                var users_count = Db_Original.Count<Users>();
+
+                var users_count2 = Db.Count<ABUserAuth>();
+
+                var lists_count = Db_Original.Count<Listings>();
+                
+                var countTypes = Db_Original.Count<PropertyTypes>(x => (x.Description != null && x.Description != ""));
+
+                var countCategories = Db_Original.Count<Collections>(x => (x.Description != null && x.Description != ""));
+
+                this.progressBar1.Value = 0;
+
+                this.progressBar1.Maximum = (int)users_count + (int)countTypes + (int)countCategories + (int)lists_count;
+
+                this.progressBar1.Minimum = 0;
+                
+                int readAmount = 10;
+
+                int index = 0;
+
+                button2.PerformClick();
+                btnSyncIdRelative_Listing.PerformClick();
+                btnSyncPDFReport.PerformClick();
+
+                #region UPDATE LISTING 06/11/2014
+
+                //// Không đếm những listing có Title là NULL hoặc Empty
+                //long oldCountListing = Db_Original.Count<Listings>(x => x.Title != null && x.Title != "");
+
+                //progressBar1.Value = 0;
+                //progressBar1.Minimum = 0;
+                //progressBar1.Maximum = (int)oldCountListing;
+
+                //index = 0;
+                //readAmount = 10;
+                //long countIns = 0;
+                //long countUpd = 0;
+
+                //while (index < oldCountListing)
+                //{
+                //    int amountCanRead = readAmount;
+                //    if (index + amountCanRead > oldCountListing)
+                //    {
+                //        amountCanRead = (int)(oldCountListing - index);
+                //    }
+
+                //    // Loại bỏ những listing có Title là NULL hoặc Empty
+                //    var oldListings = Db_Original.Select<Listings>(x => x.Where(y => y.Title != null && y.Title != "").Limit(index, amountCanRead));
+                //    foreach (var oldListing in oldListings ?? Enumerable.Empty<Listings>())
+                //    {
+                //        Application.DoEvents();
+                //        Application.DoEvents();
+                //        progressBar1.Value += 1;
+                //        UpdateInfo(string.Format("{0}. PROCESSING OLD LISTING [{1}]: {2}", index + 1, oldListing.ID, oldListing.Title));
+                //        // Sử dụng {Title, City, State, ZipCode, Address} làm khóa chính
+                //        var newListings = Db.Select<ListingProperty>(x => x.Where(y =>
+                //            y.Info_Title.ToLower() == ToLowerCase(oldListing.Title) &&
+                //            y.Locate_City.ToLower() == ToLowerCase(oldListing.City) &&
+                //            y.Locate_State.ToLower() == ToLowerCase(oldListing.State) &&
+                //            y.Locate_ZipCode.ToLower() == ToLowerCase(oldListing.ZipCode) &&
+                //            y.Locate_Addr.ToLower() == ToLowerCase(oldListing.Address)));
+                //        if (newListings.Count > 0) // Xử lý update
+                //        {
+                //            foreach (var newListing in newListings ?? Enumerable.Empty<ListingProperty>())
+                //            {
+                //                List<string> colsChange = new List<string>();
+
+                //                #region Assign
+                //                /* TODO: Assign_User đã được xử lý thủ công nhiều, hơn nữa nó cũng ít khi thay đổi
+                //                int? assignUser = Assign_User_From_UserID(oldListing.UserID, oldListing.SellerEmail);
+                //                if (newListing.Assign_User != assignUser)
+                //                {
+                //                    newListing.Assign_User = assignUser;
+                //                    colsChange.Add("Assign_User");
+                //                }*/
+                //                /* TODO: Assign_Category đã được xử lý thủ công nhiều, hơn nữa nó cũng ít khi thay đổi
+                //                int? assignCat = Assign_Category_From_CollectionID(oldListing.CollectionID);
+                //                if (newListing.Assign_Category != assignCat)
+                //                {
+                //                    newListing.Assign_Category = assignCat;
+                //                    colsChange.Add("Assign_Category");
+                //                }*/
+                //                int? assignType = Assign_Type_From_PropertyType(oldListing.PropertyType);
+                //                if (newListing.Assign_Type != assignType)
+                //                {
+                //                    newListing.Assign_Type = assignType;
+                //                    colsChange.Add("Assign_Type");
+                //                }
+                //                string assignFile = oldListing.pdf != null ? oldListing.pdf.Replace("http://www.churchrealty.com/", "Content/File/MediaUpload/") : null;
+                //                if (newListing.Assign_File != assignFile)
+                //                {
+                //                    newListing.Assign_File = assignFile;
+                //                    colsChange.Add("Assign_File");
+                //                }
+                //                #endregion
+
+                //                #region Locate
+                //                /* TODO: Field là một thành phần của khóa chính
+                //                if (newListing.Locate_Addr != oldListing.Address)
+                //                {
+                //                    newListing.Locate_Addr = oldListing.Address;
+                //                    colsChange.Add("Locate_Addr");
+                //                }*/
+                //                /* TODO: Field là một thành phần của khóa chính
+                //                if (newListing.Locate_City != oldListing.City)
+                //                {
+                //                    newListing.Locate_City = oldListing.City;
+                //                    colsChange.Add("Locate_City");
+                //                }*/
+                //                /* TODO: Field là một thành phần của khóa chính
+                //                if (newListing.Locate_State != oldListing.State)
+                //                {
+                //                    newListing.Locate_State = oldListing.State;
+                //                    colsChange.Add("Locate_State");
+                //                }*/
+                //                /* TODO: Field là một thành phần của khóa chính
+                //                if (newListing.Locate_ZipCode != oldListing.ZipCode)
+                //                {
+                //                    newListing.Locate_ZipCode = oldListing.ZipCode;
+                //                    colsChange.Add("Locate_ZipCode");
+                //                }*/
+                //                /* TODO: Field không có trong database
+                //                newListing.Locate_Description = null;*/
+                //                if (newListing.Locate_Latitude != oldListing.Latitude)
+                //                {
+                //                    newListing.Locate_Latitude = oldListing.Latitude;
+                //                    colsChange.Add("Locate_Latitude");
+                //                }
+                //                if (newListing.Locate_Longitude != oldListing.Longitude)
+                //                {
+                //                    newListing.Locate_Longitude = oldListing.Longitude;
+                //                    colsChange.Add("Locate_Longitude");
+                //                }
+                //                /* TODO: Field không có trong database
+                //                newListing.Locate_Zoom = null;*/
+                //                #endregion
+
+                //                #region Info
+                //                /* TODO: Field là một thành phần của khóa chính
+                //                if (newListing.Info_Title != oldListing.Title)
+                //                {
+                //                    newListing.Info_Title = oldListing.Title
+                //                    colsChange.Add("Info_Title");
+                //                }*/
+                //                if (newListing.Info_YearBuild != string.Format("{0}", oldListing.YearBuilt))
+                //                {
+                //                    newListing.Info_YearBuild = string.Format("{0}", oldListing.YearBuilt);
+                //                    colsChange.Add("Info_YearBuild");
+                //                }
+                //                if (newListing.Info_PriceRent != oldListing.Price)
+                //                {
+                //                    newListing.Info_PriceRent = oldListing.Price;
+                //                    colsChange.Add("Info_PriceRent");
+                //                }
+                //                if (newListing.Info_SquareFootage != oldListing.SqFoot)
+                //                {
+                //                    newListing.Info_SquareFootage = oldListing.SqFoot;
+                //                    colsChange.Add("Info_SquareFootage");
+                //                }
+                //                if (newListing.Info_Acreage != oldListing.Acreage)
+                //                {
+                //                    newListing.Info_Acreage = oldListing.Acreage;
+                //                    colsChange.Add("Info_Acreage");
+                //                }
+                //                if (newListing.Info_Seating != oldListing.Seating)
+                //                {
+                //                    newListing.Info_Seating = oldListing.Seating;
+                //                    colsChange.Add("Info_Seating");
+                //                }
+                //                if (newListing.Info_Parking != oldListing.Parking)
+                //                {
+                //                    newListing.Info_Parking = oldListing.Parking;
+                //                    colsChange.Add("Info_Parking");
+                //                }
+                //                #endregion
+
+                //                #region Other
+                //                if (newListing.Other_Description != oldListing.Description)
+                //                {
+                //                    newListing.Other_Description = oldListing.Description;
+                //                    colsChange.Add("Other_Description");
+                //                }
+                //                if (newListing.Other_Featured != (oldListing.Featured != null && oldListing.Featured.Value > 0 ? true : false))
+                //                {
+                //                    newListing.Other_Featured = (oldListing.Featured != null && oldListing.Featured.Value > 0 ? true : false);
+                //                    colsChange.Add("Other_Featured");
+                //                }
+                                
+                //                if (newListing.Other_ListingSRI != (oldListing.ListingType == "SRI" ? true : false))
+                //                {
+                //                    newListing.Other_ListingSRI = (oldListing.ListingType == "SRI" ? true : false);
+                //                    colsChange.Add("Other_ListingSRI");
+                //                }
+                //                /* TODO: Field không có trong database
+                //                newListing.Other_FeaturedImage = null;*/
+                //                /* TODO: Field không có trong database
+                //                newListing.Other_FeaturedItemOrder = 0;*/
+                //                #endregion
+
+                //                #region Additional
+                //                /* TODO: Field không có trong database
+                //                newListing.Status1 = 0;*/
+                //                /* TODO: IsActive đã được xử lý thủ công nhiều
+                //                newListing.IsActive = oldListing.Show != null && oldListing.Show > 0 ? true : false;*/
+                //                /* TODO: Field không có trong database
+                //                newListing.CreatedOn = DateTime.Now;*/
+                //                /* TODO: Field không có trong database
+                //                newListing.CreatedBy = 1;*/
+                //                /* TODO: Field không có trong database
+                //                string random = "";
+                //                do
+                //                {
+                //                    if (newListing.SEO == null || newListing.SEO == "")
+                //                    {
+                //                        newListing.SEO = newListing.Info_Title + random;
+                //                        newListing.SEO = newListing.SEO.ToSeoUrl();
+                //                    }
+                //                    else
+                //                    {
+                //                        newListing.SEO = newListing.SEO.ToSeoUrl();
+                //                    }
+                //                    if (Db.Count<ListingProperty>(m => m.SEO == newListing.SEO) == 0) break;
+                //                    random = "_" + random.GenerateRandomText(3);
+                //                    newListing.SEO = "";
+                //                } while (true);*/
+                //                /* TODO: Field không có trong database
+                //                newListing.IsSchedule = false;*/
+                //                if (oldListing.dtTimeStamp.HasValue && newListing.PublishSchedule != oldListing.dtTimeStamp.Value)
+                //                {
+                //                    newListing.PublishSchedule = oldListing.dtTimeStamp.Value;
+                //                    colsChange.Add("PublishSchedule");
+                //                }
+                //                if (oldListing.dtExpiry.HasValue && newListing.UnPublishSchedule != oldListing.dtExpiry.Value)
+                //                {
+                //                    newListing.UnPublishSchedule = oldListing.dtExpiry.Value;
+                //                    colsChange.Add("UnPublishSchedule");
+                //                }
+                //                /* TODO: Images đã được xử lý thủ công nhiều
+                //                List<string> Images = new List<string>();
+                //                if (oldListing.Image1 != null && oldListing.Image1 != "")
+                //                {
+                //                    Images.Add("Content/File/MediaUpload/" + oldListing.Image1);
+                //                }
+                //                if (oldListing.Image2 != null && oldListing.Image2 != "")
+                //                {
+                //                    Images.Add("Content/File/MediaUpload/" + oldListing.Image2);
+                //                }
+                //                if (oldListing.Image3 != null && oldListing.Image3 != "")
+                //                {
+                //                    Images.Add("Content/File/MediaUpload/" + oldListing.Image3);
+                //                }
+                //                if (oldListing.Image4 != null && oldListing.Image4 != "")
+                //                {
+                //                    Images.Add("Content/File/MediaUpload/" + oldListing.Image4);
+                //                }
+                //                if (oldListing.Image5 != null && oldListing.Image5 != "")
+                //                {
+                //                    Images.Add("Content/File/MediaUpload/" + oldListing.Image5);
+                //                }
+                //                Db.Insert<ListingProperty>(newListing);
+                //                newListing.Id = (int)Db.GetLastInsertId();
+                //                foreach (var x in Images)
+                //                {
+                //                    Db.Insert<ListingImage>(new ListingImage() { ListingId = newListing.Id, Thumbnail = x, IsActive = true });
+                //                }*/
+                //                #endregion
+
+                //                if (colsChange.Count > 0)
+                //                {
+                //                    countUpd++;
+                //                    Db.Update<ListingProperty>(newListing);
+                //                    UpdateInfo(string.Format("{0}. UPDATED NEW LISTING [{1}]: {2}", index + 1, newListing.Id, string.Join(";", colsChange)));
+                //                }
+                //            }
+                //        }
+                //        else // Xử lý insert
+                //        {
+                //            var newListing = new ListingProperty();
+
+                //            #region Assign
+                //            newListing.Assign_User = Assign_User_From_UserID(oldListing.UserID, oldListing.SellerEmail);
+                //            newListing.Assign_Category = Assign_Category_From_CollectionID(oldListing.CollectionID);
+                //            newListing.Assign_Type = Assign_Type_From_PropertyType(oldListing.PropertyType);
+                //            newListing.Assign_File = oldListing.pdf != null ? oldListing.pdf.Replace("http://www.churchrealty.com/", "Content/File/MediaUpload/") : null;
+                //            #endregion
+
+                //            #region Locate
+                //            newListing.Locate_Addr = oldListing.Address;
+                //            newListing.Locate_City = oldListing.City;
+                //            newListing.Locate_State = oldListing.State;
+                //            newListing.Locate_ZipCode = oldListing.ZipCode;
+                //            newListing.Locate_Description = null;
+                //            newListing.Locate_Latitude = oldListing.Latitude;
+                //            newListing.Locate_Longitude = oldListing.Longitude;
+                //            newListing.Locate_Zoom = null;
+                //            #endregion
+
+                //            #region Info
+                //            newListing.Info_Title = oldListing.Title;
+                //            newListing.Info_YearBuild = string.Format("{0}", oldListing.YearBuilt);
+                //            newListing.Info_PriceRent = oldListing.Price;
+                //            newListing.Info_SquareFootage = oldListing.SqFoot;
+                //            newListing.Info_Acreage = oldListing.Acreage;
+                //            newListing.Info_Seating = oldListing.Seating;
+                //            newListing.Info_Parking = oldListing.Parking;
+                //            #endregion
+
+                //            #region Other
+                //            newListing.Other_Description = oldListing.Description;
+                //            newListing.Other_Featured = (oldListing.Featured != null && oldListing.Featured.Value > 0 ? true : false);
+                //            newListing.Other_ListingSRI = (oldListing.ListingType == "SRI" ? true : false);
+                //            newListing.Other_FeaturedImage = null;
+                //            newListing.Other_FeaturedItemOrder = 0;
+                //            #endregion
+
+                //            #region Additional
+                //            newListing.Status1 = 0;
+                //            newListing.IsActive = oldListing.Show != null && oldListing.Show > 0 ? true : false;
+                //            newListing.CreatedOn = DateTime.Now;
+                //            newListing.CreatedBy = 1;
+                //            string random = "";
+                //            do
+                //            {
+                //                if (newListing.SEO == null || newListing.SEO == "")
+                //                {
+                //                    newListing.SEO = newListing.Info_Title + random;
+                //                    newListing.SEO = newListing.SEO.ToSeoUrl();
+                //                }
+                //                else
+                //                {
+                //                    newListing.SEO = newListing.SEO.ToSeoUrl();
+                //                }
+                //                if (Db.Count<ListingProperty>(m => m.SEO == newListing.SEO) == 0) break;
+                //                random = "_" + random.GenerateRandomText(3);
+                //                newListing.SEO = "";
+                //            } while (true);
+                //            newListing.IsSchedule = false;
+                //            newListing.PublishSchedule = oldListing.dtTimeStamp.HasValue ? oldListing.dtTimeStamp.Value : DateTime.Now;
+                //            newListing.UnPublishSchedule = oldListing.dtExpiry.HasValue ? oldListing.dtExpiry.Value : DateTime.Now.AddYears(1);
+
+                //            List<string> Images = new List<string>();
+                //            if (oldListing.Image1 != null && oldListing.Image1 != "")
+                //            {
+                //                Images.Add("Content/File/MediaUpload/" + oldListing.Image1);
+                //            }
+                //            if (oldListing.Image2 != null && oldListing.Image2 != "")
+                //            {
+                //                Images.Add("Content/File/MediaUpload/" + oldListing.Image2);
+                //            }
+                //            if (oldListing.Image3 != null && oldListing.Image3 != "")
+                //            {
+                //                Images.Add("Content/File/MediaUpload/" + oldListing.Image3);
+                //            }
+                //            if (oldListing.Image4 != null && oldListing.Image4 != "")
+                //            {
+                //                Images.Add("Content/File/MediaUpload/" + oldListing.Image4);
+                //            }
+                //            if (oldListing.Image5 != null && oldListing.Image5 != "")
+                //            {
+                //                Images.Add("Content/File/MediaUpload/" + oldListing.Image5);
+                //            }
+                //            #endregion
+
+                //            countIns++;
+                //            Db.Insert<ListingProperty>(newListing);
+                //            newListing.Id = (int)Db.GetLastInsertId();
+                //            foreach (var x in Images)
+                //            {
+                //                Db.Insert<ListingImage>(new ListingImage() { ListingId = newListing.Id, Thumbnail = x, IsActive = true });
+                //            }
+                //            UpdateInfo(string.Format("{0}. INSERT NEW LISTING [{1}]: {2}", index + 1, newListing.Id, newListing.Info_Title));
+                //        }
+                //        Application.DoEvents();
+                //        Application.DoEvents();
+                //        index++;
+                //        Application.DoEvents();
+                //        Application.DoEvents();
+                //    }
+                //}
+
+                //UpdateInfo(string.Format("SUMMARY RESULT [Total | Update | Insert]: [{0} | {1} | {2}]", index, countUpd, countIns));
+
+                #endregion
+
+                UpdateInfo("Finish 100%");
+            }
+            else
+            {
+                UpdateInfo("Can not connect to database");
+            }
+        }
+
+        private void btnSyncIdRelative_User_Click(object sender, EventArgs e)
+        {
+            if (ConnectDB("original") && ConnectDB("new_db"))
+            {
+                long count = Db_Original.Count<Users>();
+                long countIns = 0;
+                
+                progressBar1.Value = 0;
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = (int)count;
+
+                int index = 0;
+                int readAmount = 10;
+                while (index < count)
+                {
+                    int amountCanRead = readAmount;
+                    if (index + amountCanRead > count)
+                    {
+                        amountCanRead = (int)(count - index);
+                    }
+
+                    var lstItem = Db_Original.Select<Users>(x => x.Where().Limit(index, amountCanRead));
+                    foreach (var item in lstItem)
+                    {
+                        progressBar1.Value += 1;
+                        UpdateInfo(string.Format("{0}. PROCESSING USER: {1} - {2}", index + 1, item.ID, item.Email));
+
+                        // Dùng Email để phân biệt user
+                        List<ABUserAuth> newUsers = Db.Select<ABUserAuth>(x => x.Where(y => y.Email.ToLower() == ToLowerCase(item.Email)));
+
+                        // Dùng Email để loại bỏ những user đã được thêm vào
+                        List<int> syncIds = Db.Select<SyncIdRelative_User>(x => x.Where(y => y.Email == ToLowerCase(item.Email))).Select(x => x.NewId).ToList();
+                        newUsers = newUsers.Where(x => !syncIds.Contains(x.Id)).ToList();
+
+                        if (newUsers.Count > 0)
+                        {
+                            // Ưu tiên lấy user được tìm thấy đầu tiên
+                            ABUserAuth newUser = newUsers.First();
+
+                            SyncIdRelative_User syncUser = new SyncIdRelative_User()
+                            {
+                                OldId = item.ID,
+                                NewId = newUser.Id,
+                                Email = ToLowerCase(item.Email)
+                            };
+                            Db.Insert<SyncIdRelative_User>(syncUser);
+
+                            countIns++;
+                            UpdateInfo(string.Format("{0}. INSERT USER SUCCESSFUL: {1} - {2}", index + 1, item.ID, item.Email));
+                        }
+
+                        Application.DoEvents();
+                        index++;
+                    }
+                }
+                UpdateInfo(string.Format("Finish {0}/{1}", countIns, count));
+            }
+            else
+            {
+                UpdateInfo("Can not connect to database");
+            }
+        }
+
+        private void btnSyncIdRelative_Listing_Click(object sender, EventArgs e)
+        {
+            if (ConnectDB("original") && ConnectDB("new_db"))
+            {
+                long count = Db_Original.Count<Listings>();
+                long countIns = 0;
+
+                progressBar1.Value = 0;
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = (int)count;
+
+                int index = 0;
+                int readAmount = 10;
+                while (index < count)
+                {
+                    int amountCanRead = readAmount;
+                    if (index + amountCanRead > count)
+                    {
+                        amountCanRead = (int)(count - index);
+                    }
+
+                    var lstItem = Db_Original.Select<Listings>(x => x.Where().Limit(index, amountCanRead));
+                    foreach (var item in lstItem)
+                    {
+                        progressBar1.Value += 1;
+                        UpdateInfo(string.Format("{0}. PROCESSING LISTING: {1} - {2}", index + 1, item.ID, item.Title));
+
+                        ListingProperty newListing = new ListingProperty(); bool isInst = false;
+                        if (string.IsNullOrEmpty(item.Latitude) || string.IsNullOrEmpty(item.Longitude))
+                        {
+                            // Dùng {Title, City, State, ZipCode, Address} để phân biệt listing
+                            List<ListingProperty> newListings = Db.Select<ListingProperty>(x => x.Where(y =>
+                                y.Info_Title.ToLower() == ToLowerCase(item.Title) &&
+                                y.Locate_City.ToLower() == ToLowerCase(item.City) &&
+                                y.Locate_State.ToLower() == ToLowerCase(item.State) &&
+                                y.Locate_ZipCode.ToLower() == ToLowerCase(item.ZipCode) &&
+                                y.Locate_Addr.ToLower() == ToLowerCase(item.Address)));
+
+                            // Dùng {Title, City, State, ZipCode, Address} để loại bỏ những listing đã được thêm vào
+                            List<int> syncIds = Db.Select<SyncIdRelative_Listing>(x => x.Where(y =>
+                                y.Title == ToLowerCase(item.Title) &&
+                                y.City == ToLowerCase(item.City) &&
+                                y.State == ToLowerCase(item.State) &&
+                                y.ZipCode == ToLowerCase(item.ZipCode) &&
+                                y.Addr == ToLowerCase(item.Address))).Select(x => x.NewId).ToList();
+
+                            newListings = newListings.Where(x => !syncIds.Contains(x.Id)).ToList();
+
+                            if (newListings.Count > 0)
+                            {
+                                // Ưu tiên lấy listing được tìm thấy đầu tiên
+                                newListing = newListings.First();
+                                isInst = true;
+                            }
+                        }
+                        else
+                        {
+                            // Dùng {Latitude, Longitude} để phân biệt listing
+                            List<ListingProperty> newListings = Db.Select<ListingProperty>(x => x.Where(y => y.Locate_Latitude == item.Latitude && y.Locate_Longitude == item.Longitude));
+
+                            // Dùng {Latitude, Longitude} để loại bỏ những listing đã được thêm vào
+                            List<int> syncIds = Db.Select<SyncIdRelative_Listing>(x => x.Where(y => y.Latitude == item.Latitude && y.Longitude == item.Longitude)).Select(x => x.NewId).ToList();
+                            newListings = newListings.Where(x => !syncIds.Contains(x.Id)).ToList();
+
+                            if (newListings.Count > 0)
+                            {
+                                // Ưu tiên lấy listing được tìm thấy đầu tiên
+                                newListing = newListings.First();
+                                isInst = true;
+                            }
+                        }
+                        if (isInst)
+                        {
+                            SyncIdRelative_Listing syncListing = new SyncIdRelative_Listing()
+                            {
+                                OldId = item.ID,
+                                NewId = newListing.Id,
+                                Latitude = item.Latitude,
+                                Longitude = item.Longitude,
+                                Title = ToLowerCase(item.Title),
+                                City = ToLowerCase(item.City),
+                                State = ToLowerCase(item.State),
+                                ZipCode = ToLowerCase(item.ZipCode),
+                                Addr = ToLowerCase(item.Address)
+                            };
+                            Db.Insert<SyncIdRelative_Listing>(syncListing);
+
+                            countIns++;
+                            UpdateInfo(string.Format("{0}. INSERT Listing SUCCESSFUL: {1} - {2}", index + 1, item.ID, item.Title));
+                        }
+                        
+                        Application.DoEvents();
+                        index++;
+                    }
+                }
+                UpdateInfo(string.Format("Finish {0}/{1}", countIns, count));
+            }
+            else
+            {
+                UpdateInfo("Can not connect to database");
+            }
+        }
+
+        private void btnSyncPDFReport_Click(object sender, EventArgs e)
+        {
+            if (ConnectDB("original") && ConnectDB("new_db"))
+            {
+                long count = Db_Original.Count<PDFRequests>();
+                long countIns = 0;
+
+                progressBar1.Value = 0;
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = (int)count;
+
+                int index = 0;
+                int readAmount = 10;
+                while (index < count)
+                {
+                    int amountCanRead = readAmount;
+                    if (index + amountCanRead > count)
+                    {
+                        amountCanRead = (int)(count - index);
+                    }
+
+                    var lstItem = Db_Original.Select<PDFRequests>(x => x.Where().Limit(index, amountCanRead));
+                    foreach (var item in lstItem)
+                    {
+                        progressBar1.Value += 1;
+                        UpdateInfo(string.Format("{0}. PROCESSING PDF: {1}", index + 1, item.ID));
+
+                        ListingPDFRequest pdfRequest = new ListingPDFRequest();
+                        SyncIdRelative_User syncUser = Db.Select<SyncIdRelative_User>(x => x.Where(y => (y.OldId == item.UserID)).Limit(1)).FirstOrDefault();
+                        SyncIdRelative_User syncAgent = Db.Select<SyncIdRelative_User>(x => x.Where(y => (y.OldId == item.AgentID)).Limit(1)).FirstOrDefault();
+                        SyncIdRelative_Listing syncListing = Db.Select<SyncIdRelative_Listing>(x => x.Where(y => (y.OldId == item.ListingID)).Limit(1)).FirstOrDefault();
+                        if (syncUser != null)
+                        {
+                            ABUserAuth user = Db.Select<ABUserAuth>(x => x.Where(y => y.Id == syncUser.NewId).Limit(1)).FirstOrDefault();
+                            if (user != null)
+                            {
+                                pdfRequest.UserId = user.Id;
+                                pdfRequest.FullName = user.FullName;
+                                pdfRequest.TitleRole = user.TitleRole;
+                                pdfRequest.ChurchOrganization = user.ChurchOrg;
+                                pdfRequest.Address1 = user.Address2;
+                                pdfRequest.City = user.City;
+                                pdfRequest.States = user.States;
+                                pdfRequest.ZipCode = user.PostalCode;
+                                pdfRequest.Phone = user.Phone;
+                                pdfRequest.Email = user.Email;
+                            }
+                        }
+                        if (syncAgent != null)
+                        {
+                            ABUserAuth agent = Db.Select<ABUserAuth>(x => x.Where(y => y.Id == syncAgent.NewId).Limit(1)).FirstOrDefault();
+                            if (agent != null)
+                            {
+                                pdfRequest.AgentId = agent.Id;
+                                pdfRequest.AgentName = agent.FullName;
+                            }
+                        }
+                        if (syncListing != null)
+                        {
+                            ListingProperty listing = Db.Select<ListingProperty>(x => x.Where(y => (y.Id == syncListing.NewId)).Limit(1)).FirstOrDefault();
+                            if (listing != null)
+                            {
+                                pdfRequest.ListingId = listing.Id;
+                                pdfRequest.Listings = listing.Info_Title;
+                                pdfRequest.pdf = listing.Assign_File;
+                            }
+                        }
+                        if (item.AccessAt.HasValue)
+                        {
+                            pdfRequest.DateRequested = item.AccessAt.Value;
+                        }
+                        
+                        Db.Insert<ListingPDFRequest>(pdfRequest);
+
+                        countIns++;
+                        UpdateInfo(string.Format("{0}. INSERT PDF SUCCESSFUL: {1}", index + 1, item.ID));
+
+                        Application.DoEvents();
+                        index++;
+                    }
+                }
+                UpdateInfo(string.Format("Finish {0}/{1}", countIns, count));
+            }
+            else
+            {
+                UpdateInfo("Can not connect to database");
+            }
+        }
+    }
+}

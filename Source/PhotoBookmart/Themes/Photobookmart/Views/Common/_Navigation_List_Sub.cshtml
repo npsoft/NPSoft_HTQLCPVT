@@ -1,0 +1,53 @@
+﻿@model Navigation
+@{
+    var Navs = (List<Navigation>)ViewData["Navs"];
+
+    var deep = (int)ViewData["deep"];
+
+    var Topics = (List<SiteTopic>)ViewData["Topics"];
+
+    var SubMenu = Navs.Where(m => (m.ParentId == Model.Id)).ToList();
+}
+@if (!Model.RequireLogin || (Model.RequireLogin && User.Identity.IsAuthenticated))
+{
+    <li class="menu-item @{if (SubMenu.Count != 0)
+                           {<text>menu-item-has-children</text>}
+                           else { }}">
+        @{if (Model.Menutype == 0)
+          {
+            <a rel="#" href="@Model.Link">@Model.Name</a>
+          }
+          else
+          {
+              var topic = Topics.Where(m => (m.Id == Model.TopicId)).FirstOrDefault();
+              if (topic != null)
+              {
+            <a rel="#" href="@Url.Action("TopicDetail", "Topic", new { id = topic.SystemName })">@Model.Name</a>
+              }
+              else
+              {
+            <a rel="#" href="#">@Model.Name</a>
+              }
+          }
+        }
+        @{if (SubMenu.Count != 0)
+          {
+            <ul class="sub-menu">
+                @foreach (var item in SubMenu)
+                {
+                    Navs.Remove(item);
+
+                    var vd = new ViewDataDictionary();
+
+                    vd.Add("Navs", Navs);
+
+                    vd.Add("deep", deep + 1);
+
+                    vd.Add("Topics", Topics);
+
+                    @Html.Partial("_Navigation_List_Sub", item, vd);
+                }
+            </ul>
+          }}
+    </li>
+}

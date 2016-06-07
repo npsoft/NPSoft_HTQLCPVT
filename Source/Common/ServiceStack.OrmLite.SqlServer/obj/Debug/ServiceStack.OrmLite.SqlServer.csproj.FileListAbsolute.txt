@@ -1,0 +1,8 @@
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\bin\Debug\ServiceStack.OrmLite.SqlServer.dll
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\bin\Debug\ServiceStack.OrmLite.SqlServer.pdb
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\bin\Debug\ServiceStack.OrmLite.dll
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\bin\Debug\ServiceStack.Text.dll
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\bin\Debug\ServiceStack.Text.xml
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\obj\Debug\ServiceStack.OrmLite.SqlServer.dll
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\obj\Debug\ServiceStack.OrmLite.SqlServer.pdb
+G:\NPSoft_HTQLNHCS\Common\ServiceStack.OrmLite.SqlServer\obj\Debug\ServiceStack.OrmLite.SqlServer.csprojResolveAssemblyReference.cache

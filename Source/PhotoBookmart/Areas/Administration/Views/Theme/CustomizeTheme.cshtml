@@ -1,0 +1,215 @@
+﻿@model PhotoBookmart.DataLayer.Models.System.Theme
+@using PhotoBookmart.Common.Helpers;
+@{
+    ViewBag.Title = "Customize Theme - "+Model.ThemeName;
+}
+<div class="head">
+    <h3>
+        Customize Theme - @Model.ThemeName</h3>
+</div>
+<link rel="stylesheet" type="text/css" media="screen" href="@Url.ContentArea("~/Content/elfinder/css/smoothness-1.8.23/jquery-ui-1.8.23.custom.css")" />
+@*<script type="text/javascript" src="@Url.ContentArea("~/Content/elfinder/js/jquery-1.7.1.min.js")"></script>
+	<script type="text/javascript" src="@Url.ContentArea("~/Content/elfinder/js/jquery-ui-1.8.11.min.js")"></script>*@
+<link rel="stylesheet" type="text/css" media="screen" href="@Url.ContentArea("~/Content/elfinder/css/elfinder.min.css")" />
+<script type="text/javascript" src="@Url.ContentArea("~/Content/elfinder/js/elfinder.min.js")"></script>
+<script type="text/javascript">
+    var entityMap = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': '&quot;',
+        "'": '&#39;',
+        "/": '&#x2F;'
+    };
+    // size for editor dialog
+    var new_width = 1024;
+    var new_height = 700;
+
+    function escapeHtml(string) {
+        return String(string).replace(/[&<>"'\/]/g, function (s) {
+            return entityMap[s];
+        });
+    }
+
+    function setEditorSize(id) {
+        var obj = jQuery("#" + id).parent().parent();
+        var pos = obj.offset();
+        pos.left -= (new_width - obj.width()) / 2;
+        pos.top -= (new_height - obj.height()) / 2;
+        obj.width(new_width);
+        obj.height(new_height);
+        obj.offset(pos);
+    }
+
+    $(function () {
+        var myCommands = elFinder.prototype._options.commands;
+        var disabled = ['extract', 'archive', 'help', 'select'];
+        $.each(disabled, function (i, cmd) {
+            (idx = $.inArray(cmd, myCommands)) !== -1 && myCommands.splice(idx, 1);
+        });
+        var selectedFile = null;
+        var options = {
+            url: '/Administration/connector',
+            commands: myCommands,
+            lang: 'en',
+            height: 600,
+            uiOptions: {
+                toolbar: [
+		                ['back', 'forward'],
+                        ['reload'],
+                        ['home', 'up'],
+		                ['mkdir', 'mkfile', 'upload'],
+		                ['open', 'download'],
+		                ['info'],
+		                ['quicklook'],
+		                ['copy', 'cut', 'paste'],
+		                ['rm'],
+		                ['duplicate', 'rename', 'edit', 'resize'],
+		                ['view', 'sort']
+	                ]
+            },
+            handlers: {
+                select: function (event, elfinderInstance) {
+
+                    if (event.data.selected.length == 1) {
+                        var item = $('#' + event.data.selected[0]);
+                        if (!item.hasClass('directory')) {
+                            selectedFile = event.data.selected[0];
+                            $('#elfinder-selectFile').show();
+                            return;
+                        }
+                    }
+                    $('#elfinder-selectFile').hide();
+                    selectedFile = null;
+                }
+            },
+            commandsOptions: {
+                edit: {
+                    editors: [
+                    // html editor
+                    {
+                    mimes: ['text/html'],
+                    load: function (textarea) {
+                        CKEDITOR.config.startupMode = 'source';
+                        CKEDITOR.config["code_mode"] = "htmlmixed";
+                        CKEDITOR.config.toolbar = [{ name: 'document', items: ['searchCode', 'autoFormat', 'CommentSelectedRange', 'UncommentSelectedRange', 'AutoComplete']}];
+
+                        setEditorSize(textarea.id);
+
+                        CKEDITOR.replace(textarea.id, {
+                            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+                            height: new_height - 130
+                        });
+                    },
+                    close: function (textarea, instance) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    },
+                    save: function (textarea, editor) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                textarea.value = allInstances[i].getData();
+                                // destroy this instance
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    }
+                },
+                // css file
+                    {
+                    mimes: ['text/css'],  // add here other mimes if required
+                    load: function (textarea) {
+                        CKEDITOR.config.startupMode = 'source';
+                        CKEDITOR.config["code_mode"] = "text/css";
+                        CKEDITOR.config.toolbar = [{ name: 'document', items: ['searchCode', 'autoFormat', 'CommentSelectedRange', 'UncommentSelectedRange', 'AutoComplete']}];
+
+                        setEditorSize(textarea.id);
+
+                        CKEDITOR.replace(textarea.id, {
+                            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+                            height: new_height - 130
+                        });
+                    },
+                    close: function (textarea, instance) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    },
+                    save: function (textarea, editor) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                textarea.value = escapeHtml(allInstances[i].getData());
+                                // destroy this instance
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    }
+                },
+                // javascript file
+                    {
+                    mimes: ['application/javascript'],  // add here other mimes if required
+                    load: function (textarea) {
+                        CKEDITOR.config.startupMode = 'source';
+                        CKEDITOR.config["code_mode"] = 'text/javascript';
+                        CKEDITOR.config.toolbar = [{ name: 'document', items: ['searchCode', 'autoFormat', 'CommentSelectedRange', 'UncommentSelectedRange', 'AutoComplete']}];
+
+                        setEditorSize(textarea.id);
+
+                        CKEDITOR.replace(textarea.id, {
+                            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+                            height: new_height - 130
+                        });
+                    },
+                    close: function (textarea, instance) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    },
+                    save: function (textarea, editor) {
+                        var allInstances = CKEDITOR.instances;
+                        for (var i in allInstances) {
+                            if (allInstances[i].name == textarea.id) {
+                                textarea.value = escapeHtml(allInstances[i].getData());
+                                // destroy this instance
+                                allInstances[i].destroy();
+                                break;
+                            }
+                        }
+                    }
+                }
+                    ]
+            }
+        }
+    };
+    $('#elfinder').elfinder(options).elfinder('instance');
+
+    $('.elfinder-toolbar:first').append('<div class="ui-widget-content ui-corner-all elfinder-buttonset" id="elfinder-selectFile" style="display:none; float:right;">' +
+            '<div class="ui-state-default elfinder-button" title="Select" style="width: 100px;"></div>');
+    $('#elfinder-selectFile').click(function () {
+        if (selectedFile != null)
+            $.post('@Url.Action("FileManager_SelectFile","Theme")', { target: selectedFile }, function (response) {
+                alert(response);
+            });
+
+    });
+});
+</script>
+<div id="elfinder">
+</div>

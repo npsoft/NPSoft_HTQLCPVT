@@ -1,0 +1,67 @@
+﻿@model Order
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.User.cshtml";
+
+    ViewBag.Title = "Order " + Model.Order_Number + " detail";
+    Model.LoadAddress(0);
+    Model.LoadAddress(1);
+    Model.LoadProductInfo();
+}
+@section _TitleMain {
+    <a href='@Url.Action("Detail", "Orders", new { id = Model.Order_Number })' title='Permanent Link: Order Detail'>
+        Order @Model.Order_Number detail </a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">Order @Model.Order_Number detail</span>
+}
+<script type="text/javascript" src="@Url.ContentTheme("Content/scripts/jquery-ui-1.10.1.custom.min.js")"></script>
+<script type="text/javascript" src="@Url.ContentTheme("Content/scripts/OrderDetail.js")"></script>
+<input type="hidden" name="OrderId" value="@Model.Id" />
+<div class="block-fluid mws-tabs" style="height: 730px;">
+    <ul id="tabs_ul">
+        <li><a href="#Detail">Order Info</a></li>
+        <li><a href="#ProductsOptions">Product & Options</a></li>
+        <li><a href="#PaymentDetail">Payment</a></li>
+        @if (Model.isUseCoupon)
+        {
+            <li><a href="#CouponDetail">Coupon</a></li>
+        }
+        <li><a href="#BillingAddress">Billing</a></li>
+        <li><a href="#ShippingAddress">Shipping</a></li>
+        <li><a href="#Progress">Working Progress</a></li>
+    </ul>
+    <div id="Detail">
+        @Html.Partial("Detail_Info", Model)
+    </div>
+    <div id="ProductsOptions">
+        @Html.Partial("ProductOption_Info", Model)
+    </div>
+    <div id="PaymentDetail">
+        @Html.Partial("Payment_Info", Model)
+    </div>
+    @if (Model.isUseCoupon)
+    {
+        <div id="CouponDetail">
+            @Html.Partial("Coupon_Info", Model)
+        </div>
+    }
+    <div id="BillingAddress">
+        @Html.Partial("Billing_Info", Model)
+    </div>
+    <div id="ShippingAddress">
+        @Html.Partial("Shipping_Info", Model)
+    </div>
+    <div id="Progress">
+        @Html.Partial("History_Info", Model)
+    </div>
+</div>
+<script language="javascript" type="text/javascript">
+    jQuery(document).ready(function () {
+        $(".mws-tabs").tabs();
+
+//        jQuery("#tabs_ul li a").click(function () {
+//            event.preventDefault();
+//        });
+    });
+</script>

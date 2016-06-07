@@ -1,0 +1,1188 @@
+﻿@model DoiTuong
+@{  
+    ViewBag.Title = Model.Id > 0 ? "CS đối tượng" : "TM Đối tượng";
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<script>
+    var JsonModel = @Html.Raw(JsonConvert.SerializeObject(Model));
+    JsonModel.IDDiaChi = IsNullOrEmpty(JsonModel.IDDiaChi) ? "" : JsonModel.IDDiaChi.replace(/-/g, "");
+    JsonModel.DangKT = IsNullOrEmpty(JsonModel.DangKT) ? "" : JsonModel.DangKT.replace(/-/g, "");
+    var Url_GetEthnicsForFilter = "@Url.Action("GetEthnicsForFilter", "WebsiteProduct")";
+    var Url_GetLevelsDisabilityForFilter = "@Url.Action("GetLevelsDisabilityForFilter", "WebsiteProduct")";
+    var Url_GetMaLDT_DetailsByParams = "@Url.Action("Svc_GetMaLDT_DetailsByParams", "WebsiteProduct")";
+    var Id = @Model.Id;
+    var Code_Province = Id > 0 ? "@Model.MaHC.GetCodeProvince()" : "@CurrentUser.MaHC.GetCodeProvince()";
+    var Code_District = Id > 0 ? "@Model.MaHC.GetCodeDistrict()" : "@CurrentUser.MaHC.GetCodeDistrict()";
+    var MaHC = Id > 0 ? "@Model.MaHC.GetCodeVillage()" : "@CurrentUser.MaHC.GetCodeVillage()";
+    var Settings = { TL02: null, TL11: null };
+    var $ddl_province, $ddl_district, $ddl_MaHC, $ddl_IDDiaChi, $ddl_MaLDT;
+
+    function CalcMucTC(_data) {
+        var heso = parseFloat($ddl_MaLDT.find("option:selected").attr("data-heso"));
+        var muctc = $("#obj-info-common [name='isHoNgheo']").prop("checked") ? Settings.TL11 : Settings.TL02;
+        return heso * muctc;
+    };
+
+    function UpdDataForAddrs(_data) {
+        var val = "";
+        if (!IsNullOrEmpty($ddl_province.val())) {
+            val = $ddl_province.data("select2").selection.find(">span:first-child").text() + val;
+        }
+        if (!IsNullOrEmpty($ddl_district.val())) {
+            val = $ddl_district.data("select2").selection.find(">span:first-child").text() + ", " + val;
+        }
+        if (!IsNullOrEmpty($ddl_MaHC.val())) {
+            val = $ddl_MaHC.data("select2").selection.find(">span:first-child").text() + ", " + val;
+        }
+        if (!IsNullOrEmpty($ddl_IDDiaChi.val())) {
+            val = $ddl_IDDiaChi.data("select2").selection.find(">span:first-child").text() + ", " + val;
+        }
+        $("#obj-info-common [name='NguyenQuan'], #obj-info-common [name='TruQuan']").val(val);
+    };
+
+    function UpdDataForMucTC(_data) {
+        if (Settings.TL02 != null &&
+            Settings.TL11 != null &&
+            !IsNullOrEmpty($ddl_MaLDT.val())) {
+            $("#obj-info-common [name='MucTC']").val(CalcMucTC({}));
+        }
+    };
+
+    function FillDataForSelect2(_data) {
+        var $ddl = _data.$ddl, val = _data.val, data = _data.data, id = _data.id, name = _data.name;
+        var opts = "";
+        data.forEach(function (element, index, array) {
+            opts += "<option value='" + element[id] + "'>" + element[name] + "</option>";
+        });
+        $ddl.children(":not(:first-child)").remove();
+        $ddl.append(opts);
+        $ddl.select2().select2("val", _data.val);
+    };
+
+    function InitSelectedForSelect2(_data) {
+        $ddl_province = $("#obj-info-common #ddl-province");
+        $ddl_district = $("#obj-info-common #ddl-district");
+        $ddl_MaHC = $("#obj-info-common [name='MaHC']");
+        $ddl_IDDiaChi = $("#obj-info-common [name='IDDiaChi']");
+        $ddl_MaLDT = $("#obj-info-common [name='MaLDT']");
+
+        $.post(SVC_GETALLPROVINCES, {}, function (data) {
+            FillDataForSelect2({ $ddl: $ddl_province, val: Code_Province, data: data, id: "MaHC", name: "TenHC" });
+            if (!IsNullOrEmpty(Code_Province)) {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, { MaHC: Code_Province }, function (data) {
+                    FillDataForSelect2({ $ddl: $ddl_district, val: Code_District, data: data, id: "MaHC", name: "TenHC" });
+                    if (!IsNullOrEmpty(Code_District)) {
+                        $.post(SVC_GETVILLAGESBYDISTRICT, { MaHC: Code_District }, function (data) {
+                            FillDataForSelect2({ $ddl: $ddl_MaHC, val: MaHC, data: data, id: "MaHC", name: "TenHC" });
+                            if (!IsNullOrEmpty(MaHC)) {
+                                $.post(SVC_GETHAMLETSBYVILLAGE, { MaHC: MaHC }, function (data) {
+                                    FillDataForSelect2({ $ddl: $ddl_IDDiaChi, val: JsonModel.IDDiaChi, data: data, id: "IDDiaChi", name: "TenDiaChi" });
+                                });
+                                if (Id == 0) { UpdDataForAddrs({}); };
+                            } else {
+                                if (Id == 0) { UpdDataForAddrs({}); };
+                            }
+                        });
+                    } else {
+                        if (Id == 0 ) { UpdDataForAddrs({}); };
+                    }
+                });
+            }
+        });
+
+        $.post(Url_GetEthnicsForFilter, {}, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='MaDanToc']"), val: "@Model.MaDanToc", data: data, id: "Id", name: "TenDanToc" });
+        });
+        $.post(SVC_GETALLTYPESDISABILITY, {}, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='DangKT']"), val: JsonModel.DangKT, data: data, id: "IDDangTat", name: "TenDangTat" });
+        });
+        $.post(Url_GetLevelsDisabilityForFilter, {}, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='MucDoKT']"), val: "@Model.MucDoKT", data: data, id: "Id", name: "Name" });
+        });
+        $.post(SVC_GETALLMARITALSTATUSES, {}, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='MaLDT_Type4_MaritalStatus']"), val: "@if (Model.MaLDT_Details.Count > 0) {<text>@Model.MaLDT_Details[0].Type4_MaritalStatus</text>}", data: data, id: "IDTinhTrangHN", name: "TenTinhTrangHN" });
+        });
+        $.post(SVC_GETALLSELFSERVINGS, {}, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='MaLDT_Type5_SelfServing']"), val: "@if (Model.MaLDT_Details.Count > 0) {<text>@Model.MaLDT_Details[0].Type5_SelfServing</text>}", data: data, id: "IDKhaNangPV", name: "TenKhaNangPV" });
+        });
+        $.post(SVC_GETALLTYPESOBJ, {}, function (data) {
+            var opts = "";
+            data.forEach(function (group, index, array) {
+                opts += "<optgroup label='" + group.Key.MaLDT + " - " + group.Key.TenLDT + "'>";
+                group.Value.forEach(function (type, index, array) {
+                    opts += "<option value='" + type.MaLDT + "' data-heso='" + type.HeSo + "'>" + type.MaLDT + " - " + type.TenLDT + "</option>";
+                });
+                opts += "</optgroup>";
+            });
+            $ddl_MaLDT.append(opts);
+            $ddl_MaLDT.select2().select2("val", "@Model.MaLDT");
+        });
+        $.post(SVC_GETTINHTRANGDTSBYPARAMS, { IsDuyet: JsonModel.IsDuyet }, function (data) {
+            FillDataForSelect2({ $ddl: $("#obj-info-common [name='TinhTrang']"), val: JsonModel.TinhTrang, data: data, id: "MaTT", name: "TenTT" });
+        });
+        if (!IsNullOrEmpty(Code_Province)) {
+            $.post(SVC_GETMUCTROCAPCOBANBYPARAMS, { MaHC: Code_Province }, function (data) {
+                Settings.TL02 = data.TL02;
+                Settings.TL11 = data.TL11;
+            });
+        }
+        setTimeout(function () {
+            $ddl_province.select2().select2("val", Code_Province);
+            $ddl_district.select2().select2("val", Code_District);
+            $ddl_MaHC.select2().select2("val", MaHC);
+            $ddl_IDDiaChi.select2().select2("val", JsonModel.IDDiaChi);
+            $("#obj-info-common [name='GioiTinh']").select2().select2("val", "@Model.GioiTinh");
+        }, 100);
+    };
+
+    function ChangeTab(data) {
+        $(".mws-tabs a[href='" + data + "']").trigger("click");
+    };
+    
+    function DisableTab(data) {
+        var val = IsNullOrEmpty(data) ? "" : data.substr(0, 2);
+        if (val == "01" || val == "03" || val == "04" || val == "05") {
+            $(".mws-tabs").tabs({ disabled: [] });
+        } else {
+            $(".mws-tabs").tabs({ disabled: [2] });
+        }
+    };
+
+    jQuery(document).ready(function ($) {
+        InitSelectedForSelect2({});
+
+        $ddl_province.on("change", function (e) {
+            var data = { MaHC: $ddl_province.val() };
+            if (IsNullOrEmpty(data.MaHC)) {
+                FillDataForSelect2({ $ddl: $ddl_district, val: "", data: [], id: "", name: "" });
+                $ddl_district.trigger("change");
+                Settings.TL02 = null;
+                Settings.TL11 = null;
+            } else {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, data, function (data) {
+                    FillDataForSelect2({ $ddl: $ddl_district, val: "", data: data, id: "MaHC", name: "TenHC" });
+                    $ddl_district.trigger("change");
+                });
+                $.post(SVC_GETMUCTROCAPCOBANBYPARAMS, data, function (data) {
+                    Settings.TL02 = data.TL02;
+                    Settings.TL11 = data.TL11;
+                    UpdDataForMucTC({});
+                })
+            }
+        });
+
+        $ddl_district.on("change", function (e) {
+            var data = { MaHC: $ddl_district.val() };
+            if (IsNullOrEmpty(data.MaHC)) {
+                FillDataForSelect2({ $ddl: $ddl_MaHC, val: "", data: [], id: "", name: "" });
+                $ddl_MaHC.trigger("change");
+            } else {
+                $.post(SVC_GETVILLAGESBYDISTRICT, data, function (data) {
+                    FillDataForSelect2({ $ddl: $ddl_MaHC, val: "", data: data, id: "MaHC", name: "TenHC" });
+                    $ddl_MaHC.trigger("change");
+                });
+            }
+        }).on("open", function (e) {
+            if (IsNullOrEmpty($ddl_province.val())) {
+                notify_info("Thông báo", "Vui lòng chọn tỉnh trước.");
+                setTimeout(function () { $ddl_province.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_MaHC.on("change", function (e) {
+            var data = { MaHC: $ddl_MaHC.val() };
+            if (IsNullOrEmpty(data.MaHC)) {
+                FillDataForSelect2({ $ddl: $ddl_IDDiaChi, val: "", data: [], id: "", name: "" });
+                $ddl_IDDiaChi.trigger("change");
+            } else {
+                $.post(SVC_GETHAMLETSBYVILLAGE, data, function (data) {
+                    FillDataForSelect2({ $ddl: $ddl_IDDiaChi, val: "", data: data, id: "IDDiaChi", name: "TenDiaChi" });
+                    $ddl_IDDiaChi.trigger("change");
+                });
+            }
+        }).on("open", function (e) {
+            if (IsNullOrEmpty($ddl_district.val())) {
+                notify_info("Thông báo", "Vui lòng chọn huyện trước.");
+                setTimeout(function () { $ddl_district.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_IDDiaChi.on("change", function (e) {
+            UpdDataForAddrs({});
+        }).on("open", function (e) {
+            if (IsNullOrEmpty($ddl_MaHC.val())) {
+                notify_info("Thông báo", "Vui lòng chọn xã trước.");
+                setTimeout(function () { $ddl_MaHC.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_MaLDT.on("change", function (e) {
+            var $tbl = $("[data-con='type'][data-val='03'] #ListTable");
+            $tbl.DataTable().fnDestroy();
+            $tbl.removeAttr("style");
+            $tbl.find("tbody").empty();
+            if ($.fn.dataTable) {
+                $tbl.dataTable({
+                    sPaginationType: "full_numbers",
+                    "aLengthMenu": [30, 50, 100],
+                    "aaSorting": []
+                });
+            }
+
+            var val = $(this).val().substr(0, 2);
+            $("#obj-info-common [data-con='type']:not([data-val='" + val + "'])").addClass("hide");
+            $("#obj-info-common [data-con='type'][data-val='" + val + "']").removeClass("hide");
+
+            UpdDataForMucTC({});
+            DisableTab($(this).val());
+        });
+
+        $("#obj-info-common [name='isHoNgheo']").on("change", function (e) {
+            UpdDataForMucTC({});
+        });
+
+        $("#obj-info-common [name='isKhuyetTat']").on("change", function (e) {
+            if ($(this).prop("checked")) {
+                $("#obj-info-common [data-con='disability']").removeClass("hide");
+            } else {
+                $("#obj-info-common [data-con='disability']").addClass("hide");
+            }
+        });
+
+        $("#obj-info-common")
+            .find("[name='NgayCap'], [name='NgayHuong'], [name='NgayQD']")
+            .datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: "dd/mm/yy"
+            });
+
+        $("#popup-maldt-child").dialog({
+            modal: true,
+            autoOpen: false,
+            width: 800,
+            buttons: {
+                "Lưu lại": function () {
+                    $(this).find("form").trigger("submit");
+                },
+                "Hủy bỏ": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("[data-con='type'][data-val='03']").on("click", ".np-add", function (e) {
+            var $popup = $("#popup-maldt-child");
+            var $frm = $popup.find("form");
+
+            $frm.trigger("reset");
+            $frm.find("[name='MaLDT_Row_Id']").val(NewGuid());
+            $frm.find("[name='MaLDT_Id']").val(0);
+
+            $popup.dialog("option", "title", "Thêm mới » con");
+            $popup.dialog("open");
+        });
+
+        $("[data-con='type'][data-val='03']").on("click", ".np-edit", function (e) {
+            var $popup = $("#popup-maldt-child");
+            var $frm = $popup.find("form");
+            var $row = $(this).closest("tr[data-id]");
+
+            $frm.find("[name='MaLDT_Row_Id']").val($row.attr("row-id"));
+            $frm.find("[name='MaLDT_Id']").val($row.attr("data-id"));
+            $frm.find("[name='MaLDT_Type3_FullName']").val($row.attr("data-full-name"));
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Date']").val($row.attr("data-date-of-birth-is-date") == "1" ? $row.attr("data-date-of-birth").substr(0, 2) : "");
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Month']").val($row.attr("data-date-of-birth-is-month") == "1" ? $row.attr("data-date-of-birth").substr(3, 2) : "");
+            $frm.find("[name='MaLDT_Type3_DateOfBirth_Year']").val($row.attr("data-date-of-birth").substr(6, 4));
+            $frm.find("[name='MaLDT_Type3_Gender']").select2().select2("val", $row.attr("data-gender"));
+            $frm.find("[name='MaLDT_Type3_CurrAddr']").val($row.attr("data-curr-addr"));
+            $frm.find("[name='MaLDT_Type3_StatusLearn']").val($row.attr("data-status-learn"));
+
+            $popup.dialog("option", "title", "Chỉnh sửa » con");
+            $popup.dialog("open");
+        });
+
+        $("[data-con='type'][data-val='03']").on("click", ".np-delete", function (e) {
+            var $tbl = $("[data-con='type'][data-val='03'] #ListTable");
+            $tbl.DataTable().fnDestroy();
+            $tbl.removeAttr("style");
+            $(this).closest("tr").remove();
+            if ($.fn.dataTable) {
+                $tbl.dataTable({
+                    sPaginationType: "full_numbers",
+                    "aLengthMenu": [30, 50, 100],
+                    "aaSorting": []
+                });
+            }
+        });
+
+        $("#popup-maldt-child form").on("submit", function (e) {
+            var $frm = $(this);
+            var row_id = $frm.find("[name='MaLDT_Row_Id']").val();
+            var id = $frm.find("[name='MaLDT_Id']").val();
+            var $txt_full_name = $frm.find("[name='MaLDT_Type3_FullName']");
+            var $txt_date_of_birth_date = $frm.find("[name='MaLDT_Type3_DateOfBirth_Date']");
+            var $txt_date_of_birth_month = $frm.find("[name='MaLDT_Type3_DateOfBirth_Month']");
+            var $txt_date_of_birth_year = $frm.find("[name='MaLDT_Type3_DateOfBirth_Year']");
+            var $ddl_gender = $frm.find("[name='MaLDT_Type3_Gender']");
+            var $txt_curr_addr = $frm.find("[name='MaLDT_Type3_CurrAddr']");
+            var $txt_status_learn = $frm.find("[name='MaLDT_Type3_StatusLearn']");
+
+            if (IsNullOrEmpty($.trim($txt_full_name.val()))) {
+                notify_error("Lỗi", "Vui lòng nhập họ & tên.");
+                $txt_full_name.focus();
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_gender.val())) {
+                notify_error("Lỗi", "Vui lòng chọn giới tính.");
+                $ddl_gender.select2("open");
+                return false;
+            }
+            if (!CheckDateOfBirth({ $txt_year: $txt_date_of_birth_year, $txt_month: $txt_date_of_birth_month, $txt_date: $txt_date_of_birth_date })) {
+                return false;
+            }
+
+            var full_name = $.trim($txt_full_name.val());
+            var date_of_birth_is_date = !IsNullOrEmpty($txt_date_of_birth_date.val());
+            var date_of_birth_is_month = !IsNullOrEmpty($txt_date_of_birth_month.val());
+            var date_of_birth_val = (date_of_birth_is_date ? $txt_date_of_birth_date.val() : "01") + "/" + (date_of_birth_is_month ? $txt_date_of_birth_month.val() : "01") + "/" + $txt_date_of_birth_year.val();
+            var date_of_birth_txt = (date_of_birth_is_date ? $txt_date_of_birth_date.val() + "/": "") + (date_of_birth_is_month ? $txt_date_of_birth_month.val() + "/" : "") + $txt_date_of_birth_year.val();
+            var gender = $ddl_gender.val();
+            var curr_addr = $.trim($txt_curr_addr.val());
+            var status_learn = $.trim($txt_status_learn.val());
+
+            var $tbl = $("[data-con='type'][data-val='03'] #ListTable");
+            var $old_tr = $tbl.find("tbody tr[row-id='{0}']".format(row_id));
+            var $new_tr = '<tr row-id="{0}"'.format(row_id) +
+                'data-id="{0}"'.format(id) +
+                'data-full-name="{0}"'.format(full_name) +
+                'data-date-of-birth="{0}"'.format(date_of_birth_val) +
+                'data-date-of-birth-is-month="{0}"'.format(date_of_birth_is_month ? 1 : 0) +
+                'data-date-of-birth-is-date="{0}"'.format(date_of_birth_is_date ? 1 : 0) +
+                'data-gender="{0}"'.format(gender) +
+                'data-curr-addr="{0}"'.format(curr_addr) +
+                'data-status-learn="{0}">'.format(status_learn) +
+                '<td><span>{0}</span></td>'.format(full_name) +
+                '<td class="align-r"><span>{0}</span></td>'.format(date_of_birth_txt) +
+                '<td><span>{0}</span></td>'.format($ddl_gender.data("select2").selection.find(">span:first-child").text()) +
+                '<td><span>{0}</span></td>'.format(curr_addr) +
+                '<td><span>{0}</span></td>'.format(status_learn) +
+                '<td class="no_padding np-align-c">' +
+                    '<span class="btn-group">' +
+                        '<a href="javascript:void(0);" class="btn btn-small np-edit" title="Chỉnh sửa"><i class="icon-pencil"></i></a>' +
+                        '<a href="javascript:void(0);" class="btn btn-small np-delete" title="Xóa bỏ"><i class="icon-trash"></i></a>' +
+                    '</span>' +
+                '</td>' +
+            '</tr>';
+
+            $tbl.DataTable().fnDestroy();
+            $tbl.removeAttr("style");
+            if ($old_tr.length > 0) {
+                $old_tr.replaceWith($new_tr);
+            } else {
+                $tbl.find("tbody").append($new_tr);
+            }
+            if ($.fn.dataTable) {
+                $tbl.dataTable({
+                    sPaginationType: "full_numbers",
+                    "aLengthMenu": [30, 50, 100],
+                    "aaSorting": []
+                });
+            }
+            $("#popup-maldt-child").dialog("close");
+            return false;
+        });
+
+        if ($.fn.dataTable) {
+            $("[data-con='type'][data-val='03'] #ListTable").dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100],
+                "aaSorting": []
+            });
+        }
+
+        $("[data-action='save']").on("click", function (e) {
+            $("#obj-info-common").trigger("submit");
+        });
+
+        $("#obj-info-common").on("submit", function (e) {
+            var $frm = $(this);
+            var $ddl_gender = $frm.find("[name='GioiTinh']");
+            var $ddl_disability_type = $frm.find("[name='DangKT']");
+            var $ddl_disability_level = $frm.find("[name='MucDoKT']");
+            var $ddl_tinh_trang = $frm.find("[name='TinhTrang']");
+            var $txt_ho_ten = $frm.find("[name='HoTen']");
+            var $txt_nam_sinh = $frm.find("[name='NamSinh']");
+            var $txt_thang_sinh = $frm.find("[name='ThangSinh']");
+            var $txt_ngay_sinh = $frm.find("[name='NgaySinh']");
+            var $txt_tru_quan = $frm.find("[name='TruQuan']");
+            var $txt_nguyen_quan = $frm.find("[name='NguyenQuan']");
+            var $txt_muc_tc = $frm.find("[name='MucTC']");
+            var $txt_ngay_huong = $frm.find("[name='NgayHuong']");
+            var $chk_disability = $frm.find("[name='isKhuyetTat']");
+            $txt_ho_ten.val($.trim($txt_ho_ten.val()));
+            $txt_nam_sinh.val($.trim($txt_nam_sinh.val()));
+            $txt_thang_sinh.val($.trim($txt_thang_sinh.val()));
+            $txt_ngay_sinh.val($.trim($txt_ngay_sinh.val()));
+            $txt_tru_quan.val($.trim($txt_tru_quan.val()));
+            $txt_nguyen_quan.val($.trim($txt_nguyen_quan.val()));
+            $txt_muc_tc.val($.trim($txt_muc_tc.val()));
+            $txt_ngay_huong.val($.trim($txt_ngay_huong.val()));
+
+            if (IsNullOrEmpty($ddl_province.val())) {
+                ChangeTab("#thong-tin-chung");
+                setTimeout(function () { $ddl_province.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn tỉnh.");
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_district.val())) {
+                ChangeTab("#thong-tin-chung");
+                setTimeout(function () { $ddl_district.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn huyện.");
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_MaHC.val())) {
+                ChangeTab("#thong-tin-chung");
+                setTimeout(function () { $ddl_MaHC.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn xã.");
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_IDDiaChi.val())) {
+                ChangeTab("#thong-tin-chung");
+                setTimeout(function () { $ddl_IDDiaChi.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn xóm.");
+                return false;
+            }
+
+            if (IsNullOrEmpty($txt_ho_ten.val())) {
+                ChangeTab("#thong-tin-chung");
+                $txt_ho_ten.focus();
+                notify_error("Lỗi", "Vui lòng nhập họ & tên.");
+                return false;
+            }
+            if (!CheckDateOfBirth({
+                $txt_year: $txt_nam_sinh,
+                $txt_month: $txt_thang_sinh,
+                $txt_date: $txt_ngay_sinh
+            })) {
+                ChangeTab("#thong-tin-chung");
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_gender.val())) {
+                ChangeTab("#thong-tin-chung");
+                setTimeout(function () { $ddl_gender.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn giới tính.");
+                return false;
+            }
+            if (IsNullOrEmpty($txt_tru_quan.val())) {
+                ChangeTab("#thong-tin-chung");
+                $txt_tru_quan.focus();
+                notify_error("Lỗi", "Vui lòng nhập trú quán.");
+                return false;
+            }
+            if (IsNullOrEmpty($txt_nguyen_quan.val())) {
+                ChangeTab("#thong-tin-chung");
+                $txt_nguyen_quan.focus();
+                notify_error("Lỗi", "Vui lòng nhập nguyên quán.");
+                return false;
+            }
+
+            if (IsNullOrEmpty($ddl_MaLDT.val())) {
+                ChangeTab("#thong-tin-tro-cap");
+                setTimeout(function() { $ddl_MaLDT.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn loại.");
+                return false;
+            }
+            var $txt_loai_info_father = $frm.find("[name='MaLDT_Type1_InfoFather']");
+            var $txt_loai_info_mother = $frm.find("[name='MaLDT_Type1_InfoMother']");
+            var $trs_loai_children = $frm.find("[data-con='type'][data-val='03'] #ListTable tbody tr[row-id]");
+            var $ddl_loai_marital_status = $frm.find("[name='MaLDT_Type4_MaritalStatus']");
+            var $txt_loai_info_additional = $frm.find("[name='MaLDT_Type4_InfoAdditional']");
+            var $ddl_loai_self_serving = $frm.find("[name='MaLDT_Type5_SelfServing']");
+            var $txt_loai_carer = $frm.find("[name='MaLDT_Type5_Carer']");
+            $txt_loai_info_father.val($.trim($txt_loai_info_father.val()));
+            $txt_loai_info_mother.val($.trim($txt_loai_info_mother.val()));
+            $txt_loai_info_additional.val($.trim($txt_loai_info_additional.val()));
+            $txt_loai_carer.val($.trim($txt_loai_carer.val()));
+            if ($ddl_MaLDT.val().startsWith("01")) {
+                if (IsNullOrEmpty($txt_loai_info_father.val())) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    $txt_loai_info_father.focus();
+                    notify_error("Lỗi", "Vui lòng nhập thông tin cha.");
+                    return false;
+                }
+                if (IsNullOrEmpty($txt_loai_info_mother.val())) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    $txt_loai_info_mother.focus();
+                    notify_error("Lỗi", "Vui lòng nhập thông tin mẹ.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("03")) {
+                if ($trs_loai_children.length == 0) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    $frm.find("[data-con='type'][data-val='03'] .np-add").trigger("click");
+                    notify_error("Lỗi", "Vui lòng thêm thông tin » con.");
+                    return false;
+                } else if ($ddl_MaLDT.val().startsWith("0301") && $trs_loai_children.length != 1) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    notify_error("Lỗi", "Loại 0301 giành cho đối tượng nuôi 1 con.");
+                    return false;
+                } else if ($ddl_MaLDT.val().startsWith("0302") && $trs_loai_children.length < 2) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    $frm.find("[data-con='type'][data-val='03'] .np-add").trigger("click");
+                    notify_error("Lỗi", "Loại 0302 giành cho đối tượng nuôi 2 con trở lên.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("04")) {
+                if (IsNullOrEmpty($ddl_loai_marital_status.val())) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    setTimeout(function () { $ddl_loai_marital_status.select2("open"); }, 200);
+                    notify_error("Lỗi", "Vui lòng chọn tình trạng hôn nhân.");
+                    return false;
+                }
+            } else if ($ddl_MaLDT.val().startsWith("05")) {
+                if (IsNullOrEmpty($ddl_loai_self_serving.val())) {
+                    ChangeTab("#thong-tin-bo-sung");
+                    setTimeout(function () { $ddl_loai_self_serving.select2("open"); }, 200);
+                    notify_error("Lỗi", "Vui lòng chọn khả năng phục vụ.");
+                    return false;
+                }
+            }
+            if ($chk_disability.prop("checked")) {
+                if (IsNullOrEmpty($ddl_disability_type.val())) {
+                    ChangeTab("#thong-tin-tro-cap");
+                    setTimeout(function () { $ddl_disability_type.select2("open"); });
+                    notify_error("Lỗi", "Vui lòng chọn dạng khuyết tật.");
+                    return false;
+                }
+                if (IsNullOrEmpty($ddl_disability_level.val())) {
+                    ChangeTab("#thong-tin-tro-cap");
+                    setTimeout(function () { $ddl_disability_level.select2("open"); });
+                    notify_error("Lỗi", "Vui lòng chọn mức độ khuyết tật.");
+                    return false;
+                }
+            }
+
+            if (IsNullOrEmpty($txt_muc_tc.val())) {
+                ChangeTab("#thong-tin-tro-cap");
+                $txt_muc_tc.focus();
+                notify_error("Lỗi", "Vui lòng nhập mức trợ cấp.");
+                return false;
+            }
+            var val_muc_tc = parseFloat($txt_muc_tc.val());
+            if (isNaN(val_muc_tc) || val_muc_tc < 0) {
+                ChangeTab("#thong-tin-tro-cap");
+                $txt_muc_tc.focus();
+                notify_error("Lỗi", "Mức trợ cấp không đúng định dạng.");
+                return false;
+            }
+            $txt_muc_tc.val(val_muc_tc);
+            if (IsNullOrEmpty($txt_ngay_huong.val())) {
+                ChangeTab("#thong-tin-tro-cap");
+                $txt_ngay_huong.focus();
+                notify_error("Lỗi", "Vui lòng chọn ngày hưởng.");
+                return false;
+            }
+            if (IsNullOrEmpty(ParseTime($txt_ngay_huong.val()))) {
+                ChangeTab("#thong-tin-tro-cap");
+                $txt_ngay_huong.focus();
+                notify_error("Lỗi", "Ngày hưởng không đúng định dạng.");
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_tinh_trang.val())) {
+                ChangeTab("#thong-tin-tro-cap");
+                setTimeout(function () { $ddl_tinh_trang.select2("open"); }, 200);
+                notify_error("Lỗi", "Vui lòng chọn tình trạng.");
+                return false;
+            }
+
+            if (!CheckDateOfBirth_MaLDT({
+                year: $txt_nam_sinh.val(),
+                month: $txt_thang_sinh.val(),
+                date: $txt_ngay_sinh.val(),
+                type: $ddl_MaLDT.val()
+            })) {
+                ChangeTab("#thong-tin-chung");
+                $txt_nam_sinh.focus();
+                notify_error("Lỗi", "Ngày sinh không phù hợp với loại.");
+                return false;
+            }
+
+            var data = $frm.serializeObject();
+            data.Id = parseInt(data.Id);
+            data.NgayCap = TimeForReq(ParseTime(data.NgayCap));
+            data.NgayHuong = TimeForReq(ParseTime(data.NgayHuong));
+            data.NgayQD = TimeForReq(ParseTime(data.NgayQD));
+            data.MaLDT_Details = [];
+            if ($ddl_MaLDT.val().startsWith("01")) {
+                data.MaLDT_Details.push({
+                    Type1_InfoFather: $txt_loai_info_father.val(),
+                    Type1_InfoMother: $txt_loai_info_mother.val()
+                });
+            } else if ($ddl_MaLDT.val().startsWith("03")) {
+                $trs_loai_children.each(function (index, element) {
+                    data.MaLDT_Details.push({
+                        Id: parseInt($(element).attr("data-id")),
+                        Type3_FullName: $(element).attr("data-full-name"),
+                        Type3_DateOfBirth: TimeForReq(ParseTime($(element).attr("data-date-of-birth"))),
+                        Type3_DateOfBirth_IsMonth: $(element).attr("data-date-of-birth-is-month") == "1" ? true : false,
+                        Type3_DateOfBirth_IsDate: $(element).attr("data-date-of-birth-is-date") == "1" ? true : false,
+                        Type3_Gender: $(element).attr("data-gender"),
+                        Type3_CurrAddr: $(element).attr("data-curr-addr"),
+                        Type3_StatusLearn: $(element).attr("data-status-learn")
+                    });
+                });
+            } else if ($ddl_MaLDT.val().startsWith("04")) {
+                data.MaLDT_Details.push({
+                    Type4_MaritalStatus: $ddl_loai_marital_status.val(),
+                    Type4_InfoAdditional: $txt_loai_info_additional.val()
+                });
+            } else if ($ddl_MaLDT.val().startsWith("05")) {
+                data.MaLDT_Details.push({
+                    Type5_SelfServing: $ddl_loai_self_serving.val(),
+                    Type5_Carer: $txt_loai_carer.val()
+                });
+            }
+
+            var is_continue = true;
+            if (JsonModel.Id > 0 &&
+                JsonModel.IsDuyet &&
+                JsonModel.MaLDT != $ddl_MaLDT.val()) {
+                @if (!Model.CheckBienDongCreate(CurrentUser)) {
+                    @: $.pnotify({
+                    @:    type: "error",
+                    @:    title: "Lỗi",
+                    @:    text: "Vui lòng xóa hết lịch sử biến động trước khi sửa.",
+                    @:    opacity: .8
+                    @: });
+                    @: return false;
+                }
+                var dt_old = ParseTime(JsonModel.NgayHuong);
+                var dt_new = ParseTime(data.NgayHuong);
+                dt_old = new Date(dt_old.getFullYear(), dt_old.getMonth() - 1, 1, 0, 0, 0, 0);
+                dt_new = new Date(dt_new.getFullYear(), dt_new.getMonth() - 1, 1, 0, 0, 0, 0);
+                if (dt_new <= dt_old) {
+                    $.pnotify({
+                        type: "error",
+                        title: "Lỗi",
+                        text: "Tháng biến động phải lớn hơn tháng đang hưởng.",
+                        opacity: .8
+                    });
+                    return false;
+                }
+            }
+            $.ajax({
+                url: SVC_GETDOITUONGBYPARAMS,
+                type: "post",
+                data: JSON.stringify({
+                    Id: data.Id,
+                    HoTen: data.HoTen,
+                    NamSinh: data.NamSinh,
+                    TruQuan: data.TruQuan,
+                    NguyenQuan: data.NguyenQuan
+                }),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                global: false,
+                success: function (result, textStatus, jqXHR) {
+                    if (result != null) {
+                        var msg = "Đã tồn tại đối tượng với thông tin:\n";
+                        msg += "Họ tên: {0}\n".format(result.HoTen);
+                        msg += "Năm sinh: {0}\n".format(result.NamSinh);
+                        msg += "Trú quán: {0}\n".format(result.TruQuan);
+                        msg += "Nguyên quán: {0}\n".format(result.NguyenQuan);
+                        msg += "Loại: {0}\n\n".format(result.MaLDT_Name);
+                        msg += "Bạn muốn nhập tiếp?";
+                        if (!confirm(msg)) {
+                            ChangeTab("#thong-tin-chung");
+                            $txt_ho_ten.focus();
+                            is_continue = false;
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.warn("textStatus: " + textStatus + " | errorThrown: " + errorThrown);
+                }
+            });
+            if (!is_continue) { return false; }
+            $.ajax({
+                url: $frm.attr("action"),
+                type: "post",
+                data: JSON.stringify({ model: data }, null, 0),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result, textStatus, jqXHR) {
+                    if (result.Status == "error") {
+                        $.pnotify({
+                            type: "error",
+                            title: "Lỗi",
+                            text: result.Message,
+                            opacity: .8
+                        });
+                    }
+                    if (result.RedirectUrl != null) {
+                        location.href = result.RedirectUrl;
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.warn("textStatus: " + textStatus + " | errorThrown: " + errorThrown);
+                }
+            });
+            return false;
+        });
+    
+        setTimeout(function() { DisableTab(JsonModel.MaLDT); }, 100);
+    });
+</script>
+<div class="head">
+    <h3>@{ if (Model.Id > 0) { <text>Chỉnh sửa đối tượng</text> } else { <text>Thêm mới đối tượng</text> } }</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a rel="back" href="@Url.Action("Index", "WebsiteProduct", new { })" class="btn">
+                    <i class="icol-arrow-left"></i>Quay lại
+                </a>
+                <a rel="save" href="javascript:void(0);" data-action="save" class="btn">
+                    <i class="icol-disk"></i>Lưu lại
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mws-tabs">
+        <ul>
+            <li><a rel="thong-tin-chung" href="#thong-tin-chung">Thông tin chung</a></li>
+            <li><a rel="thong-tin-tro-cap" href="#thong-tin-tro-cap">Thông tin trợ cấp</a></li>
+            <li><a rel="thong-tin-bo-sung" href="#thong-tin-bo-sung">Thông tin bổ sung</a></li>
+        </ul>
+        @using (Html.BeginForm("Update", "WebsiteProduct", FormMethod.Post, new { enctype = "multipart/form-data", @id = "obj-info-common", @class = "mws-form" }))
+        {
+            <div id="thong-tin-chung">
+                @Html.HiddenFor(m => m.Id)
+                @if (ViewBag.Error != null) { <div class="mws-form-message error">@ViewBag.Error</div> }
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Tỉnh</label>
+                                <div class="mws-form-item">
+                                    <select id="ddl-province" class="mws-select2 large" @if (!PhotoBookmart.Controllers.BaseController.IsHigherRole(RoleEnum.Province, (RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]))) { <text> disabled="disabled" </text>   }>
+                                        <option value="" selected="selected">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Huyện</label>
+                                <div class="mws-form-item">
+                                    <select id="ddl-district" class="mws-select2 large" @if (!PhotoBookmart.Controllers.BaseController.IsHigherRole(RoleEnum.District, (RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]))) { <text> disabled="disabled" </text>   }>
+                                        <option value="" selected="selected">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Xã</label>
+                                <div class="mws-form-item">
+                                    <select class="mws-select2 large" name="MaHC" @if (!PhotoBookmart.Controllers.BaseController.IsHigherRole(RoleEnum.Village, (RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]))) { <text> readonly="readonly" </text>  }>
+                                        <option value="" selected="selected">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Xóm</label>
+                                <div class="mws-form-item">
+                                    <select class="mws-select2 large" name="IDDiaChi">
+                                        <option value="" selected="selected">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Họ & Tên</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => model.HoTen, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Ngày sinh</label>
+                        <div class="mws-form-item">
+                            <div class="row-fluid">
+                                <div class="col-xs-15">@Html.TextBoxFor(model => model.NgaySinh, new { @placeholder = "Ngày", @class = "date-of-birth-date" })</div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15">@Html.TextBoxFor(model => model.ThangSinh, new { @placeholder = "Tháng", @class = "date-of-birth-month" })</div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15">@Html.TextBoxFor(model => model.NamSinh, new { @placeholder = "Năm", @class = "date-of-birth-year" })</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Giới tính</label>
+                                <div class="mws-form-item">
+                                    @Html.DropDownListFor(model => model.GioiTinh, PhotoBookmart.Controllers.BaseController.Gender_GetAll(), "- - Chọn - -", new { @class = "mws-select2 large" })
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Dân tộc</label>
+                                <div class="mws-form-item">
+                                    <select class="mws-select2 large" name="MaDanToc">
+                                        <option value="">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">CMTND</label>
+                        <div class="mws-form-item">
+                            <div class="row-fluid">
+                                <div class="col-xs-15">@Html.TextBoxFor(model => model.CMTND, new { @placeholder="Số CMTND", @class = "large" })</div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15"><input type="text" name="NgayCap" value="@string.Format("{0:dd/MM/yyyy}", Model.NgayCap)" placeholder="Ngày cấp" class="large" /></div>
+                                <span class="col-xs-15 align-c">&mdash;</span>
+                                <div class="col-xs-15">@Html.TextBoxFor(model => model.NoiCap, new { @placeholder="Nơi cấp", @class = "large" })</div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Trú quán</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => model.TruQuan, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Nguyên quán</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => model.NguyenQuan, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <button type="submit" class="btn btn-danger">Lưu lại</button>
+                        <button type="button" class="btn" onclick="javascript: location.href = '@Url.Action("Index", "WebsiteProduct", new { })'">Hủy bỏ</button>
+                    </div>
+                </div>
+            </div>
+            <div id="thong-tin-tro-cap">
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Loại</label>
+                                <div class="mws-form-item">
+                                    <select class="mws-select2 large" name="MaLDT">
+                                        <optgroup label="">
+                                            <option value="">- - Chọn - -</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <div class="mws-form-cols">
+                                    <div class="mws-form-col-4-8 decrease-10px">
+                                        <label class="mws-form-label">BHYT?</label>
+                                        <div class="mws-form-item">
+                                            <input class="ibutton" name="isBHYT" value="true" type="checkbox" data-label-on="Có&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" data-label-off="Không" @if (Model.isBHYT.HasValue && Model.isBHYT.Value) { <text> checked="checked" </text>   }>
+                                        </div>
+                                    </div>
+                                    <div class="mws-form-col-4-8 decrease-10px">
+                                        <label class="mws-form-label">Hộ nghèo?</label>
+                                        <div class="mws-form-item">
+                                            <input class="ibutton" name="isHoNgheo" value="true" type="checkbox" data-label-on="Có&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" data-label-off="Không" @if (Model.isHoNgheo.HasValue && Model.isHoNgheo.Value) { <text> checked="checked" </text>   }>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-2-8">
+                                <label class="mws-form-label">Khuyết tật?</label>
+                                <div class="mws-form-item">
+                                    <input class="ibutton" name="isKhuyetTat" value="true" type="checkbox" data-label-on="Có&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" data-label-off="Không" @if (Model.isKhuyetTat.HasValue && Model.isKhuyetTat.Value) { <text> checked="checked" </text>   }>
+                                </div>
+                            </div>
+                            <div class="mws-form-col-6-8 @if(!Model.isKhuyetTat.HasValue || !Model.isKhuyetTat.Value) { <text>hide</text> }" data-con="disability">
+                                <div class="mws-form-cols">
+                                    <div class="mws-form-col-4-8">
+                                        <label class="mws-form-label">Dạng KT</label>
+                                        <div class="mws-form-item">
+                                            <select name="DangKT" class="mws-select2 large">
+                                                <option value="">- - Chọn - -</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mws-form-col-4-8">
+                                        <label class="mws-form-label">Mức độ KT</label>
+                                        <div class="mws-form-item">
+                                            <select name="MucDoKT" class="mws-select2 large">
+                                                <option value="">- - Chọn - -</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Mức trợ cấp</label>
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(model => model.MucTC, new { @class = "large currency" })
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Ngày hưởng</label>
+                                <div class="mws-form-item">
+                                    <input type="text" name="NgayHuong" value="@string.Format("{0:dd/MM/yyyy}", Model.NgayHuong)" class="large" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Số QĐ</label>
+                                <div class="mws-form-item">
+                                    @Html.TextBoxFor(model => model.SoQD, new { @class = "large" })
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Ngày QĐ</label>
+                                <div class="mws-form-item">
+                                    <input type="text" name="NgayQD" value="@string.Format("{0:dd/MM/yyyy}", Model.NgayQD)" class="large" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-cols">
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">Tình trạng</label>
+                                <div class="mws-form-item">
+                                    <select class="mws-select2 large" name="TinhTrang">
+                                        <option value="" selected="selected">- - Chọn - -</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mws-form-col-4-8">
+                                <label class="mws-form-label">&nbsp;</label>
+                                <div class="mws-form-item">
+                                @if (Model.CanApprove)
+                                {
+                                    @: <input class="ibutton" name="IsDuyet" value="true" type="checkbox" data-label-on="Đã duyệt" data-label-off="Chưa duyệt" @if (Model.IsDuyet) { <text> checked="checked" </text>   } />
+                                }
+                                else
+                                {    
+                                    @: <input class="hide" name="IsDuyet" value="true" type="checkbox" readonly="readonly" @if (Model.IsDuyet) { <text> checked="checked" </text>  }>
+                                    @: <input class="ibutton" type="checkbox" data-label-on="Đã duyệt" data-label-off="Chưa duyệt" disabled="disabled" @if (Model.IsDuyet) { <text> checked="checked" </text>  } />
+                                }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">Ghi chú</label>
+                        <div class="mws-form-item">
+                            @Html.TextAreaFor(model => model.GhiChu, new { @class = "large" })
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <button type="submit" class="btn btn-danger">Lưu lại</button>
+                        <button type="button" class="btn" onclick="javascript: location.href = '@Url.Action("Index", "WebsiteProduct", new { })'">Hủy bỏ</button>
+                    </div>
+                </div>
+            </div>
+            <div id="thong-tin-bo-sung">
+                <div class="mws-form-inline">
+                    <div data-con="type" data-val="01" @if (string.IsNullOrEmpty(Model.MaLDT) || !Model.MaLDT.StartsWith("01")) { <text> class="hide" </text>  }>
+                        <div class="mws-form-row">
+                            <label class="mws-form-label">Thông tin cha</label>
+                            <div class="mws-form-item">
+                                <input type="text" name="MaLDT_Type1_InfoFather" value="@if (!string.IsNullOrEmpty(Model.MaLDT) && Model.MaLDT.StartsWith("01")) {<text>@Model.MaLDT_Details[0].Type1_InfoFather</text>}" class="large" />
+                            </div>
+                        </div>
+                        <div class="mws-form-row">
+                            <label class="mws-form-label">Thông tin mẹ</label>
+                            <div class="mws-form-item">
+                                <input type="text" name="MaLDT_Type1_InfoMother" value="@if (!string.IsNullOrEmpty(Model.MaLDT) && Model.MaLDT.StartsWith("01")) {<text>@Model.MaLDT_Details[0].Type1_InfoMother</text>}" class="large" />
+                            </div>
+                        </div>
+                    </div>
+                    <div data-con="type" data-val="03" @if (string.IsNullOrEmpty(Model.MaLDT) || !Model.MaLDT.StartsWith("03")) { <text> class="hide" </text>  }>
+                        <div class="mws-form-row">
+                            <div class="mws-panel">
+                                <div class="mws-panel-header">
+                                    <span><i class="icon-table"></i>Thông tin con</span>
+                                </div>
+                                <div class="mws-panel-toolbar">
+                                    <div class="btn-toolbar">
+                                        <a href="javascript:void(0);" class="btn np-add">
+                                            <i class="icol-add"></i>Thêm mới
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="mws-panel-body no-padding">
+                                    <table class="mws-table" id="ListTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Họ & Tên</th>
+                                                <th>Ngày sinh</th>
+                                                <th>Giới tính</th>
+                                                <th>Nơi ở hiện tại</th>
+                                                <th>Tình trạng đi học</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        @if (!string.IsNullOrEmpty(Model.MaLDT) && Model.MaLDT.StartsWith("03"))
+                                        {
+                                            <tbody>
+                                                @foreach (var item in Model.MaLDT_Details)
+                                                {
+                                                    <tr row-id="@Guid.NewGuid()"
+                                                        data-id="@item.Id"
+                                                        data-full-name="@item.Type3_FullName"
+                                                        data-date-of-birth="@string.Format("{0:dd/MM/yyyy}", item.Type3_DateOfBirth)"
+                                                        data-date-of-birth-is-month="@if (item.Type3_DateOfBirth_IsMonth) {<text>1</text>} else {<text>0</text>}"
+                                                        data-date-of-birth-is-date="@if (item.Type3_DateOfBirth_IsDate) {<text>1</text>} else {<text>0</text>}"
+                                                        data-gender="@item.Type3_Gender"
+                                                        data-curr-addr="@item.Type3_CurrAddr"
+                                                        data-status-learn="@item.Type3_StatusLearn">
+                                                        <td><span>@item.Type3_FullName</span></td>
+                                                        <td class="align-r"><span>@string.Format(item.Type3_DateOfBirth_IsDate ? "{0:dd/MM/yyyy}" : item.Type3_DateOfBirth_IsMonth ? "{0:MM/yyyy}" : "{0:yyyy}", item.Type3_DateOfBirth)</span></td>
+                                                        <td><span>@item.Type3_Gender.GetGender()</span></td>
+                                                        <td><span>@item.Type3_CurrAddr</span></td>
+                                                        <td><span>@item.Type3_StatusLearn</span></td>
+                                                        <td class="no_padding np-align-c">
+                                                            <span class="btn-group">
+                                                                <a href="javascript:void(0);" class="btn btn-small np-edit" title="Chỉnh sửa"><i class="icon-pencil"></i></a>
+                                                                <a href="javascript:void(0);" class="btn btn-small np-delete" title="Xóa bỏ"><i class="icon-trash"></i></a>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-con="type" data-val="04" @if (string.IsNullOrEmpty(Model.MaLDT) || !Model.MaLDT.StartsWith("04")) { <text> class="hide" </text>  }>
+                        <div class="mws-form-row">
+                            <div class="mws-form-cols">
+                                <div class="mws-form-col-4-8">
+                                    <label class="mws-form-label">TT hôn nhân</label>
+                                    <div class="mws-form-item">
+                                        <select class="mws-select2 large" name="MaLDT_Type4_MaritalStatus">
+                                            <option value="">- - Chọn - -</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mws-form-col-4-8"></div>
+                            </div>
+                        </div>
+                        <div class="mws-form-row">
+                            <label class="mws-form-label">Thông tin thêm</label>
+                            <div class="mws-form-item">
+                                <input type="text" name="MaLDT_Type4_InfoAdditional" value="@if (!string.IsNullOrEmpty(Model.MaLDT) && Model.MaLDT.StartsWith("04")) {<text>@Model.MaLDT_Details[0].Type4_InfoAdditional</text>}" class="large" />
+                            </div>
+                        </div>
+                    </div>
+                    <div data-con="type" data-val="05" @if (string.IsNullOrEmpty(Model.MaLDT) || !Model.MaLDT.StartsWith("05")) { <text> class="hide" </text>  }>
+                        <div class="mws-form-row">
+                            <div class="mws-form-cols">
+                                <div class="mws-form-col-4-8">
+                                    <label class="mws-form-label">KN phục vụ</label>
+                                    <div class="mws-form-item">
+                                        <select class="mws-select2 large" name="MaLDT_Type5_SelfServing">
+                                            <option value="">- - Chọn - -</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mws-form-col-4-8">
+                                    <label class="mws-form-label">Người chăm sóc</label>
+                                    <div class="mws-form-item">
+                                        <input type="text" name="MaLDT_Type5_Carer" value="@if (!string.IsNullOrEmpty(Model.MaLDT) && Model.MaLDT.StartsWith("05")) {<text>@Model.MaLDT_Details[0].Type5_Carer</text>}" class="large" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mws-button-row">
+                        <button type="submit" class="btn btn-danger">Lưu lại</button>
+                        <button type="button" class="btn" onclick="javascript: location.href = '@Url.Action("Index", "WebsiteProduct", new { })'">Hủy bỏ</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="dialog" id="popup-maldt-child" title="">
+    @using (Html.BeginForm("", "", FormMethod.Get, new { @id = "", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+    <div id="mws-validate-error" class="mws-form-message error" style="display: none;"></div>
+    <div class="mws-form-block">
+        <input type="hidden" name="MaLDT_Row_Id" />
+        <input type="hidden" name="MaLDT_Id" />
+        <div class="mws-form-row">
+            <label class="mws-form-label">Họ & Tên</label>
+            <div class="mws-form-item">
+                <input type="text" name="MaLDT_Type3_FullName" class="required large" />
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <div class="mws-form-cols">
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Giới tính</label>
+                    <div class="mws-form-item">
+                        <select name="MaLDT_Type3_Gender" class="mws-select2 large" data-init="">
+                            <option value="">- - Chọn - -</option>
+                            @foreach (var item in PhotoBookmart.Controllers.BaseController.Gender_GetAll())
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Ngày sinh</label>
+                    <div class="mws-form-item">
+                        <div class="row-fluid">
+                            <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Date" placeholder="Ngày" class="date-of-birth-date" /></div>
+                            <span class="col-xs-15 align-c">&mdash;</span>
+                            <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Month" placeholder="Tháng" class="date-of-birth-month" /></div>
+                            <span class="col-xs-15 align-c">&mdash;</span>
+                            <div class="col-xs-15"><input type="text" name="MaLDT_Type3_DateOfBirth_Year" placeholder="Năm" class="date-of-birth-year" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">Nơi ở hiện nay</label>
+            <div class="mws-form-item">
+                <input type="text" name="MaLDT_Type3_CurrAddr" class="large" />
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">Tình trạng đi học</label>
+            <div class="mws-form-item">
+                <input type="text" name="MaLDT_Type3_StatusLearn" class="large" />
+            </div>
+        </div>
+    </div>
+    }
+</div>

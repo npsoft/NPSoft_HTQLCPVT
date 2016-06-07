@@ -1,0 +1,285 @@
+/*
+Document   : jquery.pnotify.default.css
+Created on : Nov 23, 2009, 3:14:10 PM
+Author     : Hunter Perrin
+Version    : 1.2.0
+Link       : http://pinesframework.org/pnotify/
+Description:
+	Default styling for Pines Notify jQuery plugin.
+*/
+/* -- Notice */
+.ui-pnotify {
+top: 10px;
+right: 10px;
+position: absolute;
+height: auto;
+/* Ensures notices are above everything */
+z-index: 9999;
+}
+/* Hides position: fixed from IE6 */
+html > body .ui-pnotify {
+position: fixed;
+}
+.ui-pnotify .ui-pnotify-shadow {
+-webkit-box-shadow: 0px 2px 10px rgba(50, 50, 50, 0.5);
+-moz-box-shadow: 0px 2px 10px rgba(50, 50, 50, 0.5);
+box-shadow: 0px 2px 10px rgba(50, 50, 50, 0.5);
+}
+.ui-pnotify-container {
+background-position: 0 0;
+padding: .8em;
+height: 100%;
+margin: 0;
+}
+.ui-pnotify.palert .ui-pnotify-container{
+    background: #333 !important;
+    border-color: #333 !important;
+    text-shadow: 0px 1px 1px #000 !important;
+}
+.ui-pnotify-sharp {
+-webkit-border-radius: 0;
+-moz-border-radius: 0;
+border-radius: 0;
+}
+.ui-pnotify-closer, .ui-pnotify-sticker {
+float: right;
+margin-left: .2em;
+}
+.ui-pnotify-title {
+display: block;
+margin-bottom: 10px;
+font-weight: normal;
+}
+.ui-pnotify-text {
+    display: block;
+    font-size: 11px;
+    padding-left: 20px;
+}
+.ui-pnotify-icon, .ui-pnotify-icon span {
+display: block;
+float: left;
+margin-right: .2em;
+margin-top: 1px;
+}
+/* -- History Pulldown */
+.ui-pnotify-history-container {
+position: absolute;
+top: 0;
+right: 18px;
+width: 70px;
+border-top: none;
+padding: 0;
+-webkit-border-top-left-radius: 0;
+-moz-border-top-left-radius: 0;
+border-top-left-radius: 0;
+-webkit-border-top-right-radius: 0;
+-moz-border-top-right-radius: 0;
+border-top-right-radius: 0;
+/* Ensures history container is above notices. */
+z-index: 10000;
+}
+.ui-pnotify-history-container .ui-pnotify-history-header {
+padding: 2px;
+text-align: center;
+}
+.ui-pnotify-history-container button {
+cursor: pointer;
+display: block;
+width: 100%;
+}
+.ui-pnotify-history-container .ui-pnotify-history-pulldown {
+display: block;
+margin: 0 auto;
+}
+
+.ui-pnotify.stack-topleft{left: 10px; top: 10px; right: auto;}
+.ui-pnotify.stack-bottomleft{left: 10px; bottom: 10px; top: auto; right: auto; height: auto;}
+.ui-pnotify.stack-bottomright{bottom: 10px; top: auto; height: auto;}
+
+
+/* Alert pNotify */
+.alert {
+  padding: 8px 35px 8px 10px;
+  margin-bottom: 20px;
+    color: #F5F5F5;
+    text-shadow: 0 1px 0 #d6ab00;
+    border: 1px solid #ECB200;
+    background: #ECB200;
+    background: -moz-linear-gradient(top, #F7CE00 0%, #ECB200 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#F7CE00), color-stop(100%,#ECB200));
+    background: -webkit-linear-gradient(top, #F7CE00 0%, #ECB200 100%);
+    background: -o-linear-gradient(top, #F7CE00 0%, #ECB200 100%);
+    background: -ms-linear-gradient(top, #F7CE00 0%, #ECB200 100%);
+    background: linear-gradient(top, #F7CE00 0%, #ECB200 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F7CE00', endColorstr='#ECB200',GradientType=0 );      
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  cursor: pointer;
+}
+
+.alert h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.alert .close {
+  position: relative;
+  top: -2px;
+  right: -21px;
+  line-height: 20px;
+}
+
+.alert-success {
+    color: #fff;
+    text-shadow: 0 1px 0 #677c13;
+    border: 1px solid #829E18;
+    background: #ADC800;
+    background: -moz-linear-gradient(top, #ADC800 0%, #829E18 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ADC800), color-stop(100%,#829E18));
+    background: -webkit-linear-gradient(top, #ADC800 0%, #829E18 100%);
+    background: -o-linear-gradient(top, #ADC800 0%,#829E18 100%);
+    background: -ms-linear-gradient(top, #ADC800 0%, #829E18 100%);
+    background: linear-gradient(top, #ADC800 0%,#829E18 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ADC800', endColorstr='#829E18',GradientType=0 );  
+}
+
+.alert-danger,
+.alert-error {
+    color: #fff;
+    text-shadow: 0 1px 0 #ad2516;
+    border: 1px solid #CB2C1A;
+    background: #D96D3A;
+    background: -moz-linear-gradient(top, #D96D3A 0%, #CB2C1A 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#D96D3A), color-stop(100%,#CB2C1A));
+    background: -webkit-linear-gradient(top, #D96D3A 0%, #CB2C1A 100%);
+    background: -o-linear-gradient(top, #D96D3A 0%,#CB2C1A 100%);
+    background: -ms-linear-gradient(top, #D96D3A 0%, #CB2C1A 100%);
+    background: linear-gradient(top, #D96D3A 0%,#CB2C1A 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#D96D3A', endColorstr='#CB2C1A',GradientType=0 );  
+}
+
+.alert-info {
+    color: #fff;
+    text-shadow: 0 1px 0 #7E8FC4;
+    border: 1px solid #73A4D9;
+    background: #90C2EE;
+    background: -moz-linear-gradient(top, #90C2EE 0%, #73A4D9 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#90C2EE), color-stop(100%,#73A4D9));
+    background: -webkit-linear-gradient(top, #90C2EE 0%, #73A4D9 100%);
+    background: -o-linear-gradient(top, #90C2EE 0%,#73A4D9 100%);
+    background: -ms-linear-gradient(top, #90C2EE 0%, #73A4D9 100%);
+    background: linear-gradient(top, #90C2EE 0%,#73A4D9 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#90C2EE', endColorstr='#73A4D9',GradientType=0 );  
+}
+
+.alert-block {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.alert-block > p,
+.alert-block > ul {
+  margin-bottom: 0;
+}
+
+.alert-block p + p {
+  margin-top: 5px;
+}
+
+.icon-chevron-down {
+/*background-position: -313px -119px;*/
+}
+
+[class^="icon-"], [class*=" icon-"] {
+display: inline-block;
+/*width: 14px;*/
+height: 14px;
+margin-top: 1px;
+line-height: 14px;
+vertical-align: text-top;
+/*background-image: url("../img/glyphicons-halflings.png");
+background-position: 14px 14px;
+background-repeat: no-repeat;*/
+}
+
+
+.well {
+  min-height: 20px;
+  padding: 19px;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.well blockquote {
+  border-color: #ddd;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.well-large {
+  padding: 24px;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+}
+
+.well-small {
+  padding: 9px;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+}
+
+.fade {
+  opacity: 0;
+  -webkit-transition: opacity 0.15s linear;
+     -moz-transition: opacity 0.15s linear;
+       -o-transition: opacity 0.15s linear;
+          transition: opacity 0.15s linear;
+}
+
+.fade.in {
+  opacity: 1;
+}
+
+.collapse {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: height 0.35s ease;
+     -moz-transition: height 0.35s ease;
+       -o-transition: height 0.35s ease;
+          transition: height 0.35s ease;
+}
+
+.collapse.in {
+  height: auto;
+}
+
+.close {
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 20px;
+  color: #000000;
+  text-shadow: 0 1px 0 #ffffff;
+  opacity: 0.2;
+  filter: alpha(opacity=20);
+}
+
+.close:hover {
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+}
+
+
+/* End Alert pNotify */

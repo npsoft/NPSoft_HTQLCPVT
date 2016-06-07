@@ -1,0 +1,56 @@
+﻿@model Order
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li>
+                <div class="title">
+                    Payment Status</div>
+                <div class="text">@Model.PaymentStatusEnum.DisplayName()
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Payment Method</div>
+                <div class="text">@Model.PaymentMethod.DisplayName()</div>
+            </li>
+            @if ((Enum_PaymentStatus)Model.PaymentStatus == Enum_PaymentStatus.Paid)
+            {
+                <li>
+                    <div class="title">
+                        Paid On</div>
+                    <div class="text">@Model.PaidDate</div>
+                </li>
+            }
+            @if (Model.PaymentMethod == Enum_PaymentMethod.Paypal || Model.PaymentMethod == Enum_PaymentMethod.iPay88)
+            {
+                <li>
+                    <div class="title">
+                        Transaction id</div>
+                    <div class="text">
+                        @Model.Payment_AuthorizationTransactionId &nbsp;
+                    </div>
+                </li>
+            }
+            else if (Model.PaymentMethod == Enum_PaymentMethod.Bank_Check)
+            {
+                <li>
+                    <div class="title">
+                        Bank check number</div>
+                    <div class="text">
+                        @Model.Payment_ChequeCheckNumber &nbsp;
+                    </div>
+                </li>
+            }
+            else if (Model.PaymentMethod == Enum_PaymentMethod.Cheque)
+            {
+                <li>
+                    <div class="title">
+                        Cheque number</div>
+                    <div class="text">
+                        @Model.Payment_ChequeCheckNumber &nbsp;
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+</div>

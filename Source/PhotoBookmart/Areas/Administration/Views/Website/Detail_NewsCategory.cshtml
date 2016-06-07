@@ -1,0 +1,131 @@
+﻿@model Website
+@{
+    var langs = (List<Language>)Model.Languages();
+}
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Manage News Category for website @Model.Name</span>
+    </div>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a href="javascript:void(0)" id="add_newscategory" class="btn"><i class="icol-add"></i>
+                    Add</a>
+                &nbsp;<span style="font-size: 15px;">
+                    Please select Language
+                    <select class="large" id="NewCategory_LangId">
+                        @foreach (var l in langs)
+                        {
+                            <option value="@l.LanguageCode">@l.LanguageName</option>
+                        }
+                    </select>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="mws-panel-body no-padding WDTB_NewsCategory">
+    </div>
+</div>
+@* For the dialog *@
+<div class="dialog mws-panel-body" id="NewsCategory_Dialog" style="display: none;"
+    title="Add News Category">
+    @using (Html.BeginForm("Detail_NewsCategory_Add", "Website", FormMethod.Post, new { @id = "NewsCategory_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="0" id="NCD_Id" />
+        <input type="hidden" name="LanguageCode" value="" id="NCD_LangCode" />
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Name</label>
+                <div class="mws-form-item">
+                    <input name="Name" id="NCD_Name" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <label class="mws-form-label">
+                    Status</label>
+                <div class="mws-form-item">
+                    <input type="checkbox" name="Status" id="NCD_Status" value="true" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script language="javascript">
+    function NewsCategory_Reload() {
+        show_loading();
+        var lang_id=jQuery("#NewCategory_LangId").val();
+         $.get("@Url.Action("Detail_NewsCategory_List")"+"?lang_id="+lang_id, function (data) {
+                $(".WDTB_NewsCategory").html("");
+                $(".WDTB_NewsCategory").html(data);
+                    hide_loading();
+                });
+    }
+
+    $(document).ready(function () {
+        NewsCategory_Reload();
+
+        jQuery("#NewsCategory_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        jQuery("#NewCategory_LangId").change(function(){
+            NewsCategory_Reload();
+        });
+
+        $("#NewsCategory_Dialog").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Ok": function () {
+                    // ajax submit
+                    show_loading();
+
+                    jQuery("#NCD_LangCode").val(jQuery("#NewCategory_LangId").val());
+
+                    // and post
+                    jQuery.post(jQuery("#NewsCategory_Form").attr("action"), jQuery("#NewsCategory_Form").serialize(), function (returnObj) {
+
+                        if (returnObj.Status == "success") {
+                            if (returnObj.Message != null) {
+                                notify_success("Success", returnObj.Message);
+                                // incase success, we need to reload the form
+                                NewsCategory_Reload();
+                            }
+                            else if (returnObj.RedirectUrl != null) {
+                                window.location.href = returnObj.RedirectUrl;
+                            }
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#add_newscategory").click(function () {
+
+            // reset old form content
+            jQuery("#NCD_Id").val(0);
+            jQuery("#NCD_Name").val("");
+            jQuery("#NCD_Status").attr("checked", "checked");
+
+            $("#NewsCategory_Dialog").dialog('option', 'title', 'Add News Category');
+
+            $("#NewsCategory_Dialog").dialog('open')
+        });
+    })
+</script>

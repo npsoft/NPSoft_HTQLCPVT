@@ -1,0 +1,158 @@
+﻿@model CMSApplication.Areas.Administration.Models.TopicModel 
+@using CMSLang.BackEnd;
+
+@{ 
+    ViewBag.Title = CMSBE.Admin_TopicManagement_Add_ViewBagTitle;
+    AjaxOptions ajaxOpts = new AjaxOptions
+    {
+        HttpMethod = "post",
+        OnComplete = "CompleteAjaxRequest"
+    };
+}
+<script type="text/javascript">
+
+    function CompleteAjaxRequest(obj) {
+
+        var returnObj = eval('(' + obj.responseText + ')');
+
+        if (returnObj.Status == "success") {
+            if (returnObj.Message != null) {
+                $.pnotify({
+                    title: 'Success',
+                    text: returnObj.Message,
+                    type: 'info',
+                    opacity: .8
+                });
+                $("form input:text").val('');
+                $("form input:password").val('');
+                $("form textarea").val('');
+            }
+            else if (returnObj.RedirectUrl != null) {
+                window.location.href = returnObj.RedirectUrl;
+            }
+        } else {
+            $.pnotify({
+                title: 'Error',
+                text: returnObj.Message,
+                type: 'error',
+                opacity: .8
+            });
+        }
+
+        return false;
+    };
+
+    $(document).ready(function () {
+        CKEDITOR.replace('ckeditorId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+    });
+
+</script>
+<div class="row-fluid">
+    <div class="span12">
+        <div class="head">
+            <div class="isw-documents">
+            </div>
+            <h1>@CMSBE.Admin_TopicManagement_Add_AddTitle</h1>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="block-fluid">
+            @using (Ajax.BeginForm("AddOrUpdate", "TopicManagement", null, ajaxOpts, new { enctype = "multipart/form-data", @id = "validation" }))
+            {
+                <div class="warning-area">
+                </div>
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.LanguageLocale)
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_Title:</div>
+                    <div class="span9">
+                        @Html.TextBoxFor(x => x.Title, new { @class = "validate[required]" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                         @CMSBE.Admin_TopicManagement_Add_SystemName :</div>
+                    <div class="span9">
+                        @Html.TextBoxFor(x => x.SystemName, new { @class = "validate[required]" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_CanMapToMenu :
+                    </div>
+                    <div class="span5">
+                        @Html.CheckBoxFor(m => m.CanMapToMenu)
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                 <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_LayoutType :
+                    </div>
+                    <div class="span5">
+                        @Html.DropDownList("LayoutType", null, null, new { id = "LayoutType" })
+                        
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_TopicContent</div>
+                    <div class="span9">
+                        @Html.TextAreaFor(x => x.Body, new { @cols = "10", @class = "validate[required]", @rows = "10", @id = "ckeditorId" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_MetaTitle:</div>
+                    <div class="span9">
+                        @Html.TextAreaFor(x => x.MetaTitle, new { @class = "span8", @style = "height: 50px;" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_MetaKeyword:</div>
+                    <div class="span9">
+                        @Html.TextAreaFor(x => x.MetaKeywords, new { @class = "span8", @style = "height: 50px;" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_MetaDescription:</div>
+                    <div class="span9">
+                        @Html.TextAreaFor(x => x.MetaDescription, new { @class = "span8", @style = "height: 50px;" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                <div class="row-form">
+                    <div class="span2">
+                        @CMSBE.Admin_TopicManagement_Add_MoreLink:</div>
+                    <div class="span9">
+                        @Html.TextAreaFor(x => x.MoreLink, new { @class = "span8", @style = "height: 50px;" })</div>
+                    <div class="clear">
+                    </div>
+                </div>
+                
+                <div class="row-form">
+                    <div class="span2">
+                    </div>
+                    <div class="span9">
+                        <input type="submit" class="btn btn-info span3" value="@CMSBE.Admin_TopicManagement_Add_SubmitButton" /></div>
+                    <div class="clear">
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

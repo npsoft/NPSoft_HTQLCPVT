@@ -1,0 +1,107 @@
+﻿@model Country_State_ExtraShipping
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Extra Shipping - " + Model.State;
+    }
+    else
+    {
+        ViewBag.Title = "Create Extra Shipping";
+    }
+    var countries = Db.Select<Country>(x => x.OrderBy(y => (y.Id)));
+    Db.Close();
+}
+<script>
+    jQuery(document).ready(function () {
+
+        $(".float-than-or-equal-zero").spinner({
+            min: 0.00,
+            step: 0.01,
+            numberFormat: "n"
+        });
+
+        jQuery("#UserForm").submit(function () {
+
+            if (jQuery("#State").val() == "") {
+                notify_error("Error", "Please enter the field » State.");
+                jQuery("#State").focus();
+                return false;
+            }
+            
+            show_loading();
+
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                    else
+                        if (returnObj.RedirectUrl != null) {
+                            window.location.href = returnObj.RedirectUrl;
+                        }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Index", "ExtraShipping", new { })" >
+            <i class="icol-arrow-left"></i>Extra Shipping Management
+        </a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "ExtraShipping", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Country</label>
+                    <div class="mws-form-item">
+                        <select name="CountryId" id="CountryId" class="large mws-select2">
+                            @foreach (Country c in countries ?? Enumerable.Empty<Country>())
+                            {
+                                <option value="@c.Id" @if (c.Id == Model.CountryId){<text>selected</text>}>@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">State</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.State, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Amount</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Amount, new { @class = "large float-than-or-equal-zero" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

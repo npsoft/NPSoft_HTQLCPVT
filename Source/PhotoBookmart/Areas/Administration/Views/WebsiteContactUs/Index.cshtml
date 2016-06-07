@@ -1,0 +1,22 @@
+﻿@model Website
+@{
+    ViewBag.Title = "Manage Contact Us for " + Model.Name;
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List")
+    </div>
+</div>
+
+@*
+Get template from here 
+http://demo.themepixels.com/webpage/katniss/messages.html#
+http://themes.loxdesign.net/phoenix/mail.html
+*@

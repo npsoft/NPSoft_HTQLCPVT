@@ -1,0 +1,172 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.MaillingListSendModel
+@{
+    ViewBag.Title = "Send Mailling List to users in " + Model.SiteName;
+    var mailling_template = Db.Where<Site_MaillingListTemplate>(m => m.Status && m.IsPublic);
+}
+<div class="head">
+    <h3>
+        Send Mailling List to users in @Model.SiteName</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-calendar"></i>Send mailling list</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("SendMailing", "WebsiteMaillinglist", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(mbox => mbox.SiteId)
+            <div class="mws-form-block">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Title</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Title, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Receivers</label>
+                    <div class="mws-form-item">
+                        <select name="TargetEmails" id="TargetEmails" class="mws-select2 large" multiple="multiple">
+                        </select>
+                    </div>
+                </div>
+                <!-- Auto load receivers and template -->
+                <div class="mws-form-row">
+                    <div class="mws-panel-toolbar">
+                        <div class="btn-toolbar">
+                            <div class="btn-group">
+                                <a href="#" class="btn" target="_blank"><i class="icol-user-business-boss"></i>Load
+                                    Receivers</a> <a href="#" class="btn dropdown-toggle" data-toggle="dropdown"><span
+                                        class="caret"></span></a>
+                                <ul class="dropdown-menu pull-right">
+                                    <li><a href="javascript:void(0)" id="load_website_user"><i class="icol-user-business-boss">
+                                    </i>Website Users</a></li>
+                                    <li><a href="javascript:void(0)" id="load_website_maillinglist_user"><i class="icol-user-business-boss">
+                                    </i>Mailling list Users</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <!-- template -->
+                                <a href="#" class="btn" target="_blank"><i class="icol-photo-album"></i>Load Template</a>
+                                <a href="#" class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu pull-right">
+                                    @if (mailling_template.Count > 0)
+                                    {
+                                        foreach (var item in mailling_template)
+                                        {
+                                        <li><a href="javascript:void(0)" item_id="@item.Id" class="loadmailling_template">@item.Name</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end Auto load receivers and template -->
+                @Html.Partial("Tokens", new { area = "Administration" })
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Body</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Body, new { @class = "large", @id = "MaillinglistBody" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Send" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+            <!-- End Form -->
+        }
+    </div>
+</div>
+<script language="javascript">
+    jQuery(document).ready(function () {
+        CKEDITOR.replace('MaillinglistBody', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        jQuery("#load_website_user").click(function () {
+            show_loading();
+             jQuery.post("@Url.Action("_Get_SiteUser")", function (returnObj) {
+                var html="";
+                for (var i=0;i<returnObj.length;i++){
+                    html+="<option value="+returnObj[i].id+">"+returnObj[i].userName+" ("+ returnObj[i].email+")</option>";
+                }
+                jQuery("#TargetEmails").html(html);
+                hide_loading();
+            });
+        });
+
+        jQuery("#load_website_maillinglist_user").click(function () {
+            show_loading();
+             jQuery.post("@Url.Action("_Get_Newsletter")", function (returnObj) {
+                var html="";
+                for (var i=0;i<returnObj.length;i++){
+                    html+="<option value="+returnObj[i].id+">"+returnObj[i].name+" ("+ returnObj[i].email+")</option>";
+                }
+                jQuery("#TargetEmails").html(html);
+                hide_loading();
+            });
+        });
+        
+        jQuery(".loadmailling_template").click(function () {
+            show_loading();
+            var id=jQuery(this).attr("item_id");
+            jQuery.post("@Url.Action("_Get_Template")" + "?id=" + id, function (returnObj) {
+                var obj = eval("(" + returnObj + ")");
+                jQuery("#Title").val(obj.Title);
+                CKEDITOR.instances.MaillinglistBody.setData(obj.Body);
+                hide_loading();
+            }, "html");
+        });
+
+        jQuery("span.label").click(function(){
+            var x=jQuery(this).attr("tag");
+            CKEDITOR.instances.MaillinglistBody.insertText(x);
+        });
+
+        // form submit
+        jQuery("#UserForm").submit(function(){
+            jQuery("#MaillinglistBody").val(CKEDITOR.instances.MaillinglistBody.getData());
+            if (jQuery("#Title").val()=="")
+            {
+                alert("Please enter email title");
+                return false;
+            }
+
+            if (jQuery("#TargetEmails").val()==null || jQuery("#TargetEmails").val().length ==0)
+            {
+                alert("Please select receivers before click Send button");
+                return false;
+            }
+
+            jQuery.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+
+            return false;
+        });
+
+    });
+</script>

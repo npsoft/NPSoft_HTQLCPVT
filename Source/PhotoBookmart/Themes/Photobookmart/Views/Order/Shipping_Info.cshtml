@@ -1,0 +1,190 @@
+﻿@model Order
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li>
+                <div class="title">
+                    Ship Fee</div>
+                <div class="text">
+                    @Model.Shipping_RealPrice.ToMoneyFormated(Model.Shipping_DisplayPriceSign)
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Shipping Method</div>
+                <div class="text">
+                    @Model.Shipping_Method</div>
+            </li>
+            <li>
+                <div class="title">
+                    Shipping Status</div>
+                <div class="text">
+                    @Model.Shipping_Status.DisplayName()</div>
+            </li>
+            @if (Model.Shipping_Status != Enum_ShippingStatus.Waiting)
+            {
+                <li>
+                    <div class="title">
+                        Tracking number</div>
+                    <div class="text">
+                        @Model.Shipping_TrackingNumber</div>
+                </li>
+                <li>
+                    <div class="title">
+                        Picked on</div>
+                    <div class="text">
+                        @Model.Shipping_ShipOn.ToString("MM/dd/yyyy HH:mm:ss")</div>
+                </li>
+            }
+            <li><strong>&nbsp;&nbsp;Shipping Address</strong> </li>
+        </ul>
+        <ul class="rows" id="shipping_old_detail">
+            <li>
+                <div class="title">
+                    First Name</div>
+                <div class="text">@Model.ShippingAddressModel.FirstName&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Last Name</div>
+                <div class="text">@Model.ShippingAddressModel.LastName&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Email</div>
+                <div class="text">@Model.ShippingAddressModel.Email&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Phone number</div>
+                <div class="text">@Model.ShippingAddressModel.PhoneNumber&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Company</div>
+                <div class="text">@Model.ShippingAddressModel.Company&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Address</div>
+                <div class="text">@Model.ShippingAddressModel.Address&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    State</div>
+                <div class="text">@Model.ShippingAddressModel.State&nbsp;</div>
+            </li>
+            <li>
+                <div class="title">
+                    Country</div>
+                <div class="text">@Model.ShippingAddressModel.GetCountryName()&nbsp;</div>
+            </li>
+            @if (Model.Status > 0 && Model.Status < (int)Enum_OrderStatus.Shipping)
+            {
+                <li style="text-align: center;">
+                    <button type="button" class="btn btn-sm btn-shipping-addr" onclick="javascrit:void(0);">
+                        Update Address</button>
+                </li>
+            }
+        </ul>
+        @if (Model.Status > 0 && Model.Status < (int)Enum_OrderStatus.Shipping)
+        {
+            <form id="frmShippingAddr" name="frmShippingAddr" action="@Url.Action("UpdateShippingAddr", "Order")"
+            method="post" enctype="multipart/form-data" class="ab-form">
+            <input type="hidden" name="OrderId" value="@Model.Id" />
+            <input type="hidden" name="Id" value="@Model.ShippingAddressModel.Id" />
+            <ul class="rows container-shipping-addr display-none">
+                <li>
+                    <div class="title">
+                        First Name</div>
+                    <div class="text">
+                        <input type="text" name="FirstName" value="@Model.ShippingAddressModel.FirstName" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Last Name</div>
+                    <div class="text">
+                        <input type="text" name="LastName" value="@Model.ShippingAddressModel.LastName" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Email</div>
+                    <div class="text">
+                        <input type="text" name="Email" value="@Model.ShippingAddressModel.Email" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Phone number</div>
+                    <div class="text">
+                        <input type="text" name="PhoneNumber" value="@Model.ShippingAddressModel.PhoneNumber" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Company</div>
+                    <div class="text">
+                        <input type="text" name="Company" value="@Model.ShippingAddressModel.Company" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Address</div>
+                    <div class="text">
+                        <input type="text" name="Address" value="@Model.ShippingAddressModel.Address" class="ab-textbox" />
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        State</div>
+                    <div class="text">
+                        @{
+            var country = Db.Select<Country>(x => x.Where(y => y.Code == Model.ShippingAddressModel.Country).Limit(1)).First();
+            if (country != null)
+            {
+                var states = Db.Select<Country_State_ExtraShipping>(x => x.Where(y =>
+                    y.CountryId == country.Id && (y.Amount == 0 || y.State == Model.ShippingAddressModel.State)));
+                if (states != null && states.Count > 0)
+                {                        
+                            <select name="State" class="ab-combobox">
+                                @foreach (var s in states)
+                                {
+                                    <option value="@s.State" style="max-length: 99%;" @{if (s.State == Model.ShippingAddressModel.State)
+                                                                                        {<text>selected</text>}}>@s.State</option>
+                                }
+                            </select>
+                }
+                else
+                {
+                            <input type="text" name="State" value="@Model.ShippingAddressModel.State" class="ab-textbox" />
+                }
+            }
+            else
+            {
+                            <input type="text" name="State" value="@Model.ShippingAddressModel.State" class="ab-textbox" />
+            }
+            
+            
+                        }
+                    </div>
+                </li>
+                <li>
+                    <div class="title">
+                        Country</div>
+                    <div class="text">@Model.ShippingAddressModel.GetCountryName()</div>
+                </li>
+                <li class="ab-action align-right">
+                    <button type="submit" class="ab-submit">
+                        Submit</button>
+                    <button type="reset" class="ab-reset">
+                        Reset</button>
+                    <button type="button" class="ab-reset" id="shipping_update_form_cancel" onclick="javascrit:void(0);">
+                        Cancel Update</button>
+                </li>
+            </ul>
+            </form>
+        }
+    </div>
+</div>

@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = CMSBE.Admin_TopicManagement_Index_ViewBagTitle;
+}
+@using CMSLang.BackEnd;
+
+<a class="btn" href="/Administration/TopicManagement/Add"><span>@CMSBE.Admin_TopicManagement_Index_AddNewTopicButton</span></a>
+<div class="head">
+    <div class="isw-grid">
+    </div>
+    <h1>@CMSBE.Admin_TopicManagement_Index_TopicTitle</h1>
+    <div class="clear">
+    </div>
+</div>
+<div class="block-fluid table-sorting">
+    <div class="row-fluid list">
+         @Html.Action("List", "TopicManagement", new { page = 1 })
+    </div>
+</div>

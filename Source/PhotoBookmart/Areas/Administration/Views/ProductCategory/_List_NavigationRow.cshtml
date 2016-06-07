@@ -1,0 +1,69 @@
+﻿@model Product_Category
+@{
+    var Nav = (List<Product_Category>)ViewData["Nav"];
+    var deep = (int)ViewData["deep"];
+}
+<tr>
+    <td class="table_td_img_thumb">
+        @if (string.IsNullOrEmpty(Model.Filename))
+        {
+            <img src="@Url.Content("~/Content/img/noimage.gif")" />
+        }
+        else
+        {
+            <img src="/@Model.Filename" />
+        }
+    </td>
+    <td>
+        <span>
+            @for (int i = 0; i < deep; i++)
+            {
+                <text>&nbsp; &nbsp; &nbsp; &nbsp;</text>
+            }
+            <a  href="@Url.Action("Index", "WebsiteProduct", new { cat_id = Model.Id })" title="Manage Products for category @Model.Name" target=_blank style="color: Black;">
+                @Model.Name
+            </a></span>
+    </td>
+    <td>
+        <span>@Html.CheckBox("Acitve", Model.Status, new { disabled = "disabled" }) </span>
+    </td>
+    <td>
+        <span>@Model.CreatedByUsername</span>
+    </td>
+    <td>
+        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", Model.CreatedOn) </span>
+    </td>
+    <td>
+        <span class="btn-group"><a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span></a>
+            <ul class="dropdown-menu pull-right">
+                <li><a href="javascript:void(0)" class="btnDown" item_id="@Model.Id" title="Move Up &raquo; @Model.Name">
+                    <i class="icon-caret-up"></i>&nbsp;Move Up &raquo; @Model.Name
+                </a></li>
+                <li><a href="@Url.Action("Edit", "ProductCategory", new { id = Model.Id })"  title="Edit &raquo; @Model.Name" target="_parent">
+                    <i class="icon-pencil"></i>&nbsp;Edit &raquo; @Model.Name
+                </a></li>
+                <li><a href="javascript:void(0)" class="delete" item_id="@Model.Id" item_name="@Model.Name" title="Delete &raquo; @Model.Name">
+                    <i class="icon-trash"></i>&nbsp;Delete &raquo; @Model.Name
+                </a></li>
+                <li><a href="@Url.Action("Detail", "ProductCategory", new { id = Model.Id })" title="View Detail » @Model.Name" target="_parent" >
+                    <i class="icon-list-2"></i>&nbsp;View Detail &raquo; @Model.Name
+                </a></li>
+                <li><a href="@Url.Action("Index", "WebsiteProduct", new { cat_id = Model.Id })" title="Products of » @Model.Name" target="_parent" >
+                    <i class="icon-align-left"></i>&nbsp;Products of &raquo; @Model.Name
+                </a></li>
+                <li><a href="javascript:void(0)" class="btnUp" item_id="@Model.Id" title="Move Down &raquo; @Model.Name">
+                    <i class="icon-caret-down"></i>&nbsp;Move Down &raquo; @Model.Name
+                </a></li>
+            </ul>
+        </span>
+    </td>
+</tr>
+@foreach (var item in Nav.Where(m => m.ParentId == Model.Id).OrderBy(m => m.OrderIndex))
+{
+    var vd = new ViewDataDictionary();
+    vd.Add("Nav", Nav);
+    vd.Add("deep", deep + 1);
+                    
+    @Html.Partial("_List_NavigationRow", item, vd);
+}

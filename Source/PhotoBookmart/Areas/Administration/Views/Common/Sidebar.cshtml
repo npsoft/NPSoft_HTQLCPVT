@@ -1,0 +1,60 @@
+﻿@{
+    Layout = null;
+}
+<!-- Sidebar Wrapper -->
+<div id="mws-sidebar">
+    <!-- Hidden Nav Collapse Button -->
+    <div id="mws-nav-collapse">
+        <span></span><span></span><span></span>
+    </div>
+    <!-- Searchbox -->
+    <!-- Main Navigation -->
+    <div id="mws-navigation">
+        <ul>
+            <li><a href="@Url.Action("Detail", "Website", new { id = 1 })"><i class="icon-home"></i>Dashboard</a></li>
+            <!--<li><a href="@Url.Action("Index", "Order")"><i class="icon-list-2"></i>Orders</a></li>-->
+            <li><a href="#"><i class="icon-tags"></i>Đối tượng</a>
+                <ul @*class="closed" style="display: none;"*@>
+                    <!--<li><a href="@Url.Action("Index", "ProductCategory", new { })"><i class="icon-pictures"></i>&nbsp;Products Categories</a></li>-->
+                    <li><a href="@Url.Action("Index", "WebsiteProduct", new { })"><i class="icon-pictures"></i>&nbsp;QL Đối tượng</a></li>
+                    <!--<li><a href="@Url.Action("Index", "ProductOption", new { })"><i class="icon-pictures"></i>&nbsp;Options Management</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "CouponPromo", new { })"><i class="icon-gift"></i>&nbsp;Coupon Management</a></li>-->
+                </ul>
+            </li>
+            <li><a href="#" ><i class="icon-pie-chart"></i>Báo cáo</a>
+                <ul @*class="closed" style="display: none;"*@>
+                    <li><a href="@Url.Action("Index", "OrderReport")"><i class="icon-frame"></i>&nbsp;DS Chi trả trợ cấp</a></li>
+                    <!--<li><a href="@Url.Action("Index", "WebsiteBanners")"><i class="icon-frame"></i>&nbsp;Orders by date</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "UserManagement")"><i class="icon-users"></i>&nbsp;Staff working activities</a></li>-->
+                </ul>
+            </li>
+            <li><a href="#" id="menu_website_master"><i class="icon-font"></i>Website</a>
+                <ul @*class="closed" style="display: none;"*@>
+                    <!--<li><a href="@Url.Action("Index", "WebsiteBanners")"><i class="icon-frame"></i>&nbsp;Banners - Sliders</a></li>-->
+                    <li><a href="@Url.Action("Index", "UserManagement")"><i class="icon-users"></i>&nbsp;QL Người dùng</a></li>
+                    <!--<li><a href="@Url.Action("Category", "WebsiteBlog")"><i class="icon-pictures"></i>&nbsp;Blogs Management</a></li>-->
+                    <!--<li><a href="@Url.Action("Category", "WebsiteNews")"><i class="icon-pictures"></i>&nbsp;News Management</a></li>-->
+                </ul>
+            </li>
+            <li><a href="#"><i class="icon-cog-2"></i>Hệ thống</a>
+                <ul @*class="closed" style="display: none;"*@>
+                    <!--<li><a href="@Url.Action("Index", "ExceptionLog", new { })"><i class="icon-github-4"></i>&nbsp;Exceptions</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "Country")"><i class="icon-sign-post"></i>&nbsp;Countries Management</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "WebsiteMaillinglistTemplate", new { })"><i class="icon-font"></i>&nbsp;Mailling list Template</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "SMSTemplate", new { })"><i class="icon-font"></i>&nbsp;SMS Template</a></li>-->
+                    <!--<li><a href="@Url.Action("SMSItem_Index", "SMSTemplate", new { })"><i class="icon-font"></i>&nbsp;SMS History</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "Language", new { })"><i class="icon-amazon"></i>&nbsp;Languages</a></li>-->
+                    <!--<li><a href="@Url.Action("Index", "Theme")"><i class="icon-leaf"></i>&nbsp;Themes</a></li>-->
+                    <li><a href="@Url.Action("Index", "Settings")"><i class="icon-magic"></i>&nbsp;QL Thiết lập</a></li>
+                    <!--<li><a href="@Url.Action("Edit", "PaypalConfig")"><i class="icon-magic"></i>&nbsp;Paypal / iPay88 config</a></li>-->
+                </ul>
+            </li>
+            @*<li class="label"><a href="javascript:void(0)">ADMINISTRATOR SECTION</a> </li>*@
+            @*<li><a href="@Url.Action("Index", "Website")"><i class="icon-wordpress"></i>Website</a></li>*@
+            @*<li><a href="@Url.Action("Index", "Distributor")"><i class="icon-leaf"></i>Distributor</a></li>*@
+            @*<li><a href="@Url.Action("Index", "WebsiteFormDataType")"><i class="icon-th"></i>Form DataType</a></li>*@
+            @*<li><a href="@Url.Action("Index", "WebsiteForm")"><i class="icon-pictures"></i>Manage Public Form</a></li>*@
+            @*<li><a href="@Url.Action("Index", "ProductCategory", new { site_id = 1 })"><i class="icon-pictures"></i>Product Management</a></li>*@
+        </ul>
+    </div>
+</div>

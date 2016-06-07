@@ -1,0 +1,86 @@
+﻿@model List<Language_Translation>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("a.delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("_Translation_Delete")?id=" + item_id, function () {
+                    Translation_Form_Reload();
+                });
+            }
+        });
+
+        $("a.edit_trans").click(function () {
+            var $this = $(this);
+            var item_id = $this.attr("item_id");
+            var lang_id = $this.attr("lang_id");
+            var tr=jQuery(this).parents("tr");
+
+            // set data before show dialog
+            jQuery("#Dialog_Id").val(item_id);
+            jQuery("#Dialog_Lang_Id").val(lang_id);
+            jQuery("#Dialog_Key").val(jQuery.trim(tr.children("td:eq(1)").children("span").text()));
+            jQuery("#Dialog_Value").val(jQuery.trim(tr.children("td:eq(2)").children("span").text()));
+
+            $("#b_popup_4").dialog('option', 'title', 'Edit Translation - Key '+ jQuery.trim(tr.children("td:eq(2)").children("span").text()));
+
+             $("#b_popup_4").dialog('open');
+        });
+
+     
+        // build table layout
+        if( $.fn.dataTable ) {
+           $("#ListTable").dataTable({
+                sPaginationType: "full_numbers",
+                "iDisplayLength": 30,
+                "aLengthMenu": [30, 50, 100]
+            });
+        }  
+    });
+
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>
+                Language Name
+            </th>
+            <th>
+                Key
+            </th>
+            <th>
+                Translation
+            </th>
+            <th width="100px">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span>@item.Language_Name </span>
+                    </td>
+                    <td>
+                        <span>@item.Key</span>
+                    </td>
+                    <td>
+                        <span>@item.Value</span>
+                    </td>
+                    <td>
+                        <span class="btn-group"><a  href="javascript:void(0)" item_id="@item.Id" lang_id="@item.LangId"  class="btn btn-small edit_trans" title="Edit">
+                            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small delete" item_id="@item.Id" item_name="@item.Key" title="Delete @item.Key" >
+                                <i class="icon-trash"></i></a></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

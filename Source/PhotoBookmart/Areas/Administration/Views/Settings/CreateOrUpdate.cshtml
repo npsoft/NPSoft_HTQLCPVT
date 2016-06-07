@@ -1,0 +1,111 @@
+﻿@model Settings
+@{
+    ViewBag.Title = Model.Id > 0 ? "CS Thiết lập" : "TM Thiết lập";
+
+}
+<script>
+    var Name_HC, SettingScope;
+    var $txt_hc, $ddl_setting;
+    var url_GetDanhMucHanhChinhByMaHC = "@Url.Action("GetDanhMucHanhChinhByMaHC", "Settings")";
+
+    jQuery(document).ready(function ($) {
+        $ddl_setting = $("#Key");
+        $txt_hc = $("#name-mahc");
+
+        @if ((RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]) == RoleEnum.Admin) {
+            @: SettingScope = "@Enum_Settings_Scope.Country.ToString()";
+            @: Name_HC = "Cả nước";
+            @: $txt_hc.val(Name_HC);
+        } else {
+            if ((RoleEnum)Enum.Parse(typeof(RoleEnum), CurrentUser.Roles[0]) == RoleEnum.Province) {
+                @: SettingScope = "@Enum_Settings_Scope.Province.ToString()";
+            } else {
+                @: SettingScope = "@Enum_Settings_Scope.District.ToString()";
+            }
+            @: $.post(url_GetDanhMucHanhChinhByMaHC, { MaHC: "@CurrentUser.MaHC" }, function (data) {
+            @:      Name_HC = data.TenDayDu;
+            @:      $txt_hc.val(Name_HC);
+            @: });
+        }
+        $.post(SVC_GETSETTINGSBYSCOPE, { Scope: SettingScope }, function (data) {
+            var opt = "";
+            data.forEach(function (element, index, array) {
+                opt += "<option value='" + element.Id + "'>" + element.Name + "</option>";
+            });
+            $ddl_setting.append(opt);
+            $ddl_setting.select2().select2("val", "@Model.Key");
+        });
+
+        $(".ab-save").click(function () {
+            $("#isContinue").val(false);
+        });
+        $(".ab-save-add-new").click(function () {
+            $("#isContinue").val(true);
+        });
+        $("[type='reset']").on("click", function (e) {
+            setTimeout(function () {
+                $txt_hc.val(Name_HC);
+                $ddl_setting.select2().select2("val", "@Model.Key");
+            }, 100);
+        });
+        $("#UserForm").submit(function () {
+            if ($.trim($ddl_setting.val()) == "") {
+                notify_error("Lỗi", "Vui lòng chọn thiết lập.");
+                $ddl_setting.focus();
+                return false;
+            }
+        });
+    });
+</script>
+<div class="head">
+    <h3>@{ if (Model.Id > 0) { <text>Chỉnh sửa thiết lập</text> } else { <text>Thêm mới thiết lập</text> }}</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>Thông tin</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("CreateOrUpdate", "Settings", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            if (ViewBag.Error != null)
+            {
+                <div class="mws-form-message error">@ViewBag.Error</div>
+            }
+            <div class="mws-form-inline">
+                @Html.HiddenFor(m => m.Id)
+                <input type="hidden" id="isContinue" name="isContinue" value="false" />
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Phạm vi</label>
+                    <div class="mws-form-item">
+                        <input type="text" id="name-mahc" class="large" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Thiết lập</label>
+                    <div class="mws-form-item">
+                        <select id="Key" name="Key" class="mws-select2 large" @if (Model.Id > 0) { <text>disabled="disabled"</text>}>
+                            <option value="">- - Chọn - -</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Giá trị</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Value, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Mô tả</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Desc, new { @class = "large" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Lưu lại" class="btn btn-danger ab-save" />
+                <input type="submit" value="Lưu lại & Thêm mới" class="btn btn-danger ab-save-add-new" />
+                <input type="reset" value="Làm mới" class="btn btn-default ab-reset" />
+            </div>
+        }
+    </div>
+</div>

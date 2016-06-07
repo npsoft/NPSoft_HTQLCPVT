@@ -1,0 +1,164 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.MaillingListSendModel
+@{
+    var mailling_template = Db.Where<Site_MaillingListTemplate>(m => m.Status && m.IsPublic && m.IsForOrder).GroupBy(x => x.CategoryName);
+    // get the list of all possible properties
+    Order order = new Order();
+    order.LoadAddress(0);
+    order.LoadAddress(1);
+    Dictionary<string, string> dic = order.GetPropertiesListOrValue(false,"#");
+    var billing = order.BillingAddressModel.GetPropertiesListOrValue(false, "#Billing_");
+    var shipping = order.BillingAddressModel.GetPropertiesListOrValue(false, "#Shipping_");
+    dic = dic.MergeDictionary(billing);
+    dic = dic.MergeDictionary(shipping);
+    // add for barcode
+    dic.Add("<img src='/barcode/#Order_Number'>", "Barcode");
+}
+<div class="dialog mws-panel-body" id="Dialog_Email" style="display: none;" title="Send message to customer">
+    @using (Html.BeginForm("SendMailing", "WebsiteMaillinglist", FormMethod.Post, new { @id = "Dialog_Email_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Select template</label>
+                <div class="mws-form-item">
+                    <select id="Dialog_Email_Template" class="large mws-select2">
+                        <option value="--NoTemplate--" selected>--- No template selected ---</option>
+                        @foreach (var cat in mailling_template)
+                        { 
+                            <optgroup label="@cat.FirstOrDefault().CategoryName.DisplayName()">
+                                @foreach (var item in cat)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                    <span>You can manage all template in Mailling List Template Management</span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Title</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(m => m.Title, new { @class = "large" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Predefined Value</label>
+                <div class="mws-form-item">
+                    <select id="Dialog_Email_Predefine_Value" class="large mws-select2">
+                        <option value="--" selected>--- Please select ---</option>
+                        @foreach (var key in dic.Keys)
+                        { 
+                            <option value="@key">@dic[key]</option>
+                        }
+                    </select>
+                    <span>System will replace this predefined value by the correct value of the order before
+                        send email to customer</span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Body</label>
+                <div class="mws-form-item">
+                    @Html.TextAreaFor(m => m.Body, new { @class = "large", @id = "MaillinglistBody" })
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script language="javascript" type="text/javascript">
+    jQuery(document).ready(function () {
+        $("#Dialog_Email").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 1000,
+            buttons: {
+                "Preview": function () {
+                    show_loading();
+                    jQuery("#MaillinglistBody").val(CKEDITOR.instances.MaillinglistBody.getData());
+                    // post the content in text editor to convert and receive the result
+                    jQuery.post('@Url.Action("Email_Preview")', {
+                        id: order_id,
+                        content: jQuery("#MaillinglistBody").val()
+                    }, function (returnObj) {
+                        CKEDITOR.instances.MaillinglistBody.setData(returnObj);
+                        hide_loading();
+                    }, "html");
+                },
+                "Ok": function () {
+                    show_loading();
+                    jQuery("#MaillinglistBody").val(CKEDITOR.instances.MaillinglistBody.getData());
+                    // post the content in text editor to convert and receive the result
+                    jQuery.post('@Url.Action("Email_Sendmail_Customer")', {
+                        id: order_id,
+                        title: jQuery("#Dialog_Email_Form").find("input[name='Title']").val(),
+                        content: jQuery("#MaillinglistBody").val()
+                    }, function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            if (returnObj.Message != null) {
+                                notify_success("Success", returnObj.Message);
+                            }
+                            if (returnObj.RedirectUrl != null && returnObj.RedirectUrl != "") {
+                                setTimeout(function () {
+                                    window.location.href = returnObj.RedirectUrl;
+                                }, 800);
+                            }
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+                        hide_loading();
+                    }, "json");
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        // button to active the send email dialog
+        $("#Dialog_Message_handler").click(function () {
+            $("#Dialog_Email").dialog('open');
+        });
+
+        // activate the CKEditor
+        CKEDITOR.replace('MaillinglistBody', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        // handle when template change
+        jQuery("#Dialog_Email_Template").change(function () {
+            show_loading();
+            var id = jQuery(this).val();
+            if (id == "--NoTemplate--") {
+                return;
+            }
+            jQuery.post('@Url.Action("Email_Get_Template")' + "?id=" + id + "&order_id=" + order_id, function (returnObj) {
+                //CKEDITOR.instances.MaillinglistBody.setData(returnObj);
+                CKEDITOR.instances.MaillinglistBody.setData(returnObj.Body);
+                jQuery("#Dialog_Email_Form").find("input[name='Title']").val(returnObj.Title);
+                hide_loading();
+            }, "json");
+        });
+
+        // Handle predefine value change
+        jQuery("#Dialog_Email_Predefine_Value").change(function () {
+            var x = jQuery(this).val()
+            CKEDITOR.instances.MaillinglistBody.insertText(x);
+        });
+
+        // form submit
+        jQuery("#Dialog_Email_Form").submit(function () {
+            return false;
+        });
+
+    });
+</script>

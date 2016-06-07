@@ -1,0 +1,182 @@
+﻿@model SiteTopic
+@{
+    ViewBag.Title = "Topic Detail - " + Model.Name;
+    var Langs = (List<Language>)ViewData["Langs"];
+    var TopicLangs = Db.Where<SiteTopicLanguage>(m => m.TopicId == Model.Id);
+}
+<script language="javascript">
+    jQuery(document).ready(function () {
+        // fire click to set correct default item
+        var _ibutton2_default_changing = false;
+        $('.ibutton2').iButton({
+            change: function ($item) {
+                if (_ibutton2_default_changing) {
+                    return;
+                }
+
+                _ibutton2_default_changing = true;
+                if ($item.hasClass("default_ibutton")) {
+                    jQuery(".default_ibutton").each(function () {
+                        jQuery(this).iButton("toggle", false);
+                    });
+                }
+                $item.iButton("toggle", true);
+                _ibutton2_default_changing = false;
+            }
+        });
+
+        jQuery("#TopicLang_Detail").submit(function () {
+            if (jQuery("#TopicLang_Detail").find("input[name='Name']").val() == "") {
+                alert("Please enter topic name");
+                jQuery("a[href='#tab-detail']").trigger("click");
+                jQuery("#TopicLang_Detail").find("input[name='Name']").focus();
+                return false;
+            }
+
+            show_loading();
+
+            jQuery.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (returnObj) {
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Topic Detail Saved", returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null && returnObj.RedirectUrl != "") {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+                hide_loading();
+            });
+            return false;
+        });
+
+        jQuery("form.topiclang").submit(function () {
+            show_loading();
+            var lang_id = jQuery(this).attr("lang-id");
+            var ckeditor_id = "Body" + lang_id;
+
+            // we have to update manually the CKEDITOR before submit
+            var allInstances = CKEDITOR.instances;
+            for (var i in allInstances) {
+                if (allInstances[i].name == ckeditor_id) {
+                    jQuery("#"+ckeditor_id).val(allInstances[i].getData());
+                    break;
+                }
+            }
+
+            jQuery.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (returnObj) {
+                
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Topic Translation Saved", returnObj.Message);
+                    }
+                    if (returnObj.RedirectUrl != null && returnObj.RedirectUrl != "") {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+                hide_loading();
+            });
+            return false;
+        });
+
+        jQuery("#TopicLang_Save").click(function () {
+            jQuery("#TopicLang_Detail").trigger("submit");
+            jQuery("form.topiclang").trigger("submit");
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        Topic Detail - @Model.Name</h3>
+</div>
+<div class="mws-panel ">
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a href="@Url.Action("Index")" class="btn"><i class="icol-arrow-left"></i>Back</a>
+                <a href="javascript:void(0)" id="TopicLang_Save" class="btn"><i class="icol-disk"></i>Save all</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="mws-tabs">
+        <ul>
+            <li><a href="#tab-detail">Topic Detail</a></li>
+            @foreach (var lang in Langs)
+            {
+                <li><a href="#tab-@lang.LanguageCode">@lang.LanguageName</a></li>   
+            }
+        </ul>
+         @foreach (var lang in Langs)
+        {
+            var topiclang = TopicLangs.Where(m => m.LanguageId == lang.Id).FirstOrDefault();
+            if (topiclang == null)
+            {
+                topiclang = new SiteTopicLanguage();
+                topiclang.TopicId = Model.Id;
+                topiclang.LanguageId = lang.Id;
+                topiclang.LanguageCode = lang.LanguageCode;
+            }
+            if ((TopicLangs.Count == 0 || TopicLangs.Where(m=>m.IsDefault).Count() == 0) && lang.Id == Langs.First().Id)
+            {
+                //always set default the first language detail for new topic
+                // or if no item default
+                topiclang.IsDefault = true;
+            }
+            <div id="tab-@lang.LanguageCode">
+                @Html.Partial("_SiteTopicLanguageForm", topiclang)
+            </div>
+        }
+        <div id="tab-detail">
+            @using (Html.BeginForm("Update", "WebsiteTopic", FormMethod.Post, new { enctype = "multipart/form-data", @id = "TopicLang_Detail", @class = "mws-form" }))
+            {
+                @Html.HiddenFor(m => m.Id)
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">
+                            Name</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">
+                            SEO Name</label>
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(model => Model.SystemName, new { @class = "large" })
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-inline">
+                    <div class="mws-form-row">
+                        <label class="mws-form-label">
+                            Map to Menu</label>
+                        <div class="mws-form-item">
+                            @Html.CheckBoxFor(m=>m.CanMapToMenu)
+                        </div>
+                    </div>
+                </div>
+                 <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+            }
+        </div>
+       
+    </div>
+</div> 

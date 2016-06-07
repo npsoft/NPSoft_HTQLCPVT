@@ -1,0 +1,84 @@
+﻿<!-- Flash Header -->
+@{
+    var flash_header = Db.Select<Site_FlashHeader>(x => x.Where(m => m.Status).OrderBy(k => k.BannerIndex));
+    if (flash_header.Count > 0)
+    {
+        var is_first = true;
+    <div class='container_wrap info_text_header' id='info_text_header'>
+        <div class='container'>
+            <div class="BreakingNewsController easing" id="breakingnews1">
+                <div class="bn-title">
+                </div>
+                <ul>
+                    @foreach (var x in flash_header)
+                    {
+                        <li><a href="@if (!string.IsNullOrEmpty(x.LinkTo))
+                                     {@x.LinkTo}
+                                     else
+                                     {<text>javascript:void(0)</text>}">@x.Content</a></li>
+                    }
+                </ul>
+                <div class="bn-arrows">
+                    <span class="bn-arrows-left"></span><span class="bn-arrows-right"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+}
+<!-- Flash Header -->
+<!-- ####### HEAD CONTAINER ####### -->
+<div id='header'>
+    <div class='container_wrap header_color light_bg_color'>
+        <div class='container' id='menu_container'>
+            <!--Sta session 2-->
+            <h1 class='logo'>
+                <a href='/'>
+                    <img src="@Url.Content("~/Themes/Photobookmart/Content/images/logo_photobookmart.png")" alt='@CurrentWebsite.Name' /></a></h1>
+            <!--End session 2-->
+            @Html.Partial("_Navigation")
+            <!--Sta session 4-->
+            <div class='header_meta'>
+                <ul class="ab-user">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a rel="account"  href="@Url.Action("Profile", "User")">My Account</a></li>
+                        <li><a rel="signout" href="@Url.Action("SignOut", "Home", new { redirectTo = Url.Action("Index", "Home") })">
+                            Sign Out</a></li>
+                    }
+                    else
+                    {
+                        <li><a rel="signin" href="@Url.Action("SignIn", "Home", new { redirectTo = Url.Action("Index", "Home") })">
+                           Sign In</a></li>
+                        <li><a rel="register" href="@Url.Action("Register", "Home")">Register</a></li>
+                    }
+                </ul>
+                <br />
+                <ul class='noLightbox social_bookmarks icon_count_1'>
+                    <li class='social_bookmarks_facebook'><a href='https://www.facebook.com/photobookmart'>
+                        Facebook</a></li></ul>
+                <form action="#" id="searchform" method="get">
+                <div>
+                    <!--<input type="button" value="" id="searchsubmit" class="button" />
+                    <input type="text" id="s" name="s" value="search site" />-->
+                </div>
+                </form>
+                <!-- end searchform-->
+            </div>
+            <!--End session 4-->
+            <!--Sta session 5-->
+            <div class="download">
+                <a href="@Url.Action("TopicDetail", "Topic", new { id = "download_software" })">
+                    <img alt="Download Photobookmart Sofware" src="@Url.Content("~/Themes/Photobookmart/Content/images/download-button.jpg")">
+                </a>
+            </div>
+            <!--End session 5-->
+        </div>
+        <!-- end container-->
+    </div>
+    <!-- end container_wrap-->
+    <!-- ####### END HEAD CONTAINER ####### -->
+</div>
+@{
+    Db.Close();
+}

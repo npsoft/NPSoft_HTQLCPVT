@@ -1,0 +1,111 @@
+﻿@{
+    // Action: Category/Completed
+    [HttpGet]
+    public ActionResult Completed(int? page)
+    {
+        int pageSize = item_per_page;
+
+        int totalItem = (int)Db.Count<ListingProperty>(x => (x.IsActive && x.Status2 == (int)(Status2Enum.Completed)));
+
+        int totalPage = (int)Math.Ceiling((double)totalItem / pageSize);
+
+        int currPage = (page != null && page.Value > 0 && page < totalPage + 1) ? page.Value : 1;
+            
+        var model = Db.Select<ListingProperty>(x => x.Where(y => (y.IsActive && y.Status2 == (int)(Status2Enum.Completed)))).Skip((currPage - 1) * pageSize).Take(pageSize).ToList();
+
+        ViewData["CurrPage"] = currPage;
+
+        ViewData["PageSize"] = pageSize;
+
+        ViewData["TotalItem"] = totalItem;
+
+        ViewData["TotalPage"] = totalPage;
+
+        foreach (var lp in model ?? Enumerable.Empty<ListingProperty>())
+        {
+            lp.I_Assign_User = Db.Select<ABUserAuth>(o => o.Where(x => x.Id == lp.Assign_User).Limit(1)).FirstOrDefault();
+
+            lp.I_Created_User = Db.Select<ABUserAuth>(x => x.Where(y => y.Id == lp.CreatedBy).Limit(1)).FirstOrDefault(); ;
+
+            lp.I_Assign_Type = Db.Select<ListingPropertyType>(m => m.Where(x => x.IsActive && x.Id == lp.Assign_Type).Limit(1)).FirstOrDefault(); ;
+
+            lp.I_Assign_Category = Db.Select<ListingCategory>(x => x.Where(y => y.Id == lp.Assign_Category).Limit(1)).FirstOrDefault(); ;
+
+            lp.I_Image_Featured = Db.Select<ListingImage>(m => m.Where(x => x.IsActive && x.IsFeatured && x.ListingId == lp.Id).Limit(1)).FirstOrDefault(); ;
+
+            lp.I_Images = Db.Select<ListingImage>(m => m.Where(x => x.IsActive && x.ListingId == lp.Id).Limit(1)).OrderBy(m => (m.Order)).ToList();
+        }
+
+        return View(model);
+    }
+}
+
+@model List<ListingProperty>
+@{
+    int distance = 5;
+
+    int currPage = (int)ViewData["CurrPage"];
+
+    int pageSize = (int)ViewData["PageSize"];
+
+    int totalItem = (int)ViewData["TotalItem"];
+
+    int totalPage = (int)ViewData["TotalPage"];
+
+    string  idFooterWrapper = "FooterWrapperListingCompleted";
+
+    string nameFunctionPaging = "PagingListingCompleted";
+}
+@{
+    Layout = "~/Themes/Church/Views/Shared/_Layout.Listing.cshtml";
+
+    ViewBag.Title = "Listing Completed";
+}
+
+<script>
+    function @{<text>@nameFunctionPaging</text>}(page) {
+
+        location = "@Url.Action("Completed", "Category", new { })?page=" + page;
+    };
+</script>
+
+<div class="pageHeaderCenter">
+    Property list | <span style="color:#FF0000;">@ViewBag.Title</span>
+</div>
+<p class="ab-choose-map">
+</p>
+<hr/>
+<div class="ab-listing-list">
+    @if (Model.Count != 0)
+    {
+    <ul class="ab-list-wrapper">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            ViewDataDictionary view_data = new ViewDataDictionary();
+
+            view_data.Add("index", i + 1);
+
+            @Html.Partial("_ListingBox.Completed", Model.ElementAt(i), view_data)
+        }
+    </ul>
+    }
+</div>
+@{
+    var viewData = new ViewDataDictionary();
+    
+    viewData.Add("Distance", distance);
+    
+    viewData.Add("CurrPage", currPage);
+    
+    viewData.Add("PageSize", pageSize);
+    
+    viewData.Add("TotalItem", totalItem);
+    
+    viewData.Add("TotalPage", totalPage);
+
+    viewData.Add("IdFooterWrapper", idFooterWrapper);
+
+    viewData.Add("NameFunctionPaging", nameFunctionPaging);
+    
+    @Html.Partial("_Pager", viewData);
+}

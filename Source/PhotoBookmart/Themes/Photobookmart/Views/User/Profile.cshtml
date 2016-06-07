@@ -1,0 +1,200 @@
+﻿@model ABUserAuth
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.User.cshtml";
+
+    ViewBag.Title = "Profile";
+}
+@section _TitleMain {
+    <a href='@Url.Action("Profile", "User", new { })' rel='profile' title='Permanent Link: Profile'>
+        Edit Profile</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">Profile</span>
+}
+<link rel="stylesheet" href="@Url.ContentTheme("Content/css/jquery.minical.plain.css")" type="text/css" media="screen" />
+<script type="text/javascript" src="@Url.ContentTheme("Content/scripts/jquery.minical.plain.js")"></script>
+<form id="frmProfile" name="frmProfile" action="@Url.Action("Profile","User")" method="post" enctype="multipart/form-data"
+class="ab-form ab-profile">
+<div class="ab-title display-none">
+    <h2>
+        Profile</h2>
+</div>
+@if (ViewBag.Error != null)
+{
+    <div class="ab-error">
+        @ViewBag.Error
+    </div>
+}
+<div class="row-fluid">
+    <div class="span6">
+        <label>
+            First Name<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "ab-textbox" })
+    </div>
+    <div class="span6">
+        <label>
+            Last Name<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.LastName, new { @class = "ab-textbox" })
+    </div>
+</div>
+<div>
+    <label>
+        Full Name<span class="ab-required">*</span></label>
+    @Html.TextBoxFor(m => m.FullName, new { @class = "ab-textbox" })
+</div>
+<div>
+    <label>
+        Email<span class="ab-required">*</span></label>
+    @Html.TextBoxFor(m => m.Email, new { @class = "ab-textbox", @maxlength = "50" })
+</div>
+<div>
+    <label>
+        Address<span class="ab-required">*</span></label>
+    @Html.TextBoxFor(m => m.Addr, new { @class = "ab-textbox", @maxlength = "30" })
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <label>
+            Country<span class="ab-required">*</span></label>
+        <select name="Country" class="ab-combobox">
+            @{
+                var countries = Db.Where<Country>(x => x.Status);
+
+                foreach (var x in countries ?? Enumerable.Empty<Country>())
+                {
+                    if (Model.Country == x.Code)
+                    {
+                <option value="@x.Code" selected="selected">@x.Name</option>
+                    }
+                    else
+                    {
+                <option value="@x.Code">@x.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+    <div class="span6">
+        <label>
+            City<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.City, new { @class = "ab-textbox", @maxlength = "30" })
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <label>
+            State<span class="ab-required">*</span></label>
+        <select name="States" class="ab-combobox">
+        </select>
+        @Html.TextBoxFor(m => m.States, new { @class = "ab-textbox", @maxlength = "30" })
+    </div>
+    <div class="span6">
+        <label>
+            Zip Code<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.PostalCode, new { @class = "ab-textbox", @maxlength = "9" })
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <label>
+            Phone<span class="ab-required">*</span></label>
+        @Html.TextBoxFor(m => m.Phone, new { @class = "ab-textbox", @maxlength = "16" })
+    </div>
+    <div class="span6">
+        <label>
+            Gender<span class="ab-required">*</span></label>
+        @Html.DropDownListFor(m => Model.Gender, BaseController.Gender_GetAll(), "Please select gender", new { @class = "ab-combobox" })
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <label>
+            Birthday</label>
+        @if (Model.BirthDate.HasValue)
+        {
+            <input type="text" name="BirthDate" id="BirthDate" value="@string.Format("{0:MM/dd/yyyy}", Model.BirthDate.Value)" class="ab-date" />
+        }
+        else
+        {
+            <input type="text" name="BirthDate" id="BirthDate" class="ab-date ab-textbox" />
+        }
+    </div>
+    <div class="span6">
+        <label>
+            Avatar</label>
+        <input type="file" name="FileUps" class="ab-file" />
+    </div>
+</div>
+<div class="ab-action align-right">
+    <button type="submit" class="ab-submit">
+        Submit</button>
+    <button type="reset" class="ab-reset">
+        Reset</button>
+</div>
+</form>
+<script language="javascript" type="text/javascript">
+    jQuery(document).ready(function ($) {
+        jQuery("#BirthDate").minical()
+
+        if ($("#frmProfile").length != 0) {
+
+            jQuery("#frmProfile select[name='Country']").on("change", function (e) {
+                $this = jQuery(this);
+                if ($this.val() == "MY") {
+                    jQuery.post('@Url.Action("GetStatesForMalaysia","Home")', {}, function (data) {
+                        if (data.HasVal) {
+                            var options = "";
+                            var val = jQuery("#frmProfile input[name='States']").val();
+                            for (var i = 0; i < data.Data.length; i++) {
+                                if (val == data.Data[i].State) {
+                                    options += "<option value='" + data.Data[i].State + "' selected='selected'>" + data.Data[i].State + "</option>";
+                                } else {
+                                    options += "<option value='" + data.Data[i].State + "'>" + data.Data[i].State + "</option>";
+                                }
+                            }
+                            jQuery("#frmProfile select[name='States']").html(options);
+                            jQuery("#frmProfile input[name='States']").prop("disabled", true);
+                            jQuery("#frmProfile input[name='States']").css("display", "none");
+                            jQuery("#frmProfile select[name='States']").prop("disabled", false);
+                            jQuery("#frmProfile select[name='States']").css("display", "block");
+                        } else {
+                            jQuery("#frmProfile select[name='States']").prop("disabled", true);
+                            jQuery("#frmProfile select[name='States']").css("display", "none");
+                            jQuery("#frmProfile input[name='States']").prop("disabled", false);
+                            jQuery("#frmProfile input[name='States']").css("display", "block");
+                        }
+                    });
+                } else {
+                    jQuery("#frmProfile select[name='States']").prop("disabled", true);
+                    jQuery("#frmProfile select[name='States']").css("display", "none");
+                    jQuery("#frmProfile input[name='States']").prop("disabled", false);
+                    jQuery("#frmProfile input[name='States']").css("display", "block");
+                }
+            });
+
+            setTimeout('jQuery("#frmProfile select[name=\'Country\']").trigger("change")', 100);
+
+            $("#frmProfile").on("submit", function (e) {
+
+                if ($(this).find("input[name='FirstName']").val() == "" ||
+                    $(this).find("input[name='LastName']").val() == "" ||
+                    $(this).find("input[name='FullName']").val() == "" ||
+                    $(this).find("input[name='Country']").val() == "" ||
+                    $(this).find("input[name='City']").val() == "" ||
+                    $(this).find("[name='States']:not(:disabled)").val() == "" ||
+                    $(this).find("input[name='PostalCode']").val() == "" ||
+                    $(this).find("input[name='Phone']").val() == "" ||
+                    $(this).find("input[name='Gender']").val() == "") {
+
+                    alert("Please enter all required fields.");
+
+                    return false;
+                }
+            });
+        }
+    });
+</script>
+@{
+    Db.Close();
+}

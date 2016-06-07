@@ -1,0 +1,107 @@
+﻿@model Price
+@{  
+    var s = "";
+    if (Model.MasterType == Enum_Price_MasterType.ProductShippingPrice)
+    {
+        s = "shipping price";
+    }
+    else if (Model.MasterType == Enum_Price_MasterType.ProductOption)
+    {
+        s = "options price";
+    }
+
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit " + s + " for - " + Model.Master_Name + " / " + Model.CountryCode + " - " + Model.CurrencyCode;
+    }
+    else
+    {
+        ViewBag.Title = "Add price " + s + " for " + Model.Master_Name;
+    }
+    var country = Db.Select<Country>();
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        $(".float-than-or-equal-zero").spinner({
+            min: 0.00,
+            step: 0.01,
+            numberFormat: "n"
+        });
+
+        jQuery("#UserForm").submit(function () {
+
+            if (jQuery("#CountryCode").val() == "") {
+                alert("Please enter field >> CountryCode");
+                jQuery("#CountryCode").focus();
+                return false;
+            }
+
+            if (jQuery("#CurrencyCode").val() == "") {
+                alert("Please enter field >> CurrencyCode");
+                jQuery("#CurrencyCode").focus();
+                return false;
+            }
+
+            show_loading();
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "Price", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.MasterId)
+            @Html.HiddenFor(m => m.MasterType)                                
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Country</label>
+                    <div class="mws-form-item">
+                        <select name="CountryCode" id="CountryCode" class="large mws-select2">
+                            @foreach (var item in country)
+                            {
+                                <option value="@item.Code" @if (Model.CountryCode == item.Code)
+                                                           { <text> selected</text> }>@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Display Price</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Value, new { @class = "mws-spinner-decimal float-than-or-equal-zero large" })
+                    </div>
+                </div>
+                @*<div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Display Price</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.DisplayPrice, new { @class = "mws-spinner-decimal float-than-or-equal-zero large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Real Price (@DefaultCurrency)</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.RealPrice, new { @class = "mws-spinner-decimal float-than-or-equal-zero large" })
+                    </div>
+                </div>*@
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

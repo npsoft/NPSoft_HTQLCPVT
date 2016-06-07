@@ -1,0 +1,16 @@
+﻿@model TopicDetail
+@{
+    Layout = null;
+}
+
+@if (Model.ContextLanguageDetail != null) {
+    
+    @Html.Raw(Model.ContextLanguageDetail.Body)
+
+} else {
+
+    if (!string.IsNullOrEmpty(Model.Name)) {
+        
+        @Model.Name
+    }
+}

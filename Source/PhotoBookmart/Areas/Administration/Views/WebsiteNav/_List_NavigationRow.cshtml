@@ -1,0 +1,83 @@
+﻿@model Navigation
+@{
+    var Langs = (List<Language>)ViewData["Langs"];
+    var Topics = (List<SiteTopic>)ViewData["Topics"];
+    var Nav = (List<Navigation>)ViewData["Nav"];
+    var deep = (int)ViewData["deep"];
+}
+<tr>
+    <td>
+        <span>
+            @for (int i = 0; i < deep; i++)
+            {
+                <text>&nbsp; &nbsp; &nbsp; &nbsp;</text>
+            }
+            @Model.Name
+        </span>
+    </td>
+    <td>
+        <span>@Langs.Where(m => m.LanguageCode == Model.LanguageName).FirstOrDefault().LanguageName
+        </span>
+    </td>
+    <td>
+        @if (Model.Menutype == 0)
+        {
+            <span>URL</span>
+        }
+        else
+        {
+            <span>Link topic</span>
+        }
+    </td>
+    <td>
+        @if (Model.Menutype == 0)
+        {
+            <span>@Model.Link</span>
+        }
+        else
+        {
+            if (Topics.Where(m => m.Id == Model.TopicId).FirstOrDefault() != null)
+            {
+                <span>@Topics.Where(m => m.Id == Model.TopicId).FirstOrDefault().Name </span>
+            }
+            else
+            {
+                <span>Deleted topic</span>
+            }
+        }
+    </td>
+    <td>
+        <span>@Html.CheckBox("Acitve", Model.Status, new { disabled = "disabled" }) </span>
+    </td>
+    <td>
+        <span>@Html.CheckBox("Acitve", Model.RequireLogin, new { disabled = "disabled" })
+        </span>
+    </td>
+    <td>
+        <span>@Model.CreatedByUsername</span>
+    </td>
+    <td>
+        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", Model.CreatedOn) </span>
+    </td>
+    <td>
+        <span class="btn-group">
+        <a  href="javascript:void(0)" class="btn btn-small btnUp" item_id="@Model.Id" title="Down @Model.Name">
+            <i class="icon-caret-down"></i></a>
+        <a  href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-small" title="Edit @Model.Name">
+            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small delete" item_id="@Model.Id" item_name="@Model.Name" title="Delete @Model.Name" >
+                <i class="icon-trash"></i></a>
+                <a  href="javascript:void(0)" class="btn btn-small btnDown" item_id="@Model.Id" title="Up @Model.Name">
+            <i class="icon-caret-up"></i></a>
+                </span>
+    </td>
+</tr>
+@foreach (var item in Nav.Where(m => m.ParentId == Model.Id).OrderBy(m => m.OrderMenu))
+{
+    var vd = new ViewDataDictionary();
+    vd.Add("Langs", Langs);
+    vd.Add("Topics", Topics);
+    vd.Add("Nav", Nav);
+    vd.Add("deep", deep + 1);
+                    
+    @Html.Partial("_List_NavigationRow", item, vd);
+}

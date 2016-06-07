@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.cshtml";
+}
+
+@section _ClassWrapper {
+    class="container_wrap main_color fullwidth single-portfolio-entry"
+}
+
+@section _TitleMain {
+    <a href='/ContactUs' rel='contact-us' title='Permanent Link: Contact Us'>Contact Us</a>
+}
+
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a>
+    <span class="sep">&raquo;</span>
+    <span class="trail-end">Contact Us</span>
+}
+
+@RenderBody()

@@ -1,0 +1,145 @@
+﻿@model Website
+@{
+    var langs = (List<Language>)Model.Languages();
+    ViewBag.Title = "Blogs Management";
+}
+<div class="head">
+    <h3>Blogs Management</h3>
+    <div>
+        <div class="mws-panel-toolbar">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <a class="btn" rel="#" href="@Url.Action("Detail", "Website", new { id = Model.Id })">
+                        <i class="icol-arrow-left"></i>@CurrentWebsite.Name Detail
+                    </a>
+                    <a class="btn" rel="#" href="javascript:void(0)" id="add_blogcategory">
+                        <i class="icol-add"></i>Create Blog
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="mws-panel no_shadow">
+            <span style="font-size:15px;">
+                &nbsp;Please select Language&nbsp;
+                <select class="large" id="BlogCategory_LangId">
+                    @foreach (var l in langs)
+                    {
+                        <option value="@l.LanguageCode">@l.LanguageName</option>
+                    }
+                </select>
+            </span>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Blogs Management</span>
+    </div>
+    <div class="mws-panel-body no-padding WDTB_BlogCategory">
+        @*@Html.Action("Detail_NewsCategory_List", new { id = Model.Id })*@
+    </div>
+</div>
+@* For the dialog *@
+<div class="dialog mws-panel-body" id="BlogCategory_Dialog" style="display: none;"
+    title="Add Blog Category">
+    @using (Html.BeginForm("Detail_BlogCategory_Add", "WebsiteBlog", FormMethod.Post, new { @id = "BlogCategory_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="0" id="NCD_Id" />
+        <input type="hidden" name="SiteId" value="@Model.Id" id="NCD_SiteId" />
+        <input type="hidden" name="LanguageCode" value="" id="NCD_LangCode" />
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">Name</label>
+                <div class="mws-form-item">
+                    <input name="Name" id="NCD_Name" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <label class="mws-form-label">Status</label>
+                <div class="mws-form-item">
+                    <input type="checkbox" name="IsActive" id="NCD_Status"/>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script>
+    function BlogCategory_Reload() {
+        show_loading();
+        var lang_id=jQuery("#BlogCategory_LangId").val();
+         $.get("@Url.Action("Detail_BlogCategory_List")?id=@Model.Id" + "&lang_id=" + lang_id, function (data) {
+                $(".WDTB_BlogCategory").html("");
+                $(".WDTB_BlogCategory").html(data);
+                    hide_loading();
+                });
+    }
+
+    $(document).ready(function () {
+        BlogCategory_Reload();
+
+        jQuery("#BlogCategory_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        jQuery("#BlogCategory_LangId").change(function(){
+            BlogCategory_Reload();
+        });
+
+        $("#BlogCategory_Dialog").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Ok": function () {
+                    // ajax submit
+                    show_loading();
+
+                    $("#BlogCategory_Dialog #NCD_LangCode").val(jQuery("#BlogCategory_LangId").val());
+
+                    // and post
+                    jQuery.post(jQuery("#BlogCategory_Form").attr("action"), jQuery("#BlogCategory_Form").serialize(), function (returnObj) {
+
+                        if (returnObj.Status == "success") {
+                            if (returnObj.Message != null) {
+                                notify_success("Success", returnObj.Message);
+                                // incase success, we need to reload the form
+                                BlogCategory_Reload();
+                            }
+                            else if (returnObj.RedirectUrl != null) {
+                                window.location.href = returnObj.RedirectUrl;
+                            }
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#add_blogcategory").click(function () {
+
+            $("#BlogCategory_Dialog #NCD_Id").val(0);
+
+            $("#BlogCategory_Dialog #NCD_Name").val("");
+
+            $("#BlogCategory_Dialog #NCD_Status").attr("checked", "checked");
+
+            $("#BlogCategory_Dialog").dialog('option', 'title', 'Add Blog');
+
+            $("#BlogCategory_Dialog").dialog('open')
+        });
+    })
+</script>

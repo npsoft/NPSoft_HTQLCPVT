@@ -1,0 +1,128 @@
+﻿@model Website
+<div class="mws-panel @*grid_3*@">
+    <div class="mws-panel-header">
+        <span><i class="icon-list"></i>Website Info</span>
+    </div>
+    <div class="mws-panel-body" style="padding: 0px;">
+        <div class="block-fluid ucard">
+            <div class="info">
+                <ul class="rows">
+                    <li>
+                        <div class="title">
+                            Name</div>
+                        <div class="text">@Model.Name</div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Theme</div>
+                        <div class="text">
+                            @Model.Theme &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Domain</div>
+                        <div class="text">
+                            @Html.Raw(string.Join("<br>", Model.Domain)) &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            SSL</div>
+                        <div class="text">
+                            @if (Model.UseSSL)
+                            {
+                                <text>Yes</text>
+                            }
+                            else
+                            {
+                                <text>No</text>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Site Title</div>
+                        <div class="text">
+                            @Model.SiteTitle &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            SEO Key Words</div>
+                        <div class="text">
+                            @Model.SiteDefaultKeyword &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            SEO Meta</div>
+                        <div class="text">
+                            @Model.SiteDefaultMeta &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Status</div>
+                        <div class="text">
+                            @if (Model.Status == 0)
+                            {
+                                <text>Waiting for approve</text>
+                            }
+                            else if (Model.Status == 1)
+                            {
+                                <text>Running</text>
+                            }
+                            else if (Model.Status == 2)
+                            {
+                                <text>Disabled</text>
+                            }
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Created by</div>
+                        <div class="text">
+                            @Model.CreatedByUsername &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Created on</div>
+                        <div class="text">
+                            @string.Format("{0:MM/dd/yyyy H:mm:ss}", Model.CreatedOn)
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Admin Email</div>
+                        <div class="text">
+                            @Model.Email_Admin &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Support Email</div>
+                        <div class="text">
+                            @Model.Email_Support &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Contact Us Email</div>
+                        <div class="text">
+                            @Model.Email_Contact &nbsp;
+                        </div>
+                    </li>
+                    <li>
+                        <div class="title tt" title="Start using on">
+                            Phone number</div>
+                        <div class="text">
+                            @Model.PhoneNumber_HotLine &nbsp;
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

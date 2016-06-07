@@ -1,0 +1,96 @@
+﻿@model List<PhotoBookmart.Models.TPQuerySMSItem>
+@{
+    // for pagination
+    var pages = (int)ViewData["pages"];
+    var page = (int)ViewData["page"];
+    var total_items = (int)ViewData["total_items"];
+    var perpage = (int)ViewData["perpage"];
+    string action_name = ViewData["action"].ToString();
+    RouteValueDictionary route = new RouteValueDictionary();
+    route.Add("area", "Administration");
+}
+@if (ViewData["Error"] != "")
+{
+    <div class="mws-form-message error">
+       @ViewData["Error"]
+    </div>
+}
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th style="width: 70px;">
+                On Date
+            </th>
+            <th >
+                Phone Number
+            </th>
+            <th >
+                Content
+            </th>
+            <th>
+                Flash
+            </th>
+            <th>
+                Unicode
+            </th>
+            <th>
+                Start On
+            </th>
+            <th>
+                Sent On
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="width: 70px;">
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreateDate) </span>
+                    </td>
+                    <td >
+                        <span>@string.Join(",", item.Receivers)</span>
+                    </td>
+                    <td >
+                        <span>@item.Content</span>
+                    </td>
+                    <td style="width: 20px;">
+                        <span>
+                            <input type=checkbox @if (item.IsFlashSMS)
+                                                 {<text>checked</text>}  />
+                        </span>
+                    </td>
+                    <td style="width: 20px;">
+                        <span>
+                            <input type=checkbox @if (item.IsUnicodeSMS)
+                                                 {<text>checked</text>}  />
+                        </span>
+                    </td>
+                    <td style="width: 85px;">
+                        @if (item.ProcessingOn.Year < 1900)
+                        {
+                            <span></span>
+                        }
+                        else
+                        {
+                            <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.ProcessingOn) </span>
+                        }
+                    </td>
+                    <td style="width: 85px;">
+                        @if (item.SentOn.Year < 1900)
+                        {
+                            <span></span>
+                        }
+                        else
+                        {
+                            <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.SentOn) </span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>
+@Pagination(pages, page, "SMS", action_name, total_items, perpage, route)

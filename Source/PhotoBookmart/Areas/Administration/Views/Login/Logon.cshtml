@@ -1,0 +1,80 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.LogOnModel
+@{
+    Layout = null;
+    string returnUrlstring = string.Empty;
+    if (!string.IsNullOrEmpty(Request.QueryString["returnUrl"]))
+    {
+        returnUrlstring = Request.QueryString["returnUrl"].ToString();
+    }
+}
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <!-- Viewport Metatag -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Photo Bookmart - Login</title>
+    <!-- Required Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/bootstrap/css/bootstrap.min.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/fonts/ptsans/stylesheet.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/fonts/icomoon/style.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/login.min.css")" media="screen">
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/css/mws-theme.css")" media="screen">
+    
+    <link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/stylesheet_common.css")" media="screen">
+</head>
+<body>
+    <div id="mws-login-wrapper">
+        <div id="mws-login">
+            <h1>
+                Login - Photo Bookmart</h1>
+            <div class="mws-login-lock">
+                <i class="icon-lock"></i>
+            </div>
+            <div id="mws-login-form">
+                @using (Html.BeginForm("Logon", "Login", FormMethod.Post, new { @class = "mws-form" }))
+                {
+                    <input type="hidden" name="returnUrl" value="@returnUrlstring" />
+                    <div class="mws-form-row">
+                        <div class="mws-form-item">
+                            @Html.TextBoxFor(m => m.UserName, new { @placeholder = "Username", @class = "mws-login-username required", @autocomplete="off" })
+                        </div>
+                    </div>
+                    <div class="mws-form-row">
+                        <div class="mws-form-item">
+                            @Html.PasswordFor(m => m.Password, new { @placeholder = "Password", @class = "mws-login-password required", @autocomplete = "off" })
+                        </div>
+                    </div>
+                    <div id="mws-login-remember" class="mws-form-row mws-inset">
+                        <ul class="mws-form-list inline">
+                            <li>
+                                @Html.CheckBoxFor(m => m.RememberMe)
+                                <label for="remember">
+                                    Remember me</label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mws-form-row">
+                        <input type="submit" value="Login" class="btn btn-success mws-login-button">
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- JavaScript Plugins -->
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/jquery-1.8.3.min.js")"></script>
+    <script src="@Url.ContentArea("~/Content/admin_template/js/libs/jquery.placeholder.min.js")"></script>
+    <!-- jQuery-UI Dependent Scripts -->
+    <script src="@Url.ContentArea("~/Content/admin_template/jui/js/jquery-ui-effects.min.js")"></script>
+    <!-- Plugin Scripts -->
+    <script src="@Url.ContentArea("~/Content/admin_template/plugins/validate/jquery.validate-min.js")"></script>
+    <!-- Login Script -->
+    <script src="@Url.ContentArea("~/Content/admin_template/js/core/login.js")"></script>
+</body>
+</html>

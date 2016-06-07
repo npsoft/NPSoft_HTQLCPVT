@@ -1,0 +1,28 @@
+﻿@{
+    var Navs = Db.Where<Navigation>(m => (m.Status && (!m.RequireLogin || (m.RequireLogin && User.Identity.IsAuthenticated))))
+                       .OrderBy(m => (m.OrderMenu))
+                       .ToList();
+
+    var Topics = Db.Where<SiteTopic>(m => (m.CanMapToMenu));
+
+    var NavsRoot = Navs.Where(m => (m.ParentId == 0)).ToList();
+}
+<ul id="menu-main-menu" class="menu">
+    @foreach (var item in NavsRoot)
+    {
+        Navs.Remove(item);
+
+        var vd = new ViewDataDictionary();
+
+        vd.Add("Navs", Navs);
+
+        vd.Add("deep", 0);
+
+        vd.Add("Topics", Topics);
+        
+        @Html.Partial("_Navigation_List_Sub", item, vd)
+    }
+</ul>
+@{
+    Db.Close();
+}

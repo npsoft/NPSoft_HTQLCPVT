@@ -1,0 +1,162 @@
+﻿@model Order
+@{
+    Layout = null;
+        //
+}
+@* Dialog Set Payment *@
+<div class="dialog mws-panel-body" id="payment_updatestatus" style="display: none;"
+    title="Update Payment">
+    @using (Html.BeginForm("Payment_UpdateStatus", "Order", FormMethod.Post, new { @id = "payment_updatestatus_form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="@Model.Id"  />
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Payment Status</label>
+                <div class="mws-form-item">
+                    <select name="PaymentStatus" class="large mws-select2">
+                        <option value="0" @if (Model.PaymentStatus == (int)Enum_PaymentStatus.Pending)
+                                          { <text>selected</text>}>Pending</option>
+                        <option value="20" @if (Model.PaymentStatus == (int)Enum_PaymentStatus.Authorized)
+                                           { <text>selected</text>}>Authorized</option>
+                        <option value="30" @if (Model.PaymentStatus == (int)Enum_PaymentStatus.Paid)
+                                           { <text>selected</text>}>Paid</option>
+                        <option value="40" @if (Model.PaymentStatus == (int)Enum_PaymentStatus.Refunded)
+                                           { <text>selected</text>}>Refunded</option>
+                        <option value="50" @if (Model.PaymentStatus == (int)Enum_PaymentStatus.Voided)
+                                           { <text>selected</text>}>Voided</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Payment Method</label>
+                <div class="mws-form-item">
+                    <select name="PaymentMethod" class="large mws-select2" id="Dialog_UpdatePayment_PaymentMethod">
+                        @foreach (Enum_PaymentMethod e in (Enum_PaymentMethod[])Enum.GetValues(typeof(Enum_PaymentMethod)))
+                        {
+                            <option value="@e" @if (Model.PaymentMethod == e)
+                                               {<text>selected</text>}>@e.DisplayName()</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row" id="dialog_updatepayment_cheque_number_row">
+                <label class="mws-form-label">
+                    Check/Cheque Number</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(x => x.Payment_ChequeCheckNumber, new { @class = "large" })
+                </div>
+            </div>
+            <h4>
+                Pricing & Total</h4>
+            <div class="grid_3" style="width: 30%;">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Product Price</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(x => x.Product_Price, new { @class = "large float-number" })
+                    </div>
+                </div>
+            </div>
+            <div class="grid_3" style="width: 30%;">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Grand Total</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(x => x.Bill_GrandTotal, new { @class = "large float-number" })
+                    </div>
+                </div>
+            </div>
+            <div class="grid_3" style="width: 30%;">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Bill Total</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(x => x.Bill_Total, new { @class = "large float-number" })
+                    </div>
+                </div>
+            </div>
+            <div style="clear: both;">
+            </div>
+            <div class="grid_4">
+                <h4>
+                    Coupon</h4>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Discount</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(x => x.Coupon_TotalDiscount, new { @class = "large float-number" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Use Coupon</label>
+                    <div class="mws-form-item">
+                        @Html.CheckBoxFor(x => x.isUseCoupon)
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script language="javascript" type="text/javascript">
+    function Dialog_UpdatePayment_ReloadChequeForm() {
+        var val = jQuery("#Dialog_UpdatePayment_PaymentMethod").val();
+        if (val == "Other" || val == "Cheque" || val == "Bank_Check") {
+            jQuery("#dialog_updatepayment_cheque_number_row").show();
+        }
+        else {
+            jQuery("#dialog_updatepayment_cheque_number_row").hide();
+        }
+    }
+
+    jQuery(document).ready(function () {
+        // handle when change
+        jQuery("#Dialog_UpdatePayment_PaymentMethod").change(function () {
+            Dialog_UpdatePayment_ReloadChequeForm();
+        });
+
+        setTimeout(function () {
+            Dialog_UpdatePayment_ReloadChequeForm()
+        }, 500);
+
+        $("#payment_updatestatus").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 900,
+            buttons: {
+                "Ok": function () {
+                    show_loading();
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#payment_updatestatus_form").attr("action"), jQuery("#payment_updatestatus_form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            window.location.href = window.location.href;
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#payment_updatestatus_handler").click(function () {
+            $("#payment_updatestatus").dialog('open')
+        });
+    });
+</script>

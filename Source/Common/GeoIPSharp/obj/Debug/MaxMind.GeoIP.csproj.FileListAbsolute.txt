@@ -1,0 +1,5 @@
+G:\NPSoft_HTQLNHCS\Common\GeoIPSharp\bin\Debug\MaxMind.GeoIP.dll
+G:\NPSoft_HTQLNHCS\Common\GeoIPSharp\bin\Debug\MaxMind.GeoIP.pdb
+G:\NPSoft_HTQLNHCS\Common\GeoIPSharp\obj\Debug\MaxMind.GeoIP.dll
+G:\NPSoft_HTQLNHCS\Common\GeoIPSharp\obj\Debug\MaxMind.GeoIP.pdb
+G:\NPSoft_HTQLNHCS\Common\GeoIPSharp\obj\Debug\MaxMind.GeoIP.csprojResolveAssemblyReference.cache

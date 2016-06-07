@@ -1,0 +1,78 @@
+﻿@{
+    var Country = (Country)ViewData["Country"];
+
+    if (Country.Id > 0)
+    {
+        ViewBag.Title = "Manage Extra Shipping for " + Country.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Manage Extra Shipping";
+    }
+    var countries = Db.Where<Country>(m => m.Status).OrderBy(n => n.Id).ToList();
+    Db.Close();
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<script language="javascript">
+
+    jQuery(document).ready(function () {
+        jQuery("#CountrySelector").change(function () {
+            var cat_id = jQuery("#CountrySelector").val();
+            var url = "@Url.Action("Index")";
+            if (cat_id>0){
+                url+="?country_id="+ cat_id;
+            }
+            window.location.href=url;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <div class="grid_4">
+            @if (Country.Id != 0)
+            {
+            <a type="button" class="btn" href="@Url.Action("Index", "ExtraShipping")">
+                <i class="icol-arrow-left"></i>Extra Shipping Management
+            </a>
+            }
+            <a type="button" class="btn btn-primary" href="@Url.Action("Add", new { country_id = Country.Id })">
+                New Extra Shipping
+            </a>
+        </div>
+        <div class="grid_4">
+            Filter By Country
+            <select class="mws-select2 large" id="CountrySelector" style="width: 60%;">
+                <option value="0">- - All Country - -</option>
+                @foreach (var item in countries)
+                {
+                    <option value="@item.Id" @if (item.Id == Country.Id){<text> selected</text> }>@item.Name</option>
+                }
+            </select>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @if (!string.IsNullOrEmpty(ViewBag.Error))
+        {
+            <div class="mws-form-message error">
+                @ViewBag.Error
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(ViewBag.Notice))
+        {
+            <div class="mws-form-message info">
+                @ViewBag.Notice
+            </div>
+        }
+        @Html.Action("List", new { country_id = Country.Id })
+    </div>
+</div>

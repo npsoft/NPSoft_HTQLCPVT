@@ -1,0 +1,18 @@
+﻿@model List<Navigation>
+@{
+    var ItemId = (long)ViewData["ItemId"];
+    var ParentId = (long)ViewData["ParentId"];
+    var deep = (int)ViewData["deep"];
+    var nav = Model.Where(m => m.ParentId == ParentId).OrderBy(m => m.OrderMenu);
+    var prefix = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;>&nbsp;&nbsp;", deep));
+}
+@foreach (var item in nav)
+{
+     <option value="@item.Id" @if (item.Id == ItemId)
+                              {<text> selected</text>}>@Html.Raw(prefix) @item.Name</option>
+                                                                   ViewDataDictionary vd = new ViewDataDictionary();
+                                                                   vd.Add("ItemId", ItemId);
+                                                                   vd.Add("ParentId", item.Id);
+                                                                   vd.Add("deep", deep + 1);
+    @Html.Partial("_ParentIdSubNavigation", Model, vd);
+}

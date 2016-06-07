@@ -1,0 +1,116 @@
+﻿@model Website
+@{
+    ViewBag.Title = "Topic Management";
+}
+<div class="head">
+    <h3>
+        Topic Management for website @Model.Name</h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Detail", "Website", new {id=Model.Id})" ><i class="icol-arrow-left"></i> @Model.Name Detail</a>
+        <a type="button" class="btn btn-primary" href="javascript:void(0)" id="topic_add">New Topic</a>
+    </div>
+</div>
+
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Topic Management for website @Model.Name</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List")
+    </div>
+</div>
+
+@* For the dialog *@
+<div class="dialog mws-panel-body" id="Topic_Dialog" style="display: none;" title="Add Topic">
+    @using (Html.BeginForm("Update", "WebsiteTopic", FormMethod.Post, new { @id = "Group_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="0" id="GD_Id" />
+        <div class="mws-form-block">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Name</label>
+                <div class="mws-form-item">
+                    <input name="Name" id="GD_Name" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <label class="mws-form-label">
+                    SEO Name</label>
+                <div class="mws-form-item">
+                   <input name="SystemName" id="GD_Systemname" class="large" />
+                   <br />
+                   <span>Leave this field blank to let system generate it automatically</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    function Topic_Reload() {
+        show_loading();
+         $.get("@Url.Action("List")", function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+    }
+    $(document).ready(function () {
+        jQuery("#Group_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        $("#Topic_Dialog").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 400,
+            buttons: {
+                "Ok": function () {
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#Group_Form").attr("action"), jQuery("#Group_Form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            if (returnObj.Message != null) {
+                                notify_success("Success", returnObj.Message);
+                                // incase success, we need to reload the form
+                                Topic_Reload();
+                            }
+                            else if (returnObj.RedirectUrl != null) {
+                                window.location.href = returnObj.RedirectUrl;
+                            }
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#topic_add").click(function () {
+
+            // reset old form content
+            jQuery("#GD_Id").val(0);
+            jQuery("#GD_Name").val("");
+            jQuery("#GD_Systemname").val("");
+
+            $("#Topic_Dialog").dialog('option', 'title', 'Add Topic');
+
+            $("#Topic_Dialog").dialog('open')
+        });
+    })
+
+</script>

@@ -1,0 +1,101 @@
+﻿@model ProductCategoryImage
+@{
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Image for " + Model.ProductCategoryName + " - " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Create Image for " + Model.ProductCategoryName;
+    }
+}
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+
+        $('.mws-spinner-decimal').spinner({
+            min: 1,
+            step: 1,
+            max: 999,
+            numberFormat: "n"
+        });
+
+        jQuery("#UserForm").submit(function () {
+            
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter field » Name");
+                jQuery("#Name").focus();
+                return false;
+            }
+        });
+    });
+
+</script>
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a class="btn" rel="#" href="@Url.Action("Detail", "ProductCategory", new { id = @Model.ProductCategoryId })">
+                    <i class="icol-arrow-left"></i>Back
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update_Image", "ProductCategory", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.ProductCategoryId)
+            if (ViewBag.Error != null)
+            {
+                <div class="mws-form-message error">
+                    @ViewBag.Error
+                </div>
+            }
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Thumbnail</label>
+                    <div class="mws-form-item">
+                        <input type="file" name="Thumbnail" />
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Description</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Desc, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Order</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(m => m.Order, new { @class = "mws-spinner-decimal large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Active</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsActive" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @{if (Model.IsActive) { <text> checked="checked" </text> 
+                                                                                                                                                } else {
+                                                                                                                                                }} />
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

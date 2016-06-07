@@ -1,0 +1,81 @@
+﻿@model List<DoiTuong_BienDong>
+<script>
+    jQuery(document).ready(function ($) {
+        var buttons = {};
+        @if ((bool)ViewData["CanDelete"])
+        {
+            @: buttons["Xóa BĐ"]= function () {
+            @:  var page = $popup_lich_su.find(".dataTables_wrapper .dataTables_paginate .paginate_active").text();
+            @:  if (confirm("Bạn chắc chắn muốn xóa biến động gần nhất?")) {
+            @:     $.post("@Url.Action("LichSu_Delete", "WebsiteProduct", new { })", { Id: @ViewData["Id"] }, function (data) {
+            @:         if (data != null && data.Status == "error") {
+            @:             notify_error("Lỗi", data.Message);
+            @:         } else {
+            @:             notify_info("Thông báo", "Xóa biến động thành công.");
+            @:         }
+            @:         $.post("@Url.Action("LichSu", "WebsiteProduct", new { })", { Id: @ViewData["Id"] }, function (data) {
+            @:             $popup_lich_su.html(data);
+            @:             var $btn = $popup_lich_su.find(".dataTables_wrapper .dataTables_paginate").find(".paginate_button, .paginate_active").filter(function () { return $(this).text() == page; });
+            @:             if ($btn.length == 0) { $btn = $popup_lich_su.find(".dataTables_wrapper .dataTables_paginate .last"); }
+            @:             $btn.trigger("click");
+            @:         });
+            @:     });
+            @:  }
+            @: };
+        }
+        buttons["Đóng lại"] = function () {
+            $(this).dialog("close");
+        }
+        $popup_lich_su.dialog("option", "buttons", buttons);
+        
+        if($.fn.dataTable) {
+            $popup_lich_su.find("#ListTable").dataTable({
+                "bSort": false,
+                "sDom": 'C<"">lfrtip',
+                "oColVis": {
+                    "buttonText": "<i class='icol-accept'></i> Change columns",
+                    "bRestore": false,
+                    "sSize": "css"
+                },
+                "aoColumnDefs": [
+			        { "bVisible": false, "aTargets": [] }
+                ],
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+    });
+</script>
+<table class="mws-table" id="ListTable">
+    <thead>
+        <tr>
+            <th>Xã</th>
+            <th>Loại</th>
+            <th>Mô tả</th>
+            <th>Ngày hưởng</th>
+            <th>Mức trợ cấp</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (DoiTuong_BienDong item in Model ?? Enumerable.Empty<DoiTuong_BienDong>())
+        {
+            <tr data-id="@item.Id">
+                <td style="text-align:left;">
+                    <span>@item.MaHC_Ten_Village</span>
+                </td>
+                <td style="text-align:left">
+                    <span>@item.MaLDT_Ten</span>
+                </td>
+                <td style="text-align:left;">
+                    <span>@item.MoTa</span>
+                </td>
+                <td style="text-align:center;">
+                    <span>@string.Format("{0:dd/MM/yyyy}", item.NgayHuong)</span>
+                </td>
+                <td style="text-align:right">
+                    <span>@item.MucTC.Value.ToString("#,000.00")</span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

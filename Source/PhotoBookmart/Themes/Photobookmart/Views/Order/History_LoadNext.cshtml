@@ -1,0 +1,31 @@
+﻿@model List<Order_History>
+@{
+    Layout = null;
+}
+@foreach (var item in Model)
+{
+    var dir = item.Direction;
+    var thumb = "content/default_chat_avatar.png";
+    if (!string.IsNullOrEmpty(item.UserAvatar))
+    {
+        // use this avatar
+        thumb = item.UserAvatar;
+    }
+
+    // if from system then dir = right
+    <div class="chat-item @dir">
+        <a href="#" class="pull-@dir thumb-sm avatar">
+            <img src="/@thumb" alt="" /></a>
+        <div class="chat-body">
+            <div class="panel b-light text-sm m-b-none">
+                <div class="panel-body">
+                    <span class="arrow @dir"></span>
+                    <p class="m-b-none">
+                        @Html.Raw(item.Content.Replace("\r\n", "<br />"))
+                    </p>
+                </div>
+            </div>
+            <small class="text-muted">@item.OnDateFormat - @item.UserName@if (item.isPrivate) { <span> - <i class="icol-wall-brick" title="This is a private message"></i></span> }</small>
+        </div>
+    </div>
+}

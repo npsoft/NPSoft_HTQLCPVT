@@ -1,0 +1,310 @@
+﻿@model BaoCao_DSChiTraTroCapModel
+@{
+    ViewBag.Title = "DS Chi trả trợ cấp";
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<div class="head">
+    <h3>Danh sách chi trả trợ cấp</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-calendar"></i>Thông tin chung</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("BaoCao_DSChiTraTroCap", "OrderReport", FormMethod.Post, new { enctype = "multipart/form-data", @id = "BaoCao_DSChiTraTroCap", @class = "mws-form" }))
+        {
+            <input type="hidden" name="Action" value="download" />
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-3-8">
+                            <label class="mws-form-label">Tháng, Năm</label>
+                            <div class="mws-form-item">
+                                <div class="mws-form-row">
+                                    <div class="mws-form-cols">
+                                        <div class="mws-form-col-3-8">
+                                            <div class="mws-form-item">
+                                                <select name="Thang" class="mws-select2 large"></select>
+                                            </div>
+                                        </div>
+                                        <div class="mws-form-col-5-8">
+                                            <div class="mws-form-item">
+                                                <select name="Nam" class="mws-select2 large"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mws-form-col-5-8">
+                            <label class="mws-form-label">Tỉnh, Huyện</label>
+                            <div class="mws-form-item">
+                                <div class="mws-form-row">
+                                    <div class="mws-form-cols">
+                                        <div class="mws-form-col-4-8">
+                                            <div class="mws-form-item">
+                                                <select name="Tinh" class="mws-select2 large" @if (CurrentUser.HasRole(RoleEnum.Province) || CurrentUser.HasRole(RoleEnum.District)) {<text> disabled="disabled" </text>}>
+                                                    <option value="">- - Chọn - -</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mws-form-col-4-8">
+                                            <select name="Huyen" class="mws-select2 large" @if (CurrentUser.HasRole(RoleEnum.District)) {<text> disabled="disabled"</text>}>
+                                                <option value="">- - Chọn - -</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">Loại DT</label>
+                    <div class="mws-form-item">
+                        <select name="LoaiDTs" class="mws-select2 large" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <div class="mws-panel mws-collapsible mws-collapsed">
+                        <div class="mws-panel-header">
+                            <span><i class="icon-table"></i>Danh sách xã</span>
+                        </div>
+                        <div class="mws-panel-toolbar">
+                            <div class="btn-toolbar table">
+                                <input type="checkbox" data-action="check-uncheck-all" class="table-cell" />
+                                <span class="table-cell">Chọn tất cả / Bỏ chọn tất cả</span>
+                            </div>
+                        </div>
+                        <div class="mws-panel-body no-padding listuser">
+                            <table class="mws-table" id="ListTable">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:center; width:50px;">Duyệt?</th>
+                                        <th style="text-align:center; width:100px;">Mã</th>
+                                        <th style="text-align:left;">Tên</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" data-action="download" value="Tải về" class="btn btn-danger" />
+                <input type="button" data-action="preview" value="Xem BC" class="btn btn-primary" />
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    var code_province = "@CurrentUser.MaHC.GetCodeProvince()";
+    var code_district = "@CurrentUser.MaHC.GetCodeDistrict()";
+    var $frm_report1, $hdf_action1, $ddl_thang1, $ddl_nam1, $ddl_huyen1, $ddl_tinh1, $ddl_loaidt1, $chk_all1;
+
+    function FreshListVillage(_data) {
+        var $tbl = $(".listuser #ListTable");
+        $tbl.DataTable().fnDestroy();
+        $tbl.removeAttr("style");
+        $tbl.find("tbody").children().remove();
+        _data.forEach(function (village, index, array) {
+            $tbl.find("tbody").append('<tr>' +
+                '<td style="text-align:center; width:50px;"><span><input type="checkbox" name="Villages" value="{0}" /></span></td>'.format(village.MaHC) +
+                '<td style="text-align:center; width:100px;"><span>{0}</span></td>'.format(village.MaHC) +
+                '<td style="text-align:left;"><span>{0}</span></td>'.format(village.TenHC) +
+                '</tr>');
+        });
+        if ($.fn.dataTable) {
+            $tbl.dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [999],
+                "aaSorting": []
+            });
+        }
+        $chk_all1.prop("checked", _data.length != 0).trigger("change");
+    };
+
+    function InitCtrl(_data) {
+        $frm_report1 = $("#BaoCao_DSChiTraTroCap");
+        $hdf_action1 = $frm_report1.find("[name='Action']");
+        $ddl_thang1 = $frm_report1.find("[name='Thang']");
+        $ddl_nam1 = $frm_report1.find("[name='Nam']");
+        $ddl_huyen1 = $frm_report1.find("[name='Huyen']");
+        $ddl_tinh1 = $frm_report1.find("[name='Tinh']");
+        $ddl_loaidt1 = $frm_report1.find("[name='LoaiDTs']");
+        $chk_all1 = $frm_report1.find("[data-action='check-uncheck-all']");
+    };
+
+    function InitEvent(_data) {
+        $ddl_nam1.on("change", function (e) {
+            var years = [];
+            var val = parseInt(e.val);
+            for (var i = val - 10; i < val + 11; i++) {
+                years.push({ id: i, name: i });
+            }
+            RefillDataForSelect2({ $ddl: $ddl_nam1, val: e.val, data: years, id: "id", name: "name", frst_child: false });
+        });
+
+        $ddl_tinh1.on("change", function (e) {
+            var data = { MaHC: e.val };
+            if (IsNullOrEmpty(data.MaHC)) {
+                RefillDataForSelect2({ $ddl: $ddl_huyen1, val: "", data: [], id: "MaHC", name: "TenHC" });
+                $ddl_huyen1.trigger("change");
+            } else {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, data, function (_data) {
+                    RefillDataForSelect2({ $ddl: $ddl_huyen1, val: "", data: _data, id: "MaHC", name: "TenHC" });
+                    $ddl_huyen1.trigger("change");
+                });
+            }
+        });
+
+        $ddl_huyen1.on("change", function (e) {
+            var data = { MaHC: e.val };
+            if (IsNullOrEmpty(data.MaHC)) {
+                FreshListVillage([]);
+            } else {
+                $.post(SVC_GETVILLAGESBYDISTRICT, data, function (_data) {
+                    FreshListVillage(_data);
+                });
+            }
+        }).on("open", function (e) {
+            if (IsNullOrEmpty($ddl_tinh1.val())) {
+                notify_info("Thông báo", "Vui lòng chọn tỉnh trước.");
+                setTimeout(function () { $ddl_tinh1.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $chk_all1.on("change", function (e) {
+            $(".listuser #ListTable input[name='Villages']").prop("checked", $chk_all1.prop("checked"));
+        });
+
+        $frm_report1.find("[data-action='download']").on("click", function (e) {
+            $hdf_action1.val("download");
+            $frm_report1.trigger("submit");
+            return false;
+        });
+
+        $frm_report1.find("[data-action='preview']").on("click", function (e) {
+            $hdf_action1.val("preview");
+            $frm_report1.trigger("submit");
+            return false;
+        });
+
+        $frm_report1.on("submit", function (e) {
+            var data = $frm_report1.serializeObject();
+            if (IsNullOrEmpty($ddl_thang1.val())) {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn tháng.",
+                    type: "info",
+                    opacity: .8
+                });
+                setTimeout(function () { $ddl_thang1.select2("open"); }, 200);
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_nam1.val())) {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn năm.",
+                    type: "info",
+                    opacity: .8
+                });
+                setTimeout(function () { $ddl_nam1.select2("open"); }, 200);
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_tinh1.val())) {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn tỉnh.",
+                    type: "info",
+                    opacity: .8
+                });
+                setTimeout(function () { $ddl_tinh1.select2("open"); }, 200);
+                return false;
+            }
+            if (IsNullOrEmpty($ddl_huyen1.val())) {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn huyện.",
+                    type: "info",
+                    opacity: .8
+                });
+                setTimeout(function () { $ddl_huyen1.select2("open"); }, 200);
+                return false;
+            }
+            if (typeof data.LoaiDTs === "undefined") {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn loại đối tượng.",
+                    type: "info",
+                    opacity: .8
+                });
+                setTimeout(function () { $ddl_loaidt1.select2("open"); });
+                return false;
+            }
+            if (typeof data.Villages === "undefined") {
+                $.pnotify({
+                    title: "Thông báo",
+                    text: "Vui lòng chọn xã.",
+                    type: "info",
+                    opacity: .8
+                });
+                if ($frm_report1.find(".mws-collapsible").hasClass("mws-collapsed")) { $frm_report1.find(".mws-collapsible .mws-collapse-button span").trigger("click"); }
+                return false;
+            }
+            SubmitWithoutAjax({ action: $frm_report1.attr("action"), method: "post", target: data.Action == "preview" ? "_blank" : "_self", data: data });
+            return false;
+        });
+    };
+
+    function InitData(_data) {
+        var months = [], years = [];
+        for (var i = 1; i < 13; i++) {
+            months.push({ id: i, name: i });
+        }
+        var val = new Date().getFullYear();
+        for (var i = val - 10; i < val + 11; i++) {
+            years.push({ id: i, name: i });
+        }
+        RefillDataForSelect2({ $ddl: $ddl_thang1, val: new Date().getMonth() + 1, data: months, id: "id", name: "name", frst_child: false });
+        RefillDataForSelect2({ $ddl: $ddl_nam1, val: new Date().getFullYear(), data: years, id: "id", name: "name", frst_child: false });
+
+        $.post(SVC_GETALLPROVINCES, {}, function (_data) {
+            RefillDataForSelect2({ $ddl: $ddl_tinh1, val: code_province, data: _data, id: "MaHC", name: "TenHC" });
+            if (!IsNullOrEmpty(code_province)) {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, { MaHC: code_province }, function (_data) {
+                    RefillDataForSelect2({ $ddl: $ddl_huyen1, val: code_district, data: _data, id: "MaHC", name: "TenHC" });
+                    if (!IsNullOrEmpty(code_district)) {
+                        $.post(SVC_GETVILLAGESBYDISTRICT, { MaHC: code_district }, function (_data) {
+                            FreshListVillage(_data);
+                        });
+                    } else {
+                        FreshListVillage([]);
+                    }
+                });
+            } else {
+                $ddl_huyen1.select2().select2("val", code_district);
+                FreshListVillage([]);
+            }
+        });
+
+        $.post(SVC_GETALLTYPESOBJ, {}, function (_data) {
+            var vals = [];
+            _data.forEach(function (group, index, array) {
+                vals.push(group.Key.MaLDT);
+                $ddl_loaidt1.append($("<option>", { value: group.Key.MaLDT, text: group.Key.MaLDT + " - " + group.Key.TenLDT }));
+            });
+            $ddl_loaidt1.val(vals).trigger("change");
+        });
+    };
+
+    jQuery(document).ready(function ($) {
+        InitCtrl({});
+        InitEvent({});
+        InitData({});
+    });
+</script>

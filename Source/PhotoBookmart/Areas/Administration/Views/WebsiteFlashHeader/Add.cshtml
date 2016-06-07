@@ -1,0 +1,87 @@
+﻿@model Site_FlashHeader
+@{  
+    var Langname = ViewData["LangName"].ToString();
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit flash header / " + Langname;
+    }
+    else
+    {
+        ViewBag.Title = "Add flash header / " + Langname;
+    }
+    var Languages = (List<Language>)ViewData["Langs"];
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        jQuery("#UserForm").submit(function () {
+            if (jQuery("#Content").val() == "") {
+                alert("Please enter flash header » Content");
+                jQuery("#Content").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteFlashHeader", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.BannerIndex);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Content</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Content, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Link to</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.LinkTo, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Language</label>
+                    <div class="mws-form-item">
+                        <select name="LanguageCode">
+                            @foreach (var x in Languages)
+                            {
+                                <option value="@x.LanguageCode" @if (x.LanguageCode == Model.LanguageCode)
+                                                                {<text> selected</text>}>@x.LanguageName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

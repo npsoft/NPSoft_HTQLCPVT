@@ -1,0 +1,82 @@
+﻿@model PhotoBookmart.Models.PaginationModel
+@{
+    Layout = null;
+    var start_left = Model.page - 5;
+    var start_right = Model.page + 5;
+    if (start_left < 1)
+    {
+        start_left = 1;
+    }
+    if (start_right > Model.pages)
+    {
+        start_right = Model.pages;
+    }
+    var show_from = (Model.page - 1) * Model.per_page + 1;
+    var show_to = show_from + Model.per_page - 1;
+    if (show_to > Model.total_items)
+    {
+        show_to = Model.total_items;
+    }
+}
+@functions{
+    public string buildLink(int page)
+    {
+        if (Model.route.ContainsKey("page"))
+        {
+            Model.route["page"] = page;
+        }
+        else
+        {
+            Model.route.Add("page", page);
+        }
+        return Url.Action(Model.action, Model.controller, Model.route);
+    }
+}
+<!--pagination-->
+<div class="dataTables_info">
+    Showing @show_from to @show_to of @Model.total_items entries</div>
+<div class="dataTables_paginate paging_full_numbers">
+    @if (Model.page > 1)
+    {
+        <a href='@buildLink(1)' class="first paginate_button">@T("system.pagination.first")</a>
+        <a href='@buildLink(Model.page - 1)' class="previous paginate_button">@T("system.pagination.previous")</a>
+    }
+    else
+    {
+        <a href='javascript:void(0)' class="first paginate_button paginate_button_disabled">@T("system.pagination.first")</a>
+        <a href='javascript:void(0)' class="previous paginate_button paginate_button_disabled">@T("system.pagination.previous")</a>
+    }
+    <span>
+    @if (start_left > 1)
+    {
+        <a href='javascript:void(0)' class="paginate_button">...</a>
+    }
+    @for (int i = start_left; i <= start_right; i++)
+    {
+        if (Model.page == i)
+        {
+            <a tabindex="0" class="paginate_active">@i</a>
+        }
+        else
+        {
+            <a href='@buildLink(i)' class="paginate_button" title="@T("system.pagination.goto_page") @i">@i</a>
+        }
+
+    }
+    @if (start_right < Model.pages)
+    {
+        <a href='javascript:void(0)' class="paginate_button">...</a>
+    }
+    </span>
+    @if (Model.page < Model.pages)
+    {
+        <a href='@buildLink(Model.page + 1)' class="next paginate_button">@T("system.pagination.next")</a>
+        <a href='@buildLink(Model.pages)' class="last paginate_button ">@T("system.pagination.last")</a>
+    }
+    else
+    {
+        <a href='javascript:void(0)' class="next paginate_button paginate_button_disabled">@T("system.pagination.next")</a>
+        <a href='javascript:void(0)' class="last paginate_button paginate_button_disabled">@T("system.pagination.last")</a>
+    }
+</div>
+<!--pagination end-->

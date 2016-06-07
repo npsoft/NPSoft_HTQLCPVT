@@ -1,0 +1,608 @@
+﻿@using PhotoBookmart.DataLayer.Models.System;
+@model NewOrderModel
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.Full.cshtml";
+    ViewBag.Title = "New Order";
+    var cats = Db.Select<Product_Category>(x => x.Where(y => y.Status).OrderBy(z => z.OrderIndex));
+    //var products = (List<Product>)ViewData["Products"];
+    var country = Db.Select<Country>();
+    var user = CurrentUser;
+    var product = Db.Select<Product>(x => x.Where(y => y.Id == Model.Product_Id).Limit(1)).FirstOrDefault();
+    var cat = cats.Where(x => x.Id == product.CatId).FirstOrDefault();
+    if (cat != null)
+    {
+        product.Category_Name = cat.Name;
+    }
+    else
+    {
+        product.Category_Name = "";
+        cat = new Product_Category();
+    }
+
+    var request_code = ViewData["RequestCode"];
+
+    // currency
+    var currency = DefaultCurrency;
+    var c = country.Where(x => x.Code == CurrentUser.Country).FirstOrDefault();
+    if (c != null)
+    {
+        currency = c.CurrencyCode;
+    }
+
+    // predefine
+    Model.Billing_Address = user.Addr;
+    Model.Billing_City = user.City;
+    Model.Billing_Company = "";
+    Model.Billing_Country = user.Country;
+    Model.Billing_Email = user.Email;
+    Model.Billing_FirstName = user.FirstName;
+    Model.Billing_LastName = user.LastName;
+    Model.Billing_Phone = user.Phone;
+    Model.Billing_ZipCode = user.PostalCode;
+    Model.Billing_State = user.States;
+
+    // get the cover materials
+    List<ProductCategoryMaterial> cat_material = null;
+    List<ProductCategoryMaterialDetail> marterials = null;
+    if (product.IsAllowCoverMaterialSelect)
+    {
+        cat_material = Db.Where<ProductCategoryMaterial>(x => x.IsActive && x.ProductCategoryId == cat.Id);
+        marterials = new List<ProductCategoryMaterialDetail>();
+        if (cat_material.Count > 0)
+        {
+            marterials = Db.Where<ProductCategoryMaterialDetail>(x => x.IsActive);
+        }
+    }
+
+    // the gst
+    var use_gst = ((int)Settings.Get(Enum_Settings_Key.WEBSITE_GST_ENABLE, 0, Enum_Settings_DataType.Int)) == 1;
+
+    //
+    Db.Close();
+}
+@section _TitleMain {
+    <a href='@Url.Action("NewOrder", "Product")' rel='contact-us' title='Permanent Link: @T("fe.product.neworder.title")'>@T("fe.product.neworder.title")</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">@T("fe.product.neworder.title")</span>
+}
+<link rel="stylesheet" href="@Url.ContentTheme("Content/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.css")" />
+<script src="@Url.ContentTheme("Content/elevatezoom/jquery.elevateZoom-3.0.8.min.js")" type="text/javascript"></script>
+<script src="@Url.ContentTheme("Content/scripts/jquery.json.min.js")" type="text/javascript"></script>
+<script src="@Url.ContentTheme("Content/jquery.fancybox-1.3.4/fancybox/jquery.fancybox-1.3.4.js")"></script>
+@using (Html.BeginForm("SubmitOrder", "Product", FormMethod.Post, new { enctype = "multipart/form-data", @id = "NewOrderForm", @class = "mws-form checkout", @target = "_blank" }))
+{
+    @Html.HiddenFor(x => x.Preset_Options)
+    <input type="hidden" name="Options" id="Options" value="" />
+    <input type="hidden" id="SecCheck" value="1" />
+    <h3 id="order_review_heading">
+        Your order</h3>
+    if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+    <div id="neworder_error">
+        @Html.Raw(ViewBag.Error)
+    </div>
+    }
+    <input type="hidden" name="RequestCode" value="@request_code" />
+@* Product Info and Option*@
+    <table border="0" cellspacing="0" cellpadding="3">
+        <tbody>
+            <tr>
+                <td>
+                </td>
+                <td width="15%">
+                    <strong>Price</strong>
+                </td>
+                <td width="15%">
+                    <strong>Quantity</strong>
+                </td>
+                <td width="15%">
+                    <strong>Total</strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" bgcolor="#e6e8eb">
+                    <strong>Product</strong>
+                </td>
+            </tr>
+            <tr valign="top">
+                <td valign="top">
+                    @* <select name="Product_Id" id="Product_Id" class="form-control no_border full_width select2">
+                        @foreach (var cat_item in cats)
+                        {
+                            <optgroup label="@cat_item.Name">
+                                @foreach (var item in products.Where(x => x.CatId == cat_item.Id).OrderBy(k => k.Order).ToList())
+                                {
+                                    <option value="@item.Id" @if (item.Id == Model.Product_Id)
+                                                             {<text>selected</text>}>@item.Name
+                                        - @item.Size</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>*@ <span>@product.Name - @product.Size</span>
+                    <br />@product.Category_Name
+                    <input type="hidden" name="Product_Id" id="Product_Id" value="@product.Id" />
+                    @if (string.IsNullOrEmpty(Model.PhotobookCode))
+                    { 
+                        <div class="mv-20 order_appcode">
+                            <label>
+                                Photobook Code
+                                <abbr class="required" title="required">
+                                    *</abbr></label>
+                            @Html.TextBoxFor(mbox => mbox.PhotobookCode, new { @class = "requiredField form-control no-margin appcode_field" })
+                        </div>
+                    }
+                    else
+                    {
+                        @Html.HiddenFor(model => model.PhotobookCode)
+                    }
+                </td>
+                <td valign="top" id="product_price">
+                    &nbsp;
+                </td>
+                <td valign="top" id="product_quantity" style="text-align: center;">
+                </td>
+                <td valign="top" id="product_price2">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Shipping
+                </td>
+                <td id="shipping_price">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td id="shipping_total">
+                </td>
+            </tr>
+            <tr id="option_wrapper" style="display: none;">
+                <td colspan="4" bgcolor="#e6e8eb">
+                    <strong>Options</strong>
+                </td>
+            </tr>
+            @if (cat_material != null && cat_material.Count > 0)
+            {
+                var marterial_first_row = true;
+                <tr>
+                    <td colspan="4" bgcolor="#e6e8eb">
+                        <strong>Your choice of colour for cover</strong>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <td valign="top" style="vertical-align: top;">
+                        <select class="form-control no_border full_width" id="cover_marterial_select2" name="Cover_Marterial">
+                            @foreach (var cm in cat_material)
+                            {
+                                <optgroup label="@cm.Name">
+                                    @foreach (var m in marterials.Where(k => k.ProductCategoryMaterialId == cm.Id))
+                                    {
+                                        <option value="@m.Id" img="@m.Thumbnail" @if (marterial_first_row)
+                                                                                 {
+                                                                                     marterial_first_row = false;
+                                                                                      <text>selected</text> }>
+                                            @m.Name
+                                        </option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                    </td>
+                    <td valign="top" colspan="3">
+                        <div class="one_half" id="marterial_preview">
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <input type="hidden" value="0" name="Cover_Marterial" />
+            }
+            <tr valign="top">
+                <td valign="top" bgcolor="#e6e8eb">
+                    <strong>Sub Total</strong>
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top" id="subtotal">
+                </td>
+            </tr>
+            <tr valign="top">
+                <td valign="top" bgcolor="#e6e8eb">
+                    <strong>Quantity (number of copies)</strong><br>
+                    <i>* For voucher redemption, 1 voucher is valid for 1 copy of photobook redemption only</i>
+                </td>
+                <td valign="top">
+                    &nbsp;
+                    <input type="hidden" name="Quantity" id="Quantity" value="1" />
+                </td>
+                <td valign="top" id="quantity_adjust" class="option_quantity_field">
+                    <input type="button" class="quantity_handler option_minus" /><span>1 </span>
+                    <input type="button" class="quantity_handler option_plus" />
+                </td>
+                <td valign="top" id="quantity_display">
+                    2
+                </td>
+            </tr>
+            <tr valign="top">
+                <td valign="top" bgcolor="#e6e8eb">
+                    <strong>Grand total</strong>
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top" id="grandtotal">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" bgcolor="#e6e8eb">
+                    <strong>Coupon / Promotion Code</strong>
+                </td>
+            </tr>
+            <tr valign="top">
+                <td valign="top">
+                    <img src="@Url.ContentTheme("Content/images/discount.png")" style="float: left; margin-right: 15px; width: 54px;" />
+                    <div class="col-md-4" id="coupon_form">
+                        <div>
+                            <label>
+                                Coupon Code</label><input class="requiredField form-control " id="CouponCode" name="CouponCode"
+                                    type="text" value="" style="min-width: 70px !important; display: inline; margin-bottom: 0px;" />
+                        </div>
+                        <input id="CouponSecrect" name="CouponSecrect" type="hidden" value="" />
+                        <input type="button" name="validateCoupon" id="validateCoupon" value="Validate" class="btn submit" />
+                    </div>
+                    <div id="coupon_code_result">
+                        <div style="margin-bottom: 20px;">
+                        </div>
+                        @*<img src="@Url.ContentTheme("Content/images/coupon_cancel.png")" alt="Remove coupon" title="Remove coupon" style="width: 16px;" />*@<span
+                            id="remove_coupon_handler" style="color: #5187FC; font-size: 12px; cursor: pointer;
+                            text-decoration: underline;">Remove Coupon</span>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </td>
+                <td valign="top">
+                </td>
+                <td valign="top">
+                </td>
+                <td valign="top" id="discount_amount" class="coupon_discount">
+                </td>
+            </tr>
+            @if (use_gst)
+            {
+                <tr valign="top">
+                    <td valign="top" bgcolor="#e6e8eb">
+                        <strong>GST - 6%</strong>
+                    </td>
+                    <td valign="top">
+                        &nbsp;
+                    </td>
+                    <td valign="top">
+                        &nbsp;
+                    </td>
+                    <td valign="top" id="gst">
+                    </td>
+                </tr>
+            }
+            <tr valign="top">
+                <td valign="top" bgcolor="#e6e8eb">
+                    <strong>Order Total</strong>
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top">
+                    &nbsp;
+                </td>
+                <td valign="top" id="bill_total">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+@* End Product Info & Option *@
+    @Html.Action("Embed", "Topic", new { header = false, ignore_on_error = true, id = "New_Order_MiddlePage_Instruction" })
+    <br />
+@* Billing & Shipping *@
+    <div class="container mv-20">
+        <div class="units first billing_address_block">
+            <h3>
+                Billing Details</h3>
+            <div class="row">
+                <!-- Billing Country -->
+                <div class="row">
+                    <label for="Billing_Country" class="">
+                        Country:
+                        <abbr class="required" title="required">
+                            *</abbr></label>
+                    <select class="form-control no_border full_width select2">
+                        @foreach (var co in country)
+                        {
+                            <option value="@co.Code" @if (user.Country == co.Code)
+                                                     {<text>selected</text>}
+                                                     else
+                                                     { <text>disabled</text>} >@co.Name</option>
+                        }
+                    </select>
+                    <input type="hidden" name="Billing_Country" id="Billing_Country" value="@user.Country" />
+                </div>
+                <!-- Firstname , last name -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            First Name<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_FirstName, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Last Name<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_LastName, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <!-- Company -->
+                <div>
+                    <label>
+                        Company</label>
+                    @Html.TextBoxFor(mbox => mbox.Billing_Company, new { @class = "requiredField form-control" })
+                </div>
+                <!-- Address / State -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            Address<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_Address, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <input type=hidden id="country_states_default" value="@Model.Billing_State" />
+                        <label>
+                            State<abbr class="required" title="required">
+                                *</abbr></label>
+                        <div id="states_container">
+                            @*@Html.TextBoxFor(mbox => mbox.Billing_State, new { @class = "requiredField form-control" })*@
+                        </div>
+                    </div>
+                </div>
+                <!--  City / zip -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            City
+                            <abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_City, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Postcode / Zip<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_ZipCode, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <!-- Email & phone -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            Email<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_Email, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Phone number<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Billing_Phone, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <div class="row">
+                    <label>
+                        Order Notes</label>
+                    @Html.TextBoxFor(mbox => mbox.OrderNote, new { @class = "requiredField form-control" })
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="Shipping_IsDifferencewithBillingAddress" id="Shipping_IsSamewithBillingAddress"
+            value="false" />
+        @*<div class="six units ">
+            <h3>
+                Ship to a different address?
+                </h3>
+            <div class="row">
+                <label for="ShippingMethod" class="">
+                    Shipping Method
+                    <abbr class="required" title="required">
+                        *</abbr></label>
+                <select name="ShippingMethod" id="ShippingMethod" class="form-control no_border full_width select2">
+                    <option value="@Enum_ShippingType.Aramex" @if (Model.ShippingMethod == Enum_ShippingType.Aramex)
+                                                              { <text>checked</text>}  >Aramex</option>
+                    <option value="@Enum_ShippingType.DHL" @if (Model.ShippingMethod == Enum_ShippingType.DHL)
+                                                           { <text>checked</text>}  >DHL</option>
+                    <option value="@Enum_ShippingType.TNT" @if (Model.ShippingMethod == Enum_ShippingType.TNT)
+                                                           { <text>checked</text>}  >TNT</option>
+                </select>
+            </div>
+            <div class="row shipping_address_block" style="display: none;">
+                <!-- Shipping Country -->
+                <div class="row">
+                    <label for="Shipping_Country" class="">
+                        Country
+                        <abbr class="required" title="required">
+                            *</abbr></label>
+                    <select name="Shipping_Country" id="Shipping_Country" class="form-control no_border full_width select2">
+                        @foreach (var c in country)
+                        {
+                            
+                            <option value="@c.Code">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <!-- Firstname , last name -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            First Name<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_FirstName, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Last Name<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_LastName, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <!-- Company -->
+                <div>
+                    <label>
+                        Company</label>
+                    @Html.TextBoxFor(mbox => mbox.Shipping_Company, new { @class = "requiredField form-control" })
+                </div>
+                <!-- Address -->
+                <div>
+                    <label>
+                        Address<abbr class="required" title="required">
+                            *</abbr></label>
+                    @Html.TextBoxFor(mbox => mbox.Shipping_Address, new { @class = "requiredField form-control" })
+                </div>
+                <!-- State / City / zip -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            City
+                            <abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_City, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Postcode / Zip<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_ZipCode, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <!-- Email & phone -->
+                <div>
+                    <div class="one_half first ">
+                        <label>
+                            Email<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_Email, new { @class = "requiredField form-control" })
+                    </div>
+                    <div class="one_half">
+                        <label>
+                            Phone number<abbr class="required" title="required">
+                                *</abbr></label>
+                        @Html.TextBoxFor(mbox => mbox.Shipping_Phone, new { @class = "requiredField form-control" })
+                    </div>
+                </div>
+                <!-- end of shipping -->
+            </div>
+        </div>*@
+    </div> 
+@* End billing and shipping *@
+@* Payment section *@
+    <h3>
+        Payment methods</h3>
+    <div id="payment">
+        <ul class="payment_methods methods">
+            @* <li class="payment_method_bacs">
+                <input id="payment_method_bacs" type="radio" class="input-radio" name="PaymentMethod"
+                    value="@Enum_PaymentMethod.Bank_Check" checked="checked" data-order_button_text="">
+                <label for="payment_method_bacs">
+                    Direct Bank Transfer
+                </label>
+                <div class="payment_box payment_method_bacs">
+                    <p>
+                        Make your payment directly into our bank account. Please use your Order ID as the
+                        payment reference. Your order won’t be shipped until the funds have cleared in our
+                        account.</p>
+                </div>
+            </li>
+            <li class="payment_method_cheque">
+                <input id="payment_method_cheque" type="radio" class="input-radio" name="PaymentMethod"
+                    value="@Enum_PaymentMethod.Cheque" data-order_button_text="">
+                <label for="payment_method_cheque">
+                    Cheque Payment
+                </label>
+                <div class="payment_box payment_method_cheque" style="display: none;">
+                    <p>
+                        Please send your cheque to Store Name, Store Street, Store Town, Store State / County,
+                        Store Postcode.</p>
+                </div>
+            </li>*@
+            <li class="payment_method_ipay">
+                <input id="payment_method_ipay" type="radio" class="input-radio" checked="checked" name="PaymentMethod"
+                    value="@Enum_PaymentMethod.iPay88" data-order_button_text="" >
+                <label for="payment_method_ipay">
+                    iPay88
+                    <img alt="iPay88" src="@Url.ContentTheme("Content/images/header-payment-gateways-ipay88.png")" />
+                </label>
+                <div class="payment_box payment_method_ipay">
+                    <p>
+                        Malaysia payment gateway, a service by iPay88 Sdn Bhd</p>
+                </div>
+            </li>
+            <li class="payment_method_paypal">
+                <input id="payment_method_paypal" type="radio" class="input-radio" name="PaymentMethod"
+                    value="@Enum_PaymentMethod.Paypal" data-order_button_text="Proceed to PayPal">
+                <label for="payment_method_paypal">
+                    PayPal
+                    <img src="@Url.ContentTheme("Content/images/paypal.png")"
+                        alt="PayPal"></label>
+                <div class="payment_box payment_method_paypal" style="display: none;">
+                    <p>
+                        Pay via PayPal; you can pay with your credit card if you don’t have a PayPal account</p>
+                </div>
+            </li>
+            <li class="lst-logo-payment">
+                <ul>
+                    <li>
+                        <a rel="#" href="javascript:void(0);">
+                            <img alt="mastercard" src="@Url.ContentTheme("Content/images/logo_mastercard.png")" />
+                        </a>
+                    </li>
+                    <li>
+                        <a rel="#" href="javascript:void(0);">
+                            <img alt="visa" src="@Url.ContentTheme("Content/images/logo_visa.jpg")" />
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <div class="clear">
+        </div>
+    </div>
+@* End of Payment*@ 
+    
+@*<div class="col-md-12 mb-20">
+        @Html.Raw(Html.GenerateCaptcha())
+    </div>*@
+    <br />
+    <div class="col-md-12 mb-20">
+        <input type="checkbox" id="AcceptTermCondition" />&nbsp;I accept the Photobookmart
+        Terms & Contiditions when submit my order.
+        <br />
+        <br />
+        <input type="submit" name="sendMessage" value="Place your order" class="btn btn-primary submit">
+    </div>
+    <span></span>
+}
+<script language="javascript" type="text/javascript">
+    var currency_sign = "@currency";
+    var countrycode = "@c.Code";
+    var urlTheme = "@Url.ContentTheme("/")";
+</script>
+@{
+    Db.Close();
+}

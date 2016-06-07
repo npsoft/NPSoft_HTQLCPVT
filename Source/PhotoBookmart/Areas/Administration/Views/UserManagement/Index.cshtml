@@ -1,0 +1,95 @@
+﻿@model PhotoBookmart.Areas.Administration.Models.UserSearchModel
+@{
+    ViewBag.Title = "QL Người dùng";
+    int page = (int)ViewData["page"];
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<script>
+    function UpdateSearch(data) {
+        if (data.result_type == "excel") {
+            jQuery("#ReportForm").submit();
+            return;
+        }
+        var page = typeof data.page !== "undefined" ? data.page : 1;
+        var search_term = $("#SearchKey").val();
+        var user_status = $("#UserStatus").val();
+        var user_role = $("#UserRole").val();
+        var result_type = typeof data.result_type !== "undefined" ? data.result_type : "list";
+        show_loading();
+        $.post("/Administration/UserManagement/FullSearch", {
+            Page: page,
+            SearchKey: search_term,
+            UserStatus: user_status,
+            UserRole: user_role,
+            ResultType: result_type
+        }, function (data) {
+            hide_loading();
+            if (result_type == "list") {
+                $(".listuser").html(data);
+            }
+        });
+    };
+
+    jQuery(document).ready(function ($) {
+        $("#UserRole, #UserStatus").change(function () {
+            UpdateSearch({});
+        });
+
+        $("#SearchKey").keypress(function (event) {
+            if (event.which == 13) {
+                UpdateSearch({});
+                return false;
+            }
+        });
+
+        $("#DownloadExcel").click(function () {
+            $("#ResultType").val("excel");
+            UpdateSearch({ result_type: "excel" });
+        });
+    });
+</script>
+<div class="head">
+    <h3>Quản lý người dùng</h3>
+    <div>
+        <form id="ReportForm" method=post action="@Url.Action("FullSearch")" class="mws-form">
+            <div class="mws-panel-toolbar">
+                <div class="btn-toolbar">
+                    <div class="btn-group">
+                        <a class="btn" rel="#" href="@Url.Action("Detail", "Website", new { id = 1 })">
+                            <i class="icol-arrow-left"></i>Trang chủ
+                        </a>
+                        <a class="btn" href="@Url.Action("Add","UserManagement")">
+                            <i class="icol-add"></i>Thêm mới
+                        </a>
+                        <!-- TODO:...
+                        <a class="btn" href="javascript:void(0)" id="DownloadExcel">
+                            <i class="icol-page-white-excel"></i>Export Excel
+                        </a>-->
+                    </div>
+                </div>
+            </div>
+            <div class="mws-panel no_shadow">
+                <input id="SearchKey" type="text" name="SearchKey" placeholder="Nhập từ khóa tìm kiếm" />
+                <select id="UserStatus" name="UserStatus">
+                    <option value="">- - Tình trạng - -</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="de-active">Không hoạt động</option>
+                </select>
+                @Html.DropDownList("UserRole")
+            </div>
+            <div class="clear"></div>
+            <input type="hidden" name="ResultType" id="ResultType" value="" />
+        </form>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Danh sách người dùng</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        <div id="ListTable_wrapper" class="dataTables_wrapper WDTB_instance listuser" role="grid">
+            @Html.Action("List", "UserManagement", new { page = page })
+        </div>
+    </div>
+</div>

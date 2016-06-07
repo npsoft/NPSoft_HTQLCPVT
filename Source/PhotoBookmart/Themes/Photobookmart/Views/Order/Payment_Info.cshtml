@@ -1,0 +1,67 @@
+﻿@model Order
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li>
+                <div class="title">
+                    Payment Status</div>
+                <div class="text">@Model.PaymentStatusEnum.DisplayName()
+                </div>
+            </li>
+            <li>
+                <div class="title">
+                    Payment Method</div>
+                <div class="text">@Model.PaymentMethod.DisplayName()</div>
+            </li>
+            @if ((Enum_PaymentStatus)Model.PaymentStatus == Enum_PaymentStatus.Paid)
+            {
+                <li>
+                    <div class="title">
+                        Paid On</div>
+                    <div class="text">@Model.PaidDate</div>
+                </li>
+                if (Model.PaymentMethod == Enum_PaymentMethod.Paypal || Model.PaymentMethod == Enum_PaymentMethod.iPay88)
+                {
+                <li>
+                    <div class="title">
+                        Transaction id</div>
+                    <div class="text">
+                        @Model.Payment_AuthorizationTransactionId &nbsp;
+                    </div>
+                </li>
+                }
+                else if (Model.PaymentMethod == Enum_PaymentMethod.Bank_Check)
+                {
+                <li>
+                    <div class="title">
+                        Bank check number</div>
+                    <div class="text">
+                        @Model.Payment_ChequeCheckNumber &nbsp;
+                    </div>
+                </li>
+                }
+                else if (Model.PaymentMethod == Enum_PaymentMethod.Cheque)
+                {
+                <li>
+                    <div class="title">
+                        Cheque number</div>
+                    <div class="text">
+                        @Model.Payment_ChequeCheckNumber &nbsp;
+                    </div>
+                </li>
+                }
+            }
+            <li style="text-align: center;">
+                <button class="btn btn-sm" type="button" onclick="javascript: OpenInNewTab('@Url.Action("OrderInvoiceDetail", "Product", new { id = Model.Order_Number })')">
+                    View Invoice</button>
+                @if ((Enum_PaymentStatus)Model.PaymentStatus != Enum_PaymentStatus.Paid && Model.Status > 0)
+                {
+                    <button class="btn btn-sm" type="button" onclick="javascript: OpenInNewTab('@Url.Action("Payment_Paypal", "Product", new { id = Model.Order_Number })')" >
+                        Pay with Paypal</button>    
+                    <button class="btn btn-sm" type="button" onclick="javascript: OpenInNewTab('@Url.Action("Payment_iPay88", "Product", new { id = Model.Order_Number })')">
+                        Pay with iPay88</button>    
+                }
+            </li>
+        </ul>
+    </div>
+</div>

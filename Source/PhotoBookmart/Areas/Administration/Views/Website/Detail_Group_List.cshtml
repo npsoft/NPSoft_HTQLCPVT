@@ -1,0 +1,104 @@
+﻿@model List<Site_MemberGroup>
+<script language=javascript>
+    jQuery(document).ready(function () {
+        $("a.group_delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Detail_Group_Delete")?id=" + item_id, function () {
+                    Group_Reload();
+                });
+            }
+        });
+
+        $("a.group_edit").click(function () {
+            var $this = $(this);
+            var item_id = $this.attr("item_id");
+            var status = $this.attr("status");
+            var tr=jQuery(this).parents("tr");
+
+            // set data before show dialog
+            jQuery("#GD_Id").val(item_id);
+            jQuery("#GD_Name").val(jQuery.trim(tr.children("td:eq(0)").children("span").text()));
+            if (status.toLowerCase() == "true")
+            {
+                jQuery("#GD_Status").attr("checked",true);
+            }
+            else{
+                jQuery("#GD_Status").attr("checked",false);
+            }
+
+            $("#Group_Dialog").dialog('option', 'title', 'Edit group');
+
+             $("#Group_Dialog").dialog('open');
+        });
+
+
+        // build table layout
+        if ($.fn.dataTable) {
+            $("#WDGroup").dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+    });
+</script>
+<table class="mws-table" id="WDGroup">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Created By
+            </th>
+            <th id="date_Create_column">
+                Created On
+            </th>
+            <th width="100px">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                    <span>
+                    <a href="@Url.Action("Index","MembershipGroup", new { group_id = item.Id })" class="black_color" target="_blank">
+                    @item.Name
+                    </a>
+                    </span>
+                    </td>
+                    <td>
+                        <span>
+                           <input type="checkbox" disabled="disabled"  @if (item.Status) { <text> checked="checked"</text> } />
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.CreatedByUserName</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>
+                    <td>
+                        <span class="btn-group"><a  href="javascript:void(0)" item_id="@item.Id" status="@item.Status" class="btn btn-small group_edit" title="Edit @item.Name">
+                            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small group_delete" item_id="@item.Id" item_name="@item.Name" title="Delete @item.Name" >
+                                <i class="icon-trash"></i></a>
+                                <a  href="@Url.Action("Index","MembershipGroup", new { group_id = item.Id })" class="btn btn-small " title="Manage members for group @item.Name" target=_blank>
+                                <i class="icon-users"></i></a>
+                                </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

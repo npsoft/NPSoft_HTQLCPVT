@@ -1,0 +1,78 @@
+﻿@model ABUserAuth
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.User.cshtml";
+
+    ViewBag.Title = "Change Password";
+}
+
+@section _TitleMain {
+    <a href='@Url.Action("ChangePass", "User", new { })' rel='change-password' title='Permanent Link: Change Password'>Change Password</a>
+}
+
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">Change Password</span>
+}
+
+<form id="frmChangePass" name="frmChangePass" action="/User/ChangePass" method="post" enctype="multipart/form-data" class="ab-form ab-change-pass">
+    <div class="ab-title display-none">
+        <h2>Change Password</h2>
+    </div>
+    @if (ViewBag.Error != null)
+    {
+        <div class="ab-error">
+            @ViewBag.Error
+        </div>
+    }
+    <div class="display-none">
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Email)
+        @Html.HiddenFor(m => m.UserName)
+    </div>
+    <div>
+        <span>New password<span class="ab-required">*</span></span>
+        @Html.PasswordFor(m => m.PassNews, new { @class="ab-textbox" })
+    </div>
+    <div>
+        <span>Confirm password<span class="ab-required">*</span></span>
+        @Html.PasswordFor(m => m.ConfirmPassword, new { @class="ab-textbox" })
+    </div>
+    <div class="ab-action align-right">
+        <button type="submit" class="ab-submit">Submit</button>
+        <button type="reset" class="ab-reset">Reset</button>
+    </div>
+</form>
+
+<script>
+    jQuery(document).ready(function ($) {
+
+        if ($("#frmChangePass").length != 0) {
+
+            $("#frmChangePass").on("submit", function (e) {
+
+                if ($(this).find("input[name='PassNews']").val() == "" ||
+                    $(this).find("input[name='ConfirmPassword']").val() == "") {
+
+                    alert("Please enter all required fields.");
+
+                    return false;
+                }
+
+                if ($(this).find("input[name='PassNews']").val() !=
+                    $(this).find("input[name='ConfirmPassword']").val()) {
+
+                    alert("Please enter same New password and Confirm password fields.");
+
+                    return false;
+                }
+
+                if (!/^(?:([A-Z])*([a-z])*(\d)*){8,}$/.test($(this).find("input[name='PassNews']").val())) {
+
+                    alert("Password must contain at least 8 characters, including uppercase/lowercase and numbers.");
+
+                    return false;
+                }
+            });
+        }
+    });
+</script>

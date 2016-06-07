@@ -1,0 +1,33 @@
+﻿@Html.Partial("_Head")
+<!--<html><head></head>-->
+    <body topmargin="0" leftmargin="0">
+        <div class="menuTop"><div class="menuC1">Trang chủ | Liên hệ | Góp ý</div></div>
+        <div class="bannerVV"><img src="@Url.ContentTheme("Content/images/banner.jpg")" style="width:994px;" /></div>
+        <div class="menuVVV">
+            <div class="menuV1VV">
+                <div style="float: left"><a href="/">TRANG CHỦ</a></div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="table-row">
+                <div>
+                    <div class="left-container">
+                        <div class="eight alpha alpha units entry-content">
+                            @RenderBody()
+                        </div>
+                    </div>
+                    <div class="right-container">
+                        @Html.Partial("_Intro")
+                    </div>
+                    <div class="space"></div>
+                </div>
+                <div class="space"></div>
+            </div>
+        </div>
+        <div class="Footer">
+            Bản quyền thuộc Việt Anh<br />
+            Tel: (844) 1900 599090/ 1900* Fax: (844) 1900 5999 00<br />
+            Email: info@btxh.info *    Website: http://www.btxh.info
+        </div>
+    </body>
+</html>

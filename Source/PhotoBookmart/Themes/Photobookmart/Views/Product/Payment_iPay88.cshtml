@@ -1,0 +1,137 @@
+﻿@model long
+@{
+    Layout = null;
+}
+<!doctype html>
+<html>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+    <meta charset="utf-8" />
+    <title>Redirecting to iPay88 for invoice @Model.ToString("00000")</title>
+    <link href="@Url.Content("~/Content/http_error/style.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/http_error/cssaa28.css?family=Anton")" rel="stylesheet" />
+    <script type="text/javascript" src="@Url.ContentTheme("Content/scripts/their-jquery.js")"></script>
+</head>
+<body>
+    <div id="level">
+        <div id="content">
+            <div id="gears">
+                <div id="gears-static">
+                </div>
+                <div id="gear-system-1">
+                    <div class="shadow" id="shadow15">
+                    </div>
+                    <div id="gear15">
+                    </div>
+                    <div class="shadow" id="shadow14">
+                    </div>
+                    <div id="gear14">
+                    </div>
+                    <div class="shadow" id="shadow13">
+                    </div>
+                    <div id="gear13">
+                    </div>
+                </div>
+                <div id="gear-system-2">
+                    <div class="shadow" id="shadow10">
+                    </div>
+                    <div id="gear10">
+                    </div>
+                    <div class="shadow" id="shadow3">
+                    </div>
+                    <div id="gear3">
+                    </div>
+                </div>
+                <div id="gear-system-3">
+                    <div class="shadow" id="shadow9">
+                    </div>
+                    <div id="gear9">
+                    </div>
+                    <div class="shadow" id="shadow7">
+                    </div>
+                    <div id="gear7">
+                    </div>
+                </div>
+                <div id="gear-system-4">
+                    <div class="shadow" id="shadow6">
+                    </div>
+                    <div id="gear6">
+                    </div>
+                    <div id="gear4">
+                    </div>
+                </div>
+                <div id="gear-system-5">
+                    <div class="shadow" id="shadow12">
+                    </div>
+                    <div id="gear12">
+                    </div>
+                    <div class="shadow" id="shadow11">
+                    </div>
+                    <div id="gear11">
+                    </div>
+                    <div class="shadow" id="shadow8">
+                    </div>
+                    <div id="gear8">
+                    </div>
+                </div>
+                <div class="shadow" id="shadow1">
+                </div>
+                <div id="gear1">
+                </div>
+                <div id="gear-system-6">
+                    <div class="shadow" id="shadow5">
+                    </div>
+                    <div id="gear5">
+                    </div>
+                    <div id="gear2">
+                    </div>
+                </div>
+                <div id="chain-circle">
+                </div>
+            </div>
+            <div id="title">
+                <h1>
+                    Redirecting to iPay88<br />
+                    Please wait.</h1>
+            </div>
+        </div>
+    </div>
+    <form action="#" method="post" target=_top id="newForm">
+
+    </form>
+    <script language="javascript" type="text/javascript">
+        jQuery(document).ready(function () {
+            setTimeout(function () {
+                jQuery.post('@Url.Action("Payment_iPayRequest", "Product", new { id = Model })', function (returnObj) {
+                    if (returnObj.Status == "success") {
+                        if (returnObj.Message != null) {
+                            var obj = eval('(' + returnObj.Message + ')');
+
+                            var newForm = jQuery("#newForm");
+                            newForm.attr("action", obj.Url);
+
+                            //                            var newForm = jQuery('<form>', {
+                            //                                'action': obj.Url,
+                            //                                'method': 'post',
+                            //                                'target': '_top'
+                            //                            });
+
+                            for (var key in obj.Model) {
+                                //                                newForm.append(jQuery('<input>', {
+                                //                                    'name': key,
+                                //                                    'value': obj.Model[key],
+                                //                                    'type': 'hidden'
+                                //                                }));
+                                newForm.append("<input type=hidden name='" + key + "' value='" + obj.Model[key] + "' />");
+                            }
+                            newForm.submit();
+                        }
+                    } else {
+                        alert("Can not process the request to iPay88");
+                    }
+                }, "json");
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

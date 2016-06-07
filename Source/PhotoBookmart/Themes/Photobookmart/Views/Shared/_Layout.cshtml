@@ -1,0 +1,15 @@
+﻿@Html.Partial("_Head")
+<!--<html><head></head>-->
+    <body id="top" @RenderSection("_ClassBody", false)>
+        @Html.Partial("_PageLoading")
+	    <div id='wrap_all'>
+            @Html.Partial("_PageHeader")
+		    @RenderSection("_SlideShow", false)
+		    <div id='main'>
+                @RenderSection("_Navigation", false)
+                @RenderBody()
+                @Html.Partial("_PageFooter")
+		    </div>
+        </div>
+    </body>
+</html>

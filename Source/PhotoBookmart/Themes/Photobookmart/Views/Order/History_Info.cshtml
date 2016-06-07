@@ -1,0 +1,25 @@
+﻿@model Order
+<div class="mws-panel" id="panel_history" data-url="@Url.Action("History_LoadNext", new { id = Model.Id })" page="0">
+    <div class="mws-panel-body" style="padding: 0px;">
+        <div style="">
+            <div class="chat_list_footer">
+                @using (Html.BeginForm("History_InsertComment", "Order", FormMethod.Post, new { enctype = "multipart/form-data", @id = "OrderHistory_Form_InsertMessage", @class = "mws-form" }))
+                {
+                    <input type="hidden" name="OrderId" value="@Model.Id" />
+                    <span>Want to leave message to Photobookmart? Do it below</span>
+                    <div class="row-fluid">
+                        <input type="text" class="ab-textbox"  style="display: inline;" placeholder="Say something"
+                            name="Message" id="OrderHistory_Message">
+                        <span class="input-group-btn" style="display: inline;"> 
+                            <button class="btn btn-default btn-lg" type="buton" id="panel_history_submit">
+                                Send</button>
+                        </span>
+                    </div>
+                }
+            </div>
+            <div class="chat-list">
+            </div>
+            <!-- End history list -->
+        </div>
+    </div>
+</div>

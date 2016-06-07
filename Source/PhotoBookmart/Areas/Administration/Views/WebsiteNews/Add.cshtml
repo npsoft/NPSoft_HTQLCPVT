@@ -1,0 +1,153 @@
+﻿@model Site_News
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit news " + Model.Name + " - " + Model.Category_Name;
+    }
+    else
+    {
+        ViewBag.Title = "Add news " + " - " + Model.Category_Name;
+    }
+
+    if (Model.Tag == null)
+    {
+        Model.Tag = new List<string>();
+    }
+}
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+
+        jQuery("#Form_tag").select2({
+            tags: [],
+            tokenSeparators: [","]
+        });
+
+        $('#date_begin,#date_end').datetimepicker({
+            stepMinute: 5,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin") {
+                    $('#date_end').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+
+        CKEDITOR.replace('content_id', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        jQuery("#UserForm").submit(function () {
+            // validate
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter news Title");
+                jQuery("#Name").focus();
+                return false;
+            }
+            return true;
+        });
+    });
+</script>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "WebsiteNews", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.CategoryId);                                      
+            @Html.HiddenFor(m => m.LanguageCode);                              
+            <div class="mws-form-block">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Seo Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.SeoName, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Is New</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="isNew" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.isNew)
+                                                                                                                                         {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Active</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsActive" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.IsActive)
+                                                                                                                                            { <text> checked="checked" </text> }>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Introduction</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.ShortIntro, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Tag</label>
+                    <div class="mws-form-item">
+                        <input type="hidden" name="Tag" id="Form_tag" class="large" value="@String.Join(",", Model.Tag)"/>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Thumbnail</label>
+                    <div class="mws-form-item">
+                        <input type="file" name="FileUp" />
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Publish by Schedule</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="PublishSchedule" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.PublishSchedule)
+                                                                                                                                                   {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Publish On</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(mbox => mbox.PublishOn, new { @id = "date_begin", @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Un-Publish On</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(mbox => mbox.UnPublishOn, new { @id = "date_end", @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Content</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Description, new { @class = "large", @id = "content_id" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

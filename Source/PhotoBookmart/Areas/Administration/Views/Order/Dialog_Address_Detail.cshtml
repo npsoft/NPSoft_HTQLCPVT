@@ -1,0 +1,89 @@
+﻿@model AddressModel
+@{
+    Layout = null;
+    var country = Db.Select<Country>();
+}
+<input type="hidden" name="Id" value="@Model.Id" />
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        First Name</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.FirstName, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Last Name</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.LastName, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Email</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.Email, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Company</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.Company, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Country</label>
+    <div class="mws-form-item">
+        <select name="Country" class="large mws-select2">
+            @foreach (var c in country)
+            {      
+                <option value="@c.Code" @if (c.Code == Model.Country)
+                                        {<text>selected</text>}>@c.Name</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        City</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.City, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        State / Province</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.State, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Address</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.Address, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Zip / Postal</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.ZipPostalCode, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Phone number</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.PhoneNumber, new { @class = "large" })
+    </div>
+</div>
+<div class="mws-form-row">
+    <label class="mws-form-label">
+        Fax</label>
+    <div class="mws-form-item">
+        @Html.TextBoxFor(x => x.FaxNumber, new { @class = "large" })
+    </div>
+</div>

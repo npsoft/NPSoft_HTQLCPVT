@@ -1,0 +1,98 @@
+﻿@model SiteTopicLanguage
+@using (Html.BeginForm("UpdateTopicLanguage", "WebsiteTopic", FormMethod.Post, new { enctype = "multipart/form-data", @id = "Form_" + Model.LanguageId, @class = "mws-form topiclang", @lang_id = Model.LanguageId }))
+{
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="TopicId" value="@Model.TopicId" />
+    <input type="hidden" name="LanguageId" value="@Model.LanguageId" />
+    <input type="hidden" name="LanguageCode" value="@Model.LanguageCode" />    
+    
+        
+    <div class="mws-form-block">
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Delete</label>
+            <div class="mws-form-item">
+                <input class="ibutton" name="IsDeleted" value="true" type="checkbox" data-label-on="Yes, please delete this translation when I submit this form"
+                    data-label-off="No" lang_id="@Model.LanguageId">
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Is Default</label>
+            <div class="mws-form-item">
+                <input class="ibutton2 default_ibutton" id="@{<text>IsDefault_</text>@Model.LanguageId}" name="IsDefault" value="true" type="checkbox" data-label-on="Yes" data-label-off="No" @if (Model.IsDefault)
+                                                                                                                                                                                               {<text>checked="checked"</text>}>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Page Title</label>
+            <div class="mws-form-item">
+                @Html.TextBoxFor(m => m.Title, new { @class = "large" })
+                <br />
+                <span>If you dont enter Page Title value, system will treat this topic does not have
+                    this language translation</span>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Page Meta Title</label>
+            <div class="mws-form-item">
+                @Html.TextBoxFor(m => m.MetaTitle, new { @class = "large" })
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Page Meta Keyword</label>
+            <div class="mws-form-item">
+                @Html.TextBoxFor(m => m.MetaKeywords, new { @class = "large" })
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Page Meta Description</label>
+            <div class="mws-form-item">
+                @Html.TextAreaFor(m => m.MetaDescription, new { @class = "large" })
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Page Layout</label>
+            <div class="mws-form-item">
+                <select name="LayoutType" id="LayoutType">
+                    <option value="0" @if (Model.LayoutType == 0)
+                                      {<text>selected="selected"</text>}>Layout Navigation Full</option>
+                    <option value="1" @if (Model.LayoutType == 1)
+                                      {<text>selected="selected"</text>}>Layout Navigation Width Sidebar</option>
+                </select>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                More Link</label>
+            <div class="mws-form-item">
+                @Html.TextBoxFor(m => m.MoreLink, new { @class = "large" })
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <label class="mws-form-label">
+                Body</label>
+            <div class="mws-form-item">
+                @Html.TextAreaFor(m => m.Body, new { @class = "large", @id = "Body" + Model.LanguageId })
+            </div>
+        </div>
+    </div>
+    <div class="mws-button-row">
+        <input type="submit" value="Submit" class="btn btn-danger">
+        <input type="reset" value="Reset" class="btn ">
+    </div>
+                       
+}
+<script language="javascript">
+    jQuery(document).ready(function () {
+        CKEDITOR.replace('Body' + '@Model.LanguageId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+    });
+</script>

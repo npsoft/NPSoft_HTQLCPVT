@@ -1,0 +1,70 @@
+﻿@model Website
+@{
+    ViewBag.Title = "Manage SMS Template for " + Model.Name;
+    var countries = (List<Country>)ViewData["Countries"];
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+    <div>
+        <div class="grid_3">
+            <a type="button"  class="btn" href="@Url.Action("Detail", "Website", new { id = Model.Id })" >
+                <i class="icol-arrow-left"></i>@Model.Name Detail</a> <a type="button" class="btn btn-primary"
+                   href="@Url.Action("Add")" id="nav_add_button">New template</a>
+        </div>
+        <div class="grid_3">
+            Select country
+            <select class="large" id="Page_CountryId">
+                @foreach (var l in countries)
+                {
+                    <option value="@l.Id">@l.Name</option>
+                }
+            </select>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div class="mws-panel grid_8 listuser">
+    @* <div class="mws-panel-header">
+        <span><i class="icon-table"></i>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List", new { site_id = Model.Id })
+    </div>*@
+</div>
+<script type="text/javascript">
+    function PageTable_Reload() {
+        show_loading();
+        var country_id = jQuery("#Page_CountryId").val();
+        if (country_id ==null)
+        {
+            country_id=0;
+        }
+         $.get("@Url.Action("List")"+"?country_id="+country_id, function (data) {
+                        $(".listuser").html("");
+                        $(".listuser").html(data);
+                        hide_loading();
+                    });
+    }
+
+    $(document).ready(function () {
+        PageTable_Reload();
+
+        jQuery("#Page_CountryId").change(function(){
+            PageTable_Reload();
+        });
+
+        jQuery("#nav_add_button").click(function(){
+            var country_id=0;
+            if (jQuery("#Page_CountryId").val() !=null)
+            {
+                country_id = jQuery("#Page_CountryId").val();
+            }
+            var url="@Url.Action("Add")"+"?country_id="+country_id;
+            window.location.href=url;
+            return false;
+        });
+    })
+
+</script>

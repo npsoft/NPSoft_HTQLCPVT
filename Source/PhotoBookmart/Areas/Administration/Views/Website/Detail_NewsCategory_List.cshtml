@@ -1,0 +1,107 @@
+﻿@model List<Site_News_Category>
+<script language="javascript">
+    jQuery(document).ready(function () {
+        $("a.newscat_delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Detail_NewsCategory_Delete")?id=" + item_id, function () {
+                    NewsCategory_Reload();
+                });
+            }
+        });
+
+        $("a.newscat_edit").click(function () {
+            var $this = $(this);
+            var item_id = $this.attr("item_id");
+            var status = $this.attr("status");
+            var tr=jQuery(this).parents("tr");
+
+            // set data before show dialog
+            jQuery("#NCD_Id").val(item_id);
+            jQuery("#NCD_Name").val(jQuery.trim(tr.children("td:eq(0)").children("span").text()));
+            if (status.toLowerCase() == "true")
+            {
+                jQuery("#NCD_Status").attr("checked",true);
+            }
+            else{
+                jQuery("#NCD_Status").attr("checked",false);
+            }
+
+            $("#NewsCategory_Dialog").dialog('option', 'title', 'Edit News Category');
+
+             $("#NewsCategory_Dialog").dialog('open');
+        });
+
+
+        // build table layout
+        if ($.fn.dataTable) {
+            $("#WDNewsCategory").dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+    });
+</script>
+<table class="mws-table" id="WDNewsCategory">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Seo name
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Created By
+            </th>
+            <th id="date_Create_column">
+                Created On
+            </th>
+            <th width="100px">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span><a href="@Url.Action("Index", "WebsiteNews", new { cat_id = item.Id })" class="black_color" target="_blank">
+                            @item.Name
+                        </a></span>
+                    </td>
+                    <td>
+                        <span>@item.SeoName</span>
+                    </td>
+                    <td>
+                        <span>
+                            <input type="checkbox" disabled="disabled"  @if (item.Status)
+                                                                        { <text> checked="checked"</text> } />
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.CreatedByUsername</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>
+                    <td>
+                        <span class="btn-group"><a  href="javascript:void(0)" item_id="@item.Id" status="@item.Status" class="btn btn-small newscat_edit" title="Edit @item.Name">
+                            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small newscat_delete" item_id="@item.Id" item_name="@item.Name" title="Delete @item.Name" >
+                                <i class="icon-trash"></i></a><a  href="@Url.Action("Index", "WebsiteNews", new { cat_id = item.Id })" class="btn btn-small " title="Manage news for category @item.Name" target=_blank>
+                                    <i class="icon-newspaper"></i></a></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

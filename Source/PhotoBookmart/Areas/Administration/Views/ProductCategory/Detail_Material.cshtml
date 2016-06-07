@@ -1,0 +1,13 @@
+﻿@model ProductCategoryMaterial
+@{
+    ViewBag.Title = "Detail Material - Material " + Model.Name + " - Style " + Model.ProductCategoryName;
+}
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Detail", "ProductCategory", new { id = Model.ProductCategoryId })">
+            <i class="icol-arrow-left"></i>Materials Management - @Model.ProductCategoryName
+        </a>
+    </div>
+</div>
+@Html.Partial("_Detail_MaterialDetail", Model)

@@ -1,0 +1,105 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Home.cshtml";
+
+    ViewBag.Title = "Home";
+}
+<!--Sta session 11-->
+<div class='container_wrap  alternate_color container_split fullsize'>
+    <div class='container'>
+        <span class='bottom_shadow'>
+            <img src='@Url.ContentTheme("Content/images/layout/big_shadow.png")'  title='' alt='' /></span>
+        <div class='content twelve alpha units template-dynamic template-dynamic-frontpage_with_portfolio'>
+            <div class='outer_callout dynamic_element dynamic_el_3'>
+                <div class='callout hero-text'>
+                    <div class='padding-active content-area'>
+                        @*<h1>
+                            Important Notice</h1>
+                        <h4>
+                            Our system will be down temporarily due to system migration. Do not place your order now until further notice. Our apology for the inconvenience caused.</h4>*@
+                        <h1>
+                            Professionally Designed Photobooks. Now.</h1>
+                        <h4>
+                            It&#8217;s so easy to create your own photobook masterpiece using our FREE My Photo
+                            Creations.</h4>
+                        <a class='big_button avia-button button' href='/detail/get_started'>Get Started Now!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End session 11-->
+<div class='container_wrap main_color container_split dynamic_element dynamic_el_4'>
+    <div class='container'>
+        <span class='bottom_shadow'>
+            <img src='@Url.ContentTheme("Content/images/layout/big_shadow.png")' title='' alt='' /></span><div
+                class='content twelve alpha units template-dynamic template-dynamic-frontpage_with_portfolio'>
+                @Html.Action("Widget_BigBanner", "Product")
+                <!--Sta session 15-->
+                <div class='post-entry post-entry-dynamic dynamic_element dynamic_el_6'>
+                    <div class='entry-content'>
+                        <!--Sta session 14-->
+                        <div class="one_third first flex_column">
+                            <div class="iconbox_top">
+                                <span class="iconbox_top_icon">
+                                    <img src='@Url.ContentTheme("Content/images/icons/iconbox/Frames.png")' alt='' /></span>
+                                <div class="iconbox_top_content">
+                                    <h3 class="iconbox_top_content_title">
+                                        Hand-Crafted Photobooks</h3>
+                                    <p>
+                                        Our side-sewn binding reinforces the strength of the book spine, making your photobook
+                                        a long-lasting product of true master craftmanship. Advanced digital press printing
+                                        ensures that your photo quality surpasses that of</p>
+                                    <p>
+                                        <a href="/">Learn More</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--End session 14-->
+                        <!--Sta session 13-->
+                        <div class="one_third  flex_column">
+                            <div class="iconbox_top">
+                                <span class="iconbox_top_icon">
+                                    <img src='@Url.ContentTheme("Content/images/icons/iconbox/iPhone_4.png")' alt='' /></span>
+                                <div class="iconbox_top_content">
+                                    <h3 class="iconbox_top_content_title">
+                                        Professional Results</h3>
+                                    <p>
+                                        Anyone can create professional looking photobooks without any experience in album
+                                        design and layout. Our Photobook Editor software comes with easy-to-use templates
+                                        that make you look like a pro.</p>
+                                    <p>
+                                        <a href="/">Learn More</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--End session 13-->
+                        <!--Sta session 12-->
+                        <div class="one_third  flex_column">
+                            <div class="iconbox_top">
+                                <span class="iconbox_top_icon">
+                                    <img src='@Url.ContentTheme("Content/images/icons/iconbox/Speech_Bubble.png")' alt='' /></span>
+                                <div class="iconbox_top_content">
+                                    <h3 class="iconbox_top_content_title">
+                                        Convenient and Affordable</h3>
+                                    <p>
+                                        Create your photobooks from the comfort of your home. Choose your photos, layouts,
+                                        font styles and colours. Upload your file and we&#8217;ll do the rest, and deliver
+                                        your photobook right to your doorstep.</p>
+                                    <p>
+                                        <a href="/">Learn More</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!--End session 12-->
+                        <p>
+                            &nbsp;</p>
+                    </div>
+                </div>
+                <!--End session 15-->
+                <!--end content-->
+            </div>
+    </div>
+    <!--end container-->
+</div>
+<!-- close #main .container_wrap element -->

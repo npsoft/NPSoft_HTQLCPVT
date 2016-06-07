@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "SMS Request Management";
+    var page = (int)ViewData["page"];
+}
+<div class="head">
+    <h3>
+        @ViewBag.Title</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>SMS Management</span>
+    </div>
+    <div class="mws-panel-body no-padding ">
+        <div class="dataTables_wrapper  listuser" role="grid">
+            @Html.Action("SMSItem_List", new { page = page })
+        </div>
+    </div>
+</div>

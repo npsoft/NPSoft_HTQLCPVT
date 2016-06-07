@@ -1,0 +1,93 @@
+﻿@model Order
+<div id="filelist">
+    Your browser doesn't have Flash, Silverlight or HTML5 support.
+</div>
+<div id="file_container">
+    <a id="pickfiles" href="javascript:;">
+        Select file<span class="isw-documents"></span>
+    </a>
+    <a id="uploadfiles" href="javascript:;">
+        Upload file<span class="isw-up"></span>
+    </a>
+</div>
+<script>
+    var uploader = new plupload.Uploader({
+        runtimes: 'html5,flash,silverlight,html4',
+        browse_button: 'pickfiles', // you can pass in id...
+        container: document.getElementById('file_container'), // ... or DOM Element itself
+        url: '/Order/UploadFile',
+        chunk_size: '1500kb',
+        multiple_queues: false,
+        multipart_params: { OrderId: @Model.Id, TicketId: @((long)ViewData["TicketId"]) },
+        filters: {
+            max_file_size: '200mb',
+            mime_types: [
+                { title: "Photo Creation App", extensions: "dgl" } ]
+        },
+        init: {
+            PostInit: function () {
+                document.getElementById('filelist').innerHTML = '';
+                document.getElementById('uploadfiles').onclick = function () {
+                    uploader.start();
+                    return false;
+                };
+            },
+
+            FilesAdded: function (up, files) {
+                plupload.each(files, function (file) {
+                    document.getElementById('filelist').innerHTML += '<div id="' + file.id + '">' + file.name + ' (' + plupload.formatSize(file.size) + ') <b></b></div>';
+                });
+            },
+
+            UploadProgress: function (up, file) {
+                document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+            },
+
+            Error: function (up, err) {
+                //document.getElementById('console').innerHTML += "\nError #" + err.code + ": " + err.message;
+                alert(err.message);
+            }
+        }
+    });
+
+    uploader.bind("FileUploaded", function(up, file, response) {
+
+        var obj = JSON.parse(response.response);
+
+        if (obj.Message != null && obj.Message != "") {
+
+            alert(obj.Message);
+        }
+
+        if (obj.RedirectUrl != null && obj.RedirectUrl != "") {
+
+            location.href = obj.RedirectUrl;
+
+        } else {
+
+            location.reload();
+        }
+    });
+
+    uploader.bind("ChunkUploaded", function(up, file, response) {
+
+        var obj = JSON.parse(response.response);
+
+        if (obj.Status == "success" && obj.Message != null && obj.Message != "") {
+
+            console.log(obj.Message);
+        }
+
+        if (obj.Status == "error") {
+
+            if (obj.Message != null && obj.Message != "") {
+
+                alert(obj.Message);
+            }
+
+            location.reload();
+        }
+    });
+
+    uploader.init();
+</script>

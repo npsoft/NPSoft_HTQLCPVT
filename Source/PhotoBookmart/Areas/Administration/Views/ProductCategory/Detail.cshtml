@@ -1,0 +1,13 @@
+﻿@model Product_Category
+@{
+    ViewBag.Title = "Detail Style - " + Model.Name;
+}
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Index", "ProductCategory", new { })">
+            <i class="icol-arrow-left"></i>Categories Management</a>
+    </div>
+</div>
+@Html.Partial("_Detail_Image", Model)
+@Html.Partial("_Detail_Material", Model)

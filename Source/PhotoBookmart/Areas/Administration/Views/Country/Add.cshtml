@@ -1,0 +1,170 @@
+﻿@model Country
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit country";
+    }
+    else
+    {
+        ViewBag.Title = "Add country";
+    }
+    if (Model.Domains == null)
+    {
+        Model.Domains = new List<string>();
+    }
+}
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+        jQuery("#Form_Domain").select2({
+            tags: [],
+            tokenSeparators: [","]
+        });
+
+        $(".float-than-or-equal-zero").spinner({
+            min: 0.00,
+            step: 0.01,
+            numberFormat: "n"
+        });
+
+        jQuery("#UserForm").submit(function () {
+            // validate
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter country name");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+            if (jQuery("#Code").val() == "") {
+                alert("Please enter country code");
+                jQuery("#Code").focus();
+                return false;
+            }
+
+            if (jQuery("#CurrencyCode").val() == "") {
+                alert("Please enter currency code");
+                jQuery("#CurrencyCode").focus();
+                return false;
+            }
+
+            if (jQuery("#Currency3Letter").val() == "") {
+                alert("Please enter currency 3 letters code");
+                jQuery("#Currency3Letter").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                        $("form input:text").val('');
+                        $("form input:password").val('');
+                        $("form textarea").val('');
+                    }
+                    else if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "Country", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Country code</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Code, new { @class = "large" })
+                        <span>You can have a look in here https://developer.paypal.com/docs/classic/api/country_codes/</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Currency code</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.CurrencyCode, new { @class = "large" })
+                        <span>This is the common currency code, such as RM, đ, ..</span>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Currency 3 letters</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Currency3Letter, new { @class = "large" })
+                        <span>Currency 3 letters code, please check https://developer.paypal.com/docs/classic/api/currency_codes/</span>
+                    </div>
+                </div>
+
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        International Phone Number Prefix</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.PhoneNumberPrefix, new { @class = "large" })
+                        <span>Please enter in format +xx. For example: +60</span>
+                    </div>
+                </div>
+
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Exchange Rate</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.ExchangeRate, new { @class = "mws-spinner-decimal float-than-or-equal-zero large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Domain</label>
+                    <div class="mws-form-item">
+                        <input type="hidden" name="Domains" id="Form_Domain" class="large" value="@String.Join(",", Model.Domains)"/>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

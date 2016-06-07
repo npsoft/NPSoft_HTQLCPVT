@@ -1,0 +1,673 @@
+﻿@{
+    ViewBag.Title = "Coupons & Promotion Code  Management";
+    var options = Db.Select<Product_Option>();
+    var products = Db.Select<Product>();
+    var page = (int)ViewData["page"];
+    var cat_grouped = Db.Select<CouponPromo>().GroupBy(k => k.IssueTo);
+    var countries = Db.Select<Country>();
+    Db.Close();
+}
+<link rel="stylesheet" type="text/css" href="@Url.ContentArea("~/Content/admin_template/plugins/datatables/colvis.css")">
+<script src="@Url.ContentArea("~/Content/admin_template/plugins/datatables/ColVis.js")"></script>
+<div class="head">
+    <h3>@ViewBag.Title</h3>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Manage coupons promotion</span>
+    </div>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                @*<a type="button" class="btn" href="@Url.Action("Index")"><i class="icol-arrow-left">
+                </i>Coupons Management</a>*@ <a href="@Url.Action("Add", "CouponPromo", new { })" id="add_instance" class="btn">
+                    <i class="icol-add"></i>Add </a><a href="javascript:void(0);" id="search" class="btn">
+                        <i class="icon-list-2"></i>&nbsp;Search </a><a type="button" class="btn" href="javascript:void(0)"
+                            id="export_excel"><i class="icon-file-excel"></i>&nbsp;Export to Excel
+                </a><a href="javascript:void(0)" id="import_excel" class="btn"><i class="icol-page-white-excel">
+                </i>Import from Excel </a><a rel="" href="javascript:void(0);" id="import_excel_delete"
+                    class="btn"><i class="icol-page-white-excel"></i>Import to Delete </a><a href="javascript:void(0);"
+                        id="pure_expired" class="btn"><i class="icon-trash"></i>&nbsp;Purge Expired Coupons
+                    </a>
+            </div>
+        </div>
+    </div>
+    <div class="mws-panel-body no-padding ">
+        <div id="ListTable_wrapper" class="dataTables_wrapper  WDTB_instance listuser" role="grid">
+            @if (!string.IsNullOrEmpty(ViewBag.Error))
+            {
+                <div class="mws-form-message error">
+                    @ViewBag.Error
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.Notice))
+            {
+                <div class="mws-form-message info">
+                    @ViewBag.Notice
+                </div>
+            }
+            @Html.Action("List", "CouponPromo", new { page = page })
+        </div>
+    </div>
+</div>
+@* For the dialog import from excel file *@
+<div class="dialog mws-panel-body" id="Excel_Import" style="display: none;" title="Import Groupon code from excel">
+    @using (Html.BeginForm("ImportFromExcel", "CouponPromo", FormMethod.Post, new { @id = "FormExcel_Import", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <div class="mws-form-inline">
+            <div class="mws-form-row large">
+                <label class="mws-form-label">
+                    Excel File</label>
+                <div class="mws-form-item">
+                    <input type="file" name="FileUp" />
+                    <span>Can be xls or xlsx</span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Require Security Code</label>
+                <div class="mws-form-item">
+                    <input name="SecurityCodeRequired" id="SecurityCodeRequired" value="true" type="checkbox"
+                        data-label-on="Yes" data-label-off="No">
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Option Discount</label>
+                <div class="mws-form-item">
+                    <input name="isApplyToOption" id="isApplyToOption" value="true" type="checkbox" data-label-on="Yes"
+                        data-label-off="No" checked />
+                    <br />
+                    <span>If checked, then this coupon will be applied to Product Options, if no, then will
+                        be applied to bill total exclude the shipping cost</span>
+                </div>
+            </div>
+            <div class="mws-form-row" id="AppliedOptionsRow">
+                <label class="mws-form-label">
+                    Apply to Options</label>
+                <div class="mws-form-item">
+                    <select name="AppliedOptions" id="options_select" class="mws-select2 large" multiple="multiple">
+                        @foreach (var item in options)
+                        {
+                            <option value="@item.Id" @if (item.InternalName.ToLower().IndexOf("shipping") < 0)
+                                                     {<text>selected</text>}>@item.InternalName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row" id="AppliedProductsRow">
+                <label class="mws-form-label">
+                    Exclude to Products</label>
+                <div class="mws-form-item">
+                    <select name="ExceptProducts" id="products_select" class="mws-select2 large" multiple="multiple">
+                        @foreach (var p_groupby in products.GroupBy(x => x.CatId))
+                        {
+                            var cat = Db.Select<Product_Category>(x => x.Where(m => m.Id == p_groupby.Key).Limit(1)).FirstOrDefault();
+                            var cat_name = "Deleted Cat";
+                            if (cat != null)
+                            {
+                                cat_name = cat.Name;
+                            }
+                            <optgroup label="@cat_name">
+                                @foreach (var item in p_groupby)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label" id="DiscountAmountLabel">
+                    Discount Amount</label>
+                <div class="mws-form-item">
+                    <input type="text" name="DiscountAmount" id="DiscountAmount" class="mws-spinner-decimal float-than-or-equal-zero large"
+                        value="0" />
+                    <span>This is the discount amount we will use to calculate in bill total</span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Country</label>
+                <div class="mws-form-item">
+                    <select name="CountryCode" class="mws-select2 large">
+                        @foreach (var cg in countries.GroupBy(x => x.Status))
+                        {
+                            var label = "Active";
+                            if (!cg.FirstOrDefault().Status)
+                            {
+                                label = "Inactive";
+                            }
+
+                            <optgroup label="@label">
+                                @foreach (var item in cg)
+                                {
+                                    <option value="@item.Code">@item.Name</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Issue To</label>
+                <div class="mws-form-item">
+                    <input name="IssueTo" type="text" class="large" />
+                    <span>Internal name for easy remember</span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Effective Date Duration</label>
+                <div class="mws-form-item">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" name="BeginDate" id="date_begin_import" class="large"  value="@DateTime.Now" />
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" name="EndDate" id="date_end_import" class="large" value="@DateTime.Now.AddDays(30)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Used</label>
+                <div class="mws-form-item">
+                    <input type="text" id="Used" name="Used" value="0" class="mws-spinner-integer-than-or-equals-zero large" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Maximum Use</label>
+                <div class="mws-form-item">
+                    <input type="text" id="MaxUse" name="MaxUse" value="0" class="mws-spinner-integer-than-or-equals-zero large" />
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <span>System will avoid duplication when importing from your excel file. Please notice
+                    that all imported code will only be used one time.</span>
+            </div>
+        </div>
+    }
+</div>
+<!-- For the dialog import from excel file to delete -->
+<div class="dialog mws-panel-body" id="Import_Excel_Delete_Dialog" style="display: none;"
+    title="">
+    @using (Html.BeginForm("ImportExcelDelete", "CouponPromo", FormMethod.Post, new { @id = "Import_Excel_Delete_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Excel file</label>
+                <div class="mws-form-item">
+                    <input type="file" name="FileUps" class="large" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<!-- For the dialog search-->
+<div class="dialog mws-panel-body" id="Search_Dialog" style="display: none;" title="">
+    @{
+        SearchCouponModel obj = new SearchCouponModel();
+    }
+    @using (Html.BeginForm("Search", "CouponPromo", FormMethod.Post, new { @id = "Search_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {    
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Coupon type</label>
+                <div class="mws-form-item">
+                    <select name="Type" class="large">
+                        <option value="" @{if (obj.Type == null)
+                                           {<text>selected="selected"</text>}}>- - Select - -</option>
+                        <option value="@((int)Enum_CouponType.Monthly_PromoCode)" @{if (obj.Type != null && obj.Type == (int)Enum_CouponType.Monthly_PromoCode)
+                                                                                    {<text>selected="selected"</text>}}>
+                            Promo</option>
+                        <option value="@((int)Enum_CouponType.Groupon)" @{if (obj.Type != null && obj.Type == (int)Enum_CouponType.Groupon)
+                                                                          {<text>selected="selected"</text>}}>
+                            Groupon</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Search key</label>
+                <div class="mws-form-item">
+                    <input type="text" name="Key" value="@obj.Key" class="large" />
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Effective Date Duration</label>
+                <div class="mws-form-item">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" name="IssuedOnBefore" value="@obj.IssuedOnBefore" />
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" name="IssuedOnAfter" value="@obj.IssuedOnAfter" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@* For the dialog Export to Excel *@
+<div class="dialog mws-panel-body" id="Excel_Export" style="display: none;" title="Export to Excel">
+    @using (Html.BeginForm("ExportToExcel", "CouponPromo", FormMethod.Post, new { @id = "Excel_Export_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {   
+        <div class="mws-form-inline">
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Search By</label>
+                <div class="mws-form-item">
+                    <select class="large" name="SecurityCode">
+                        <option value="CreateDate">Create Date / Import Date</option>
+                        <option value="UsedDate">Coupon Used Date</option>
+                        <option value="BeginEndDate">Begin & End Date</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Between And</label>
+                <div class="mws-form-item">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" id="date_begin" name="BeginDate" />
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <div class="mws-form-item">
+                                <input type="text" id="date_end" name="EndDate" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Issue To</label>
+                <div class="mws-form-item">
+                    <select class="large" name="IssueTo">
+                        <option value="ANY">Any</option>
+                        @foreach (var x in cat_grouped)
+                        {
+                            var issue_to = x.FirstOrDefault().IssueTo;
+                            if (string.IsNullOrEmpty(issue_to))
+                            {
+                            <option value="@x.FirstOrDefault().IssueTo">Empty</option>
+                            }
+                            else
+                            {
+                            <option value="@x.FirstOrDefault().IssueTo">@x.FirstOrDefault().IssueTo</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="mws-form-row large">
+                <label class="mws-form-label">
+                    Type</label>
+                <div class="mws-form-item">
+                    <select class="large" id="counpon_type" name="CouponType">
+                        <option value="-1" selected>Any</option>
+                        <option value="@((int)Enum_CouponType.Monthly_PromoCode)">Monthly Promotion Code</option>
+                        <option value="@((int)Enum_CouponType.Groupon)">Groupon</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        setTimeout(function () {
+            jQuery("input[name='FileUp']").css("z-index", 10005);
+        }, 300);
+
+        jQuery("#instance_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        $(".float-than-or-equal-zero").spinner({
+            min: 0.00,
+            step: 0.01,
+            numberFormat: "n"
+        });
+
+        $(".mws-spinner-integer-than-or-equals-zero").spinner({
+            min: 0,
+            step: 1,
+            numberFormat: "n"
+        });
+
+        // for the date of the add dialog
+        $('#date_begin_add ,#date_end_add').datetimepicker({
+            stepMinute: 5,
+             showHour: false,
+            showMinute: false,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin_add") {
+                    $('#date_end_add').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin_add').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+        $("#instance_Dialog").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 800,
+            height: 330,
+            buttons: {
+                "Ok": function () {
+                    if (jQuery("#Amount").val() == "") {
+                        alert("Please enter field » Amount ");
+                        jQuery("#Amount").focus();
+                        return false;
+                    }
+
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#instance_Form").attr("action"), jQuery("#instance_Form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            window.location.href = window.location.href;
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        /* For Import */
+        $("#Excel_Import").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 600,
+            buttons: {
+                "Ok": function () {
+                    if (jQuery("#isApplyToOption").attr("checked") == "checked") {
+                        if (jQuery("#options_select").val() == null) {
+                            notify_error("Form validation", "Please select » Options for discount");
+                            jQuery("#options_select").focus();
+                            return false;
+                        }
+                    }
+//                    else {
+//                        if (jQuery("#products_select").val() == null) {
+//                            notify_error("Form validation", "Please select » Products for discount");
+//                            jQuery("#products_select").focus();
+//                            return false;
+//                        }
+//                    }
+                    show_loading();
+                    jQuery("#FormExcel_Import").submit();
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        // for the date of the add dialog
+        $('#date_begin_import ,#date_end_import').datetimepicker({
+            stepMinute: 5,
+            dateonly: false,
+             showHour: false,
+            showMinute: false,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin_import") {
+                    $('#date_end_import').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin_import').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        jQuery("#isApplyToOption").on("change", function () {
+            if (jQuery(this).is(":checked")) {
+                jQuery("#AppliedProductsRow").hide();
+                jQuery("#AppliedOptionsRow").show();
+            }
+            else {
+                jQuery("#AppliedProductsRow").show();
+                jQuery("#AppliedOptionsRow").hide();
+            }
+        }).trigger("change");
+
+        jQuery("#isPercentDiscount").on("change", function () {
+            if (jQuery(this).is(":checked")) {
+                jQuery("#DiscountAmountLabel").html("Discount Percent (%)");
+//                jQuery("#DiscountAmountDisplayRow").hide();
+//                jQuery("#DiscountAmountDisplayCurrencySignRow").hide();
+            }
+            else {
+                jQuery("#DiscountAmountLabel").html("Discount Amount");
+//                jQuery("#DiscountAmountDisplayRow").show();
+//                jQuery("#DiscountAmountDisplayCurrencySignRow").show();
+            }
+
+        }).trigger("change");
+
+        $("#import_excel").click(function () {
+            $("#Excel_Import").dialog('open');
+            jQuery("#date_begin_import").focus();
+        });
+
+        /* end of import */
+
+
+        $("#Excel_Export").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 600,
+            buttons: {
+                "Ok": function () {
+                    jQuery("#Excel_Export_Form").submit();
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        $("#export_excel").click(function () {
+            $("#Excel_Export").dialog('open')
+            return false;
+        });
+        $('#date_begin,#date_end').datetimepicker({
+            stepMinute: 5,
+             showHour: false,
+            showMinute: false,
+            onSelect: function (selectedDate, instance) {
+                if (jQuery(this).attr("id") == "date_begin") {
+                    $('#date_end').datetimepicker("option", "minDate", selectedDate);
+                }
+                else {
+                    $('#date_begin').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        // For the dialog import from excel file to delete
+        setTimeout(function () {
+
+            jQuery("input[name='FileUps']").css("z-index", 9999);
+
+        }, 300);
+
+        $("#import_excel_delete").on("click", function (e) {
+
+            $("#Import_Excel_Delete_Form")[0].reset();
+
+            $("#Import_Excel_Delete_Dialog").dialog("option", "title", "Import Excel File to Delete");
+
+            $("#Import_Excel_Delete_Dialog").dialog("open");
+        });
+
+        $("#Import_Excel_Delete_Dialog").dialog({
+
+            autoOpen: false,
+
+            modal: true,
+
+            width: 550,
+
+            buttons: {
+
+                "OK": function () {
+
+                    $("#Import_Excel_Delete_Form").submit();
+                },
+
+                Cancel: function () {
+
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Import_Excel_Delete_Form").submit(function () {
+
+            if ($(this).find("[name='FileUps']").val() == "") {
+
+                notify_error("Alert", "Please enter field » Excel file");
+
+                $(this).find("[name='FileUps']").focus();
+
+                return false;
+            }
+        });
+
+        // For the dialog search
+        $('#Search_Form [name="IssuedOnBefore"], #Search_Form [name="IssuedOnAfter"]').datetimepicker({
+
+            stepMinute: 5,
+             showHour: false,
+            showMinute: false,
+            onSelect: function (selectedDate, instance) {
+
+                if (jQuery(this).attr("name") == "IssuedOnBefore") {
+
+                    $('#Search_Form [name="IssuedOnAfter"]').datetimepicker("option", "minDate", selectedDate);
+
+                } else {
+
+                    $('#Search_Form [name="IssuedOnBefore"]').datetimepicker("option", "maxDate", selectedDate);
+                }
+            }
+        });
+
+        $("#search").on("click", function (e) {
+
+            $("#Search_Form")[0].reset();
+
+            $("#Search_Dialog").dialog("option", "title", "Search Coupon");
+
+            $("#Search_Dialog").dialog("open");
+        });
+
+        $("#Search_Dialog").dialog({
+
+            autoOpen: false,
+
+            modal: true,
+
+            width: 550,
+
+            buttons: {
+
+                "OK": function () {
+                    $("#Search_Form").submit();
+                },
+
+                Cancel: function () {
+
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Search_Form").submit(function () {
+             if ($("#Search_Form").find("input[name='Key']").val() == "" && $("#Search_Form").find("input[name='IssuedOnBefore']").val() == "" && $("#Search_Form").find("input[name='IssuedOnAfter']").val() == "")
+                    {
+                        alert("Please enter the search term");
+                        return false;
+                    }
+
+            show_loading();
+
+            $.post(jQuery(this).attr("action"), jQuery(this).serialize(), function (data) {
+
+                $("#ListTable_wrapper").html(data);
+
+                $("#Search_Dialog").dialog("close");
+
+                hide_loading();
+            });
+
+            return false;
+        });
+        
+        // For Purge Expired Coupons
+        $("#pure_expired").on("click", function (e) {
+
+            if (confirm("Do you want to purge all expired coupons?")) {
+
+                show_loading();
+
+                $.post("@Url.Action("PurgeExpired", "CouponPromo", new { })", function (data) {
+
+                    if (data.Status == "error" && data.Message != null && data.Message != "") {
+
+                        notify_error("Alert", data.Message);
+                    }
+
+                    if (data.Status == "success" && data.Message != null && data.Message != "") {
+
+                        alert(data.Message);
+                    }
+                    
+                    if (data.RedirectUrl != null && data.RedirectUrl != "") {
+
+                        location = data.RedirectUrl;
+                    }
+                    
+                    hide_loading();
+                });
+            }
+        });
+    })
+</script>

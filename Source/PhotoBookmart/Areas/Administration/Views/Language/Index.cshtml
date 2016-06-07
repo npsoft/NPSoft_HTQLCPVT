@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "Languages Management";
+}
+<div class="head">
+    <h3>
+        Languages Management</h3>
+    <div>
+        <a type="button" class="btn btn-primary" href="@Url.Action("Add")">New Language</a>
+    </div>
+</div>
+
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span><i class="icon-table"></i>Themes Management</span>
+    </div>
+    <div class="mws-panel-body no-padding listuser">
+        @Html.Action("List")
+    </div>
+</div>

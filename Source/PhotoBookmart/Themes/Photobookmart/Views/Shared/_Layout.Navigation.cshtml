@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.cshtml";
+}
+
+@section _ClassBody {
+    class="single single-portfolio postid-46 stretched open_sans open_sans"
+}
+
+@section _Navigation {
+    <div class='stretch_full container_wrap slideshow_color dark_bg_color title_container'>
+    <div class='container'>
+        <h1 class='main-title'>
+            @RenderSection("_TitleMain", true)
+        </h1>
+        <div class="breadcrumb breadcrumbs avia-breadcrumbs">
+            <div class="breadcrumb-trail" >
+                <span class="trail-before">
+                    <span class="breadcrumb-title">You are here:</span>
+                </span>
+                @RenderSection("_TrailLink", true)
+            </div>
+        </div>
+        <span class='bottom_shadow'>
+            <img src='@Url.Content("~/Themes/Photobookmart/Content/images/layout/big_shadow.png")'  title='' alt='' />
+        </span>
+    </div>
+    <span class='top_stripe_shadow'></span>
+</div>
+}
+
+<div @RenderSection("_ClassWrapper", false)>
+	<div class='container'>
+        @RenderBody()
+    </div>
+</div>

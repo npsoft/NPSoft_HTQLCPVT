@@ -1,0 +1,120 @@
+﻿@model List<Language>
+<script language="javascript">
+    jQuery(document).ready(function () {
+        $("a.lang_delete").click(function () {
+            var $this = $(this);
+            var NameItem = $this.attr("item_name");
+            var item_id = $this.attr("item_id");
+            if (confirm("Are you sure to delete " + NameItem + "")) {
+                show_loading();
+                $.get("@Url.Action("Detail_Language_Delete")?id=" + item_id, function () {
+                    Language_Reload();
+                });
+            }
+        });
+
+        $("a.lang_edit").click(function () {
+            var $this = $(this);
+            var item_id = $this.attr("item_id");
+            var lang_id = $this.attr("lang_id");
+            var status = $this.attr("status");
+            
+            // set data before show dialog
+            jQuery("#LD_Id").val(item_id);
+            jQuery("#LD_LangId").val(lang_id);
+            if (status.toLowerCase() == "true")
+            {
+                jQuery("#LD_Status").attr("checked",true);
+            }
+            else{
+                jQuery("#LD_Status").attr("checked",false);
+            }
+
+            $("#Language_Dialog").dialog('option', 'title', 'Edit language');
+
+             $("#Language_Dialog").dialog('open');
+        });
+
+        // build table layout
+        if ($.fn.dataTable) {
+            $("#WDLanguage").dataTable({
+                sPaginationType: "full_numbers",
+                "aLengthMenu": [30, 50, 100]
+            });
+        }
+    });
+</script>
+<table class="mws-table" id="WDLanguage">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Code
+            </th>
+            <th>
+                Dir
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Created By
+            </th>
+            <th id="date_Create_column">
+                Created On
+            </th>
+            <th width="100px">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    @if (Model.Count() > 0)
+    {
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span>
+                            @item.Language_Name
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.LanguageCode</span>
+                    </td>
+                    <td>
+                        @if (item.TextDirection == 0)
+                        {
+                            <span>LTR</span>
+                        }
+                        else
+                        {
+                            <span>RTL</span>
+                        }
+                    </td>
+                    <td>
+                        <span>
+                            <input type="checkbox" disabled="disabled"  @if (item.Status)
+                                                                        { <text> checked="checked"</text> } />
+                        </span>
+                    </td>
+                    <td>
+                        <span>@item.CreatedByUserName</span>
+                    </td>
+                    <td>
+                        <span>@string.Format("{0:MM/dd/yyyy HH:mm:ss}", item.CreatedOn) </span>
+                    </td>
+                    <td>
+                        <span class="btn-group"><a  href="javascript:void(0)" item_id="@item.Id" lang_id="@item.LanguageId" status="@item.Status" class="btn btn-small lang_edit" title="Edit @item.Language_Name">
+                            <i class="icon-pencil"></i></a><a  href="javascript:void(0)" class="btn btn-small lang_delete" item_id="@item.Id" item_name="@item.Language_Name" title="Delete @item.Language_Name" >
+                                <i class="icon-trash"></i></a><a  href="@Url.Action("Translation", "Language", new { lang_id = @item.LanguageId })" class="btn btn-small"
+                                        title="Manage translation" target=_blank><i class="icon-keyboard"></i>
+                            </a></span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+</table>

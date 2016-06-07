@@ -1,0 +1,228 @@
+﻿@model Order
+@{
+    Layout = null;
+    var users = Db.Where<ABUserAuth>(x => x.ActiveStatus);
+    var products = Db.Where<Product>(x => x.Status);
+    var product_cats = Db.Where<Product_Category>(x => x.Status);
+}
+@* Dialog Update Update Order Info
+    
+    Customer Id => Customer name
+    Customer email
+
+    Assign Product
+
+    Order Status
+
+    Order Total , Product price
+ *@
+<div class="dialog mws-panel-body" id="Dialog_OrderInfo" style="display: none;" title="Update order info">
+    @using (Html.BeginForm("Order_UpdateInfo", "Order", FormMethod.Post, new { @id = "Dialog_OrderInfo_Form", enctype = "multipart/form-data", @class = "mws-form" }))
+    {                            
+        <input type="hidden" name="Id" value="@Model.Id"  />
+        <div class="mws-form-inline">
+            <h4>
+                Customer Information</h4>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Assign to customer</label>
+                <div class="mws-form-item">
+                    <input type="hidden" name="Customer_Id" />
+                    @*<select name="Customer_Id" class="large mws-select2">
+                        <option value="0">Dont change</option>
+                        @foreach (var u in users)
+                        {
+                            if (u.Id != Model.Customer_Id)
+                            {
+                            <option value="@u.Id">@u.FullName</option>   
+                            }
+                        }
+                    </select>*@ <span>You can select difference customer in the list to assign this order
+                        to that user.<br />
+                        If you assign this order to difference customer, system will not update the Customer
+                        username, Customer Full Name, Customer Email </span>
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Customer user name</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(s => s.Customer_Username, new { @class = "large" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Customer Full Name</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(s => s.Customer_Name, new { @class = "large" })
+                </div>
+            </div>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Customer Email</label>
+                <div class="mws-form-item">
+                    @Html.TextBoxFor(s => s.Customer_Email, new { @class = "large" })
+                </div>
+            </div>
+            @* End of update customer *@
+            <h4>
+                Product</h4>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Assign new product</label>
+                <div class="mws-form-item">
+                    <select name="Product_Id" class="large mws-select2">
+                        <option value="0">Dont change</option>
+                        @foreach (var pc in product_cats)
+                        {
+                            var po = products.Where<Product>(x => x.CatId == pc.Id);
+                            <optgroup label="@pc.Name">
+                                @foreach (var p in po)
+                                {
+                                    if (p.Id != Model.Product_Id)
+                                    {
+                                    <option value="@p.Id">@p.Name</option>   
+                                    }
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                    <span>You can select difference product for this order</span>
+                </div>
+            </div>
+            @* End of update product *@
+            <h4>
+                Order Status</h4>
+            <div class="mws-form-row">
+                <label class="mws-form-label">
+                    Order status</label>
+                <div class="mws-form-item">
+                    <select name="Status" id="dOrderStatus" class="large mws-select2">
+                        @foreach (Enum_OrderStatus e in (Enum_OrderStatus[])Enum.GetValues(typeof(Enum_OrderStatus)))
+                        {
+                            <option value="@((int)e)" @if (Model.StatusEnum == e)
+                                                      {<text>selected</text>}>@e.DisplayName()</option>
+                        }
+                    </select>
+                    <span><i>Notice: System will revert the coupon which is used by this order (if any)
+                        when you change the status to Canceled or Refund</i></span>
+                </div>
+            </div>
+            @if (!Model.Order_Photobook_Deleted)
+            {
+                <div class="mws-form-row" id="rStatusCanceled" style="display: none;">
+                    <label class="mws-form-label">
+                        Dont Delete photobook files</label>
+                    <div class="mws-form-item">
+                        <input type="checkbox" value="true" name="DontDeletePhotobookFiles" id="DontDeletePhotobookFiles" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+<script>
+    $(document).ready(function () {
+
+        $("#Dialog_OrderInfo_Form [name='Customer_Id']").select2({
+            id: function(obj) { return obj.Id; },
+            placeholder: "Search for a customer",
+            minimumInputLength: 1,
+            ajax: {
+                url: "@Url.Action("SearchForAssignToCus", "Order", new { })",
+                dataType: "json",
+                data: function (term, page) {
+                    return {
+                        KeyWords: term,
+                        CustomerId: @Model.Customer_Id,
+                    };
+                },
+                results: function (data, page) {
+                    return { results: data.data };
+                }
+            },
+            formatResult: function (obj) { return obj.Name },
+            formatSelection: function (obj) { return obj.Name },
+            dropdownCssClass: "bigdrop",
+            escapeMarkup: function (m) { return m; }
+        });
+
+        jQuery("#Dialog_OrderInfo_Form").submit(function () {
+            return false; // force no submit
+        });
+
+        // handle order status change to show / hide delete photobook
+        jQuery("#dOrderStatus").change(function(){
+            if(jQuery(this).val() == "-1" || jQuery(this).val() == "-2"  || jQuery(this).val() == "9")
+            {
+                // canceled
+                jQuery("#rStatusCanceled").show();
+            }
+            else{
+                jQuery("#rStatusCanceled").hide();
+                jQuery("#DontDeletePhotobookFiles").removeAttr("checked")
+            }
+        });
+
+        setTimeout(function () {
+            jQuery("#Dialog_OrderInfo").css("overflow", "hidden");
+            jQuery("#dOrderStatus").trigger("change");
+        }, 500);
+
+        $("#Dialog_OrderInfo").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 800,
+            buttons: {
+                "Ok": function () {
+                    if (jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Username']").val() == "") {
+                        alert("Please enter » customer username  ");
+                        jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Username']").focus();
+                        return false;
+                    }
+
+                    if (jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Name']").val() == "") {
+                        alert("Please enter » customer full name  ");
+                        jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Name']").focus();
+                        return false;
+                    }
+
+                    if (jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Email']").val() == "") {
+                        alert("Please enter » customer email ");
+                        jQuery("#Dialog_OrderInfo_Form").find("input[name='Customer_Email']").focus();
+                        return false;
+                    }
+
+                    // ajax submit
+                    show_loading();
+
+                    // and post
+                    jQuery.post(jQuery("#Dialog_OrderInfo_Form").attr("action"), jQuery("#Dialog_OrderInfo_Form").serialize(), function (returnObj) {
+                        if (returnObj.Status == "success") {
+                            window.location.href = window.location.href;
+                        } else {
+                            $.pnotify({
+                                title: 'Error',
+                                text: returnObj.Message,
+                                type: 'error',
+                                opacity: .8
+                            });
+                        }
+
+                        hide_loading();
+                    });
+
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $("#Dialog_OrderInfo_handler").click(function () {
+            //$("#Dialog_Shipping_Note").dialog('option', 'title', 'Add security code');
+            $("#Dialog_OrderInfo").dialog('open')
+        });
+    })
+</script>

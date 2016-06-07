@@ -1,0 +1,220 @@
+﻿@model Product_Category
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Style - " + Model.Name;
+    }
+    else
+    {
+        ViewBag.Title = "Add Style";
+    }
+
+    var Navigations = Db.Where<Product_Category>(true);
+}
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        CKEDITOR.replace('ckeditorId', {
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Management")',
+            height: "300"
+        });
+
+        jQuery("#UserForm").submit(function () {
+            jQuery("#ckeditorId").val(CKEDITOR.instances.ckeditorId.getData());
+
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter field \"Name\" ");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+            show_loading();
+            return true;
+        });
+    });
+</script>
+<div class="head">
+    <h3>
+        @ViewBag.Title
+    </h3>
+    <div>
+        <a type="button" class="btn" href="@Url.Action("Index")" ><i class="icol-arrow-left">
+        </i>Styles Management</a>
+    </div>
+</div>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "ProductCategory", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            @Html.HiddenFor(m => m.OrderIndex);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Short Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.ShortCode, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Short</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.DescShort, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Description</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(m => m.Description, new { @class = "large", @id = "ckeditorId" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Parent</label>
+                    <div class="mws-form-item">
+                        <select name="ParentId" id="ParentId" class="large mws-select2">
+                            @{
+                                              var isSelected = Model.ParentId == 0;
+                            }
+                            <option value="0" @{ if (isSelected)
+                                                 { <text> selected="selected" </text> } }>[No Parent]</option>
+                            @{
+                                                 var isDisabled = false;
+                            }
+                            @foreach (var item in Navigations.Where(m => m.ParentId == 0).OrderBy(m => m.OrderIndex))
+                            {
+                                isSelected = !isSelected && Model.ParentId == item.Id;
+
+                                isDisabled = Model.Id == item.Id;
+                                
+                                <option value="@item.Id" @{ if (isSelected)
+                                                            { <text> selected="selected" </text> } }
+                                                         @{ if (isDisabled)
+                                                            { <text> disabled="disabled" </text> } }>@item.Name</option>
+                                                            var vd = new ViewDataDictionary();
+                                                            vd.Add("isSelected", isSelected);
+                                                            vd.Add("isDisabled", isDisabled);
+                                                            vd.Add("orgId", Model.Id);
+                                                            vd.Add("ItemId", Model.ParentId);
+                                                            vd.Add("ParentId", item.Id);
+                                                            vd.Add("deep", 1);
+                                @Html.Partial("_ParentIdSubNavigation", Navigations, vd);
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Cover</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Cover, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Paper Type</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.PaperType, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        No of Pages</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.NoOfPages, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Binding Type</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.BindingType, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Printing</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Printing, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        End Sheets</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.EndSheets, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Is Active</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="Status" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.Status)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Is Require Login</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsRequireLogin" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.IsRequireLogin)
+                                                                                                                                                  {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Is Display Home Page</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="IsDisplayHomePage" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.IsDisplayHomePage)
+                                                                                                                                                     {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                 <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Thumbnail</label>
+                    <div class="grid_5">
+                        <div class="mws-form-item">
+                            <input type="file" name="FileUp" />
+                        </div>
+                    </div>
+                    <div class="grid_2">
+                        @if (!string.IsNullOrEmpty(Model.Filename))
+                        {
+                            <img src="/@Model.Filename" />
+                        }
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Grayscale Thumbnail</label>
+                    <div class="grid_5">
+                        <div class="mws-form-item">
+                            <input type="file" name="FileUpGray" />
+                        </div>
+                    </div>
+                    <div class="grid_2">
+                        @if (!string.IsNullOrEmpty(Model.Filename_grayscale))
+                        {
+                            <img src="/@Model.Filename_grayscale" />
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

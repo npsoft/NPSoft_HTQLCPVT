@@ -1,0 +1,82 @@
+﻿@model DoiTuong
+
+@using (Html.BeginForm("BienDong_DungTroCap", "WebsiteProduct", FormMethod.Post, new { @id = "frm-bien-dong-dung-tro-cap", enctype = "multipart/form-data", @class = "mws-form" }))
+{
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="NgayHuong" value="@Model.NgayHuong" />
+    <div class="mws-form-inline">
+        <div class="mws-form-row">
+            <label class="mws-form-label">Ngày biến động</label>
+            <div class="mws-form-item">
+                <input type="text" name="NgayBienDong" class="large" />
+            </div>
+        </div>
+        <div class="mws-form-row align-r">
+            <button type="submit" class="btn btn-danger">Đồng ý</button>
+            <button type="button" class="btn" data-action="cancel">Hủy bỏ</button>
+        </div>
+    </div>
+}
+<script>
+    jQuery(document).ready(function ($) {
+        $("#frm-bien-dong-dung-tro-cap [name='NgayBienDong']").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy"
+        });
+
+        $("#frm-bien-dong-dung-tro-cap [data-action='cancel']").click(function () {
+            $popup_bien_dong.dialog("close");
+        });
+
+        $("#frm-bien-dong-dung-tro-cap").on("submit", function (e) {
+            var $frm = $(this);
+            var $hdf_NgayHuong = $frm.find("[name='NgayHuong']");
+            var $txt_NgayBienDong = $frm.find("[name='NgayBienDong']");
+            $txt_NgayBienDong.val($.trim($txt_NgayBienDong.val()));
+
+            if (IsNullOrEmpty($txt_NgayBienDong.val())) {
+                $txt_NgayBienDong.focus();
+                notify_error("Lỗi", "Vui lòng chọn ngày biến động.");
+                return false;
+            }
+            if (IsNullOrEmpty(ParseTime($txt_NgayBienDong.val()))) {
+                $txt_NgayBienDong.focus();
+                notify_error("Lỗi", "Ngày biến động không đúng định dạng.");
+                return false;
+            }
+
+            var data = $frm.serializeObject();
+            data.NgayBienDong = TimeForReq(ParseTime(data.NgayBienDong));
+            var dt_old = ParseTime(data.NgayHuong);
+            var dt_new = ParseTime(data.NgayBienDong);
+            dt_old = new Date(dt_old.getFullYear(), dt_old.getMonth() - 1, 1, 0, 0, 0, 0);
+            dt_new = new Date(dt_new.getFullYear(), dt_new.getMonth() - 1, 1, 0, 0, 0, 0);
+            if (dt_new <= dt_old) {
+                notify_error("Lỗi", "Tháng biến động phải lớn hơn tháng đang hưởng.");
+                $txt_NgayBienDong.focus();
+                return false;
+            }
+            $.ajax({
+                url: $frm.attr("action"),
+                type: $frm.attr("method"),
+                data: JSON.stringify({ model: data }, null, 0),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result, textStatus, jqXHR) {
+                    if (result != null && result.Status == "error") {
+                        notify_error("Lỗi", result.Message);
+                    } else {
+                        notify_info("Thông báo", "Tạo biến động thành công.");
+                        $popup_bien_dong.dialog("close");
+                        Filter({});
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.warn("textStatus: " + textStatus + " | errorThrown: " + errorThrown);
+                }
+            });
+            return false;
+        });
+    });
+</script>

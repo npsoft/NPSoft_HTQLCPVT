@@ -1,0 +1,12 @@
+﻿Links: http://localhost:3718/ | http://localhost:8083/ | http://htqlcpvt.tk/
+Hosting: https://hl-ww03.viettelidc.com.vn:8443/ :: btxhinfo :: vietanh@123
+Database: http://nsql03.viettelidc.com.vn/ :: btxhinfo_qlbs :: btxhi_qlbs :: vietanh@123
+FTP: 103.1.208.200 :: btxhinfo :: vietanh@123
+Domains: http://dot.tk/ :: chinhdinh2020@gmail.com :: 12345 | http://tenmientiengviet.vn/ :: npsoft :: angular@2015
+
+User/Pass(Administrator): immanuel.dang@gmail.com :: 123absoft.vn
+User/Pass(Province): diving :: 123456
+User/Pass(District): eric@ipo.com.my :: 123456
+User/Pass(Village): qsoonwong@yahoo.com :: 123456
+
+UPDATE CMS.Website SET Domain = '["localhost:3718","localhost:8083","htqlcpvt.tk"]'

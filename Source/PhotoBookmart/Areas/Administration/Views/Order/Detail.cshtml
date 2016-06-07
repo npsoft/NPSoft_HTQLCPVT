@@ -1,0 +1,133 @@
+﻿@model Order
+@{
+    ViewBag.Title = "Order " + Model.Order_Number + " detail";
+    Model.LoadAddress(0);
+    Model.LoadAddress(1);
+    Model.LoadProductInfo();
+    var ticket = (Order_UploadFilesTicket)ViewData["Ticket"];
+}
+<script  type="text/javascript" src="@Url.ContentArea("~/Content/scripts/OrderDetail.js")"></script>
+<div class="head">
+    <h3>
+        Order @Model.Order_Number detail</h3>
+    <div class="mws-panel-toolbar">
+        <div class="btn-toolbar">
+            <div class="btn-group">
+                <a href="@Url.Action("Invoice_SendToEmail", new { id = Model.Id })"  rel="tooltip" title="Send invoice of this order to customer email" class="btn basic_ajax">
+                    <i class="icol-envelope"></i>Resend Invoice</a>
+                    
+                     <a href="javascript:void(0)" class="btn"
+                        rel="tooltip" title="Send customer message" id="Dialog_Message_handler"><i class="icol-script">
+                        </i>Send message</a> 
+                        
+                         <a id="Dialog_OrderInfo_handler" href="javascript:void(0)"
+                    class="btn" rel="tooltip" title="Update order info such as customer name, product, .."><i class="icol-vcard"></i>Update Info</a>
+
+                    <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" title="Update payment" id="payment_updatestatus_handler"><i class="icol-coins"></i>Update payment</a>
+               
+               <a href="@Url.Action("Order_Approve", new { id = Model.Id })"
+                    class="btn basic_ajax" rel="tooltip" title="Approve this step and move this order to next step"><i class="icol-accept"></i>Approve Step</a>
+            </div>
+            <br />
+            <div class="btn-group">
+               
+                  <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" title="Update shipping" id="Dialog_ShippingNote_handler"><i class="icol-clipboard-text"></i>Shipping</a>
+
+                     <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" id="Update_BillingAddress" title="Edit billing address"><i class="icol-money-dollar"></i>Billing Address</a>
+
+                 <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" id="Update_ShippingAddress" title="Edit shipping address"><i class="icol-delivery"></i>Shipping Address</a>
+                 @if (Model.Status == (int)Enum_OrderStatus.Received || Model.Status == (int)Enum_OrderStatus.Verify)
+                 {
+                     <a href="javascript:void(0);" class="btn" rel="tooltip" id="FileUploadRequest" title="File Upload Request">
+                         <i class="icol-email"></i>File Upload Request
+                     </a>
+                 }
+              @* <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" title="Print production job sheet"><i class="icol-text-list-numbers"></i>Production Job Sheet</a>
+
+                <a href="javascript:void(0)"
+                    class="btn" rel="tooltip" title="Print shipping label"><i class="icol-text-list-numbers"></i>Print Shipping Label</a>
+*@
+               
+            </div>
+        </div>
+       
+    </div>
+</div>
+<input type="hidden" id="OrderId" value="@Model.Id" />
+<div class="mws-panel grid_3" id="orderdetail_leftcolumn">
+    <div class="mws-accordion" heightStyle="auto">
+        <h3>
+            <a href="#">Order Detail</a></h3>
+        <div>
+            @Html.Partial("Detail_Info", Model)
+        </div>
+        <h3>
+            <a href="#">Order Product Options</a></h3>
+        <div>
+            @Html.Partial("ProductOption_Info", Model)
+        </div>
+        <h3>
+            <a href="#">Payment detail</a></h3>
+        <div>
+            @Html.Partial("Payment_Info", Model)
+        </div>
+        @if (Model.isUseCoupon)
+        {
+            <h3>
+                <a href="#">Coupon detail</a></h3>
+            <div>
+                @Html.Partial("Coupon_Info", Model)
+            </div>
+        }
+        <h3>
+            <a href="#">Billing Detail</a></h3>
+        <div>
+            @Html.Partial("Billing_Info", Model)
+        </div>
+        <h3>
+            <a href="#">Shipping Detail</a></h3>
+        <div>
+            @Html.Partial("Shipping_Info", Model)
+        </div>
+        <h3>
+            <a href="#">Shipping Note</a></h3>
+        <div>
+            @Html.Partial("Shipping_Note", Model)
+        </div>
+    </div>
+</div>
+@Html.Partial("History_Info", Model)
+<div class="clear">
+</div>
+@* Dialog *@
+@Html.Partial("Dialog_SendEmail", new MaillingListSendModel())
+@Html.Partial("Dialog_ShippingNote", Model)
+@Html.Partial("Dialog_OrderInfo", Model)
+@Html.Partial("Dialog_UpdatePayment", Model)
+@Html.Partial("Dialog_Address", Model)
+@if (Model.Status == (int)Enum_OrderStatus.Received || Model.Status == (int)Enum_OrderStatus.Verify)
+{
+    if (ticket == null)
+    {
+        <script>
+            jQuery(document).ready(function ($) {
+                $("#FileUploadRequest").on("click", function (e) {
+                    ReqUploadFileAgain(@Model.Id);
+                });
+            });
+        </script>
+    }
+    else
+    {
+        ViewDataDictionary viewData = new ViewDataDictionary();
+        
+        viewData.Add("Ticket", ticket);
+        
+        @Html.Partial("_Dialog_UploadFilesTicket", Model, viewData)
+    }
+}

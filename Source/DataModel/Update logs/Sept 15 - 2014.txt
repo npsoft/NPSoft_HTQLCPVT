@@ -1,0 +1,11 @@
+﻿Table CouponPromo
+- Add SecurityCode
+
+Table Order
+- Add LastUpdate: datetime
+
+Table Country
+- Add PhoneNumberPrefix: string
+
+Table Site_ContactusConfig
+- Add IsHideMap: bool

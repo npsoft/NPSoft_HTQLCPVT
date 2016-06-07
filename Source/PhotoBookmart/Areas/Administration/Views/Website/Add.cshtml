@@ -1,0 +1,188 @@
+﻿@model Website
+@{  
+    if (Model.Id > 0)
+    {
+        ViewBag.Title = "Edit Website";
+    }
+    else
+    {
+        ViewBag.Title = "Add Website";
+    }
+    List<Theme> Themes = (List<Theme>)ViewData["Themes"];
+}
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+        jQuery("#Form_Domain").select2({
+            tags: [],
+            tokenSeparators: [","]
+        });
+        jQuery("#UserForm").submit(function () {
+            // validate
+            if (jQuery("#Name").val() == "") {
+                alert("Please enter website name");
+                jQuery("#Name").focus();
+                return false;
+            }
+
+            if (jQuery("#Form_Domain").val() == "") {
+                alert("Please enter at least one domain for this website");
+                jQuery("#Form_Domain").focus()
+                return false;
+            }
+
+            if (jQuery("#SiteTitle").val() == "") {
+                alert("Please enter website Site Title");
+                jQuery("#SiteTitle").focus();
+                return false;
+            }
+
+            show_loading();
+
+            // and post
+            jQuery.post(jQuery(this).attr("action"), jQuery("#UserForm").serialize(), function (returnObj) {
+
+                if (returnObj.Status == "success") {
+                    if (returnObj.Message != null) {
+                        notify_success("Success", returnObj.Message);
+                    }
+                    else if (returnObj.RedirectUrl != null) {
+                        window.location.href = returnObj.RedirectUrl;
+                    }
+                } else {
+                    $.pnotify({
+                        title: 'Error',
+                        text: returnObj.Message,
+                        type: 'error',
+                        opacity: .8
+                    });
+                }
+
+                hide_loading();
+            });
+            return false;
+        });
+    });
+</script>
+<div class="mws-panel grid_8">
+    <div class="mws-panel-header">
+        <span>@ViewBag.Title</span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("Update", "Website", FormMethod.Post, new { enctype = "multipart/form-data", @id = "UserForm", @class = "mws-form" }))
+        {
+            @Html.HiddenFor(m => m.Id);
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Name</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Name, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Theme</label>
+                    <div class="mws-form-item">
+                        <select id="Theme" name="Theme" class="large">
+                            @foreach (var x in Themes)
+                            {
+                                <option value="@x.FolderName" @if (Model.Theme == x.FolderName)
+                                                              { <text> selected </text> } >@x.ThemeName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Domain</label>
+                    <div class="mws-form-item">
+                        <input type="hidden" name="Domain" id="Form_Domain" class="large" value="@String.Join(",", Model.Domain)"/>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Site Title</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.SiteTitle, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        SEO Keyword</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.SiteDefaultKeyword, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        SEO Meta</label>
+                    <div class="mws-form-item">
+                        @Html.TextAreaFor(model => Model.SiteDefaultMeta, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Use SSL</label>
+                    <div class="mws-form-item">
+                        <input class="ibutton" name="UseSSL" value="true" type="checkbox" data-label-on="Enable" data-label-off="Disable" @if (Model.UseSSL)
+                                                                                                                                          {<text>checked="checked"</text>}>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Status</label>
+                    <div class="mws-form-item">
+                        <select id="Status" name="Status" class="large">
+                            <option value="0" @if (Model.Status == 0)
+                                              {<text> selected </text>}>Waiting for approve</option>
+                            <option value="1" @if (Model.Status == 1)
+                                              {<text> selected </text>}>Running Normal</option>
+                            <option value="2" @if (Model.Status == 2)
+                                              {<text> selected </text>}>Disabled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Admin Email</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Email_Admin, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Suport Email</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Email_Support, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Contact Us Email</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.Email_Contact, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                        Phone number</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.PhoneNumber_HotLine, new { @class = "large" })
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <label class="mws-form-label">
+                       ShareThis Publisher Key</label>
+                    <div class="mws-form-item">
+                        @Html.TextBoxFor(model => Model.ShareThis_PublisherKey, new { @class = "large" })
+                    </div>
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Submit" class="btn btn-danger">
+                <input type="reset" value="Reset" class="btn ">
+            </div>
+        }
+    </div>
+</div>

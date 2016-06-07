@@ -1,0 +1,345 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>wwScripting</name>
+    </assembly>
+    <members>
+        <member name="T:Westwind.wwScripting.wwASPScripting">
+            <summary>
+            Summary description for Class1.
+            </summary>
+        </member>
+        <member name="M:Westwind.wwScripting.wwASPScripting.ParseScript(System.String)">
+            <summary>
+            Parses a script into a compilable program
+            </summary>
+            <param name="lcCode"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Westwind.wwScripting.DelegateCompleted">
+            <summary>
+            Deletgate for the Completed Event
+            </summary>
+        </member>
+        <member name="T:Westwind.wwScripting.wwScripting">
+            <summary>
+            Class that enables running of code dynamcially created at runtime.
+            Provides functionality for evaluating and executing compiled code.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.oCompiler">
+            <summary>
+            Compiler object used to compile our code
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.oParameters">
+            <summary>
+            Reference to the Compiler Parameter object
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.oAssembly">
+            <summary>
+            Reference to the final assembly
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.oCompiled">
+            <summary>
+            The compiler results object used to figure out errors.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.oObjRef">
+            <summary>
+            The object reference to the compiled object available after the first method call.
+            You can use this method to call additional methods on the object.
+            For example, you can use CallMethod and pass multiple methods of code each of
+            which can be executed indirectly by using CallMethod() on this object reference.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.lSaveSourceCode">
+            <summary>
+            If true saves source code before compiling to the cSourceCode property.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.cSourceCode">
+            <summary>
+            Contains the source code of the entired compiled assembly code.
+            Note: this is not the code passed in, but the full fixed assembly code.
+            Only set if lSaveSourceCode=true.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.nStartCodeLine">
+            <summary>
+            Line where the code that runs starts
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.cAssemblyNamespace">
+            <summary>
+            Namespace of the assembly created by the script processor. Determines
+            how the class will be referenced and loaded.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.cClassName">
+            <summary>
+            Name of the class created by the script processor. Script code becomes methods in the class.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.lDefaultAssemblies">
+            <summary>
+            Determines if default assemblies are added. System, System.IO, System.Reflection
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.cSupportAssemblyPath">
+            <summary>
+            Path for the support assemblies wwScripting and RemoteLoader.
+            By default this can be blank but if you're using this functionality
+            under ASP.Net specify the bin path explicitly. Should include trailing
+            dash.
+            </summary>
+        </member>
+        <member name="F:Westwind.wwScripting.wwScripting.cScriptingLanguage">
+            <summary>
+            The scripting language used. CSharp, VB, JScript
+            </summary>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.#ctor(System.String)">
+            <summary>
+            The language to be used by this scripting class. Currently only C# is supported 
+            with VB syntax available but not tested.
+            </summary>
+            <param name="lcLanguage">CSharp or VB</param>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.SetLanguage(System.String)">
+            <summary>
+            Specifies the language that is used. Supported languages include
+            CSHARP C# VB
+            </summary>
+            <param name="lcLanguage"></param>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.AddAssembly(System.String,System.String)">
+            <summary>
+            Adds an assembly to the compiled code
+            </summary>
+            <param name="lcAssemblyDll">DLL assembly file name</param>
+            <param name="lcNamespace">Namespace to add if any. Pass null if no namespace is to be added</param>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.AddAssembly(System.String)">
+            <summary>
+            Adds an assembly to the compiled code.
+            </summary>
+            <param name="lcAssemblyDll">DLL assembly file name</param>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.ExecuteMethod(System.String,System.String,System.Object[])">
+            <summary>
+            Executes a complete method by wrapping it into a class.
+            </summary>
+            <param name="lcCode">One or more complete methods.</param>
+            <param name="lcMethodName">Name of the method to call.</param>
+            <param name="loParameters">any number of variable parameters</param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.ExecuteCode(System.String,System.Object[])">
+            <summary>
+             Executes a snippet of code. Pass in a variable number of parameters
+             (accessible via the loParameters[0..n] array) and return an object parameter.
+             Code should include:  return (object) SomeValue as the last line or return null
+            </summary>
+            <param name="lcCode">The code to execute</param>
+            <param name="loParameters">The parameters to pass the code</param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.wwScripting.wwScripting.CompileAssembly(System.String)">
+            <summary>
+            Compiles and runs the source code for a complete assembly.
+            </summary>
+            <param name="lcSource"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Westwind.wwScripting.wwScripting.PropertyTest">
+            <summary>
+            This is a test property
+            </summary>
+            <seealso cref="P:Westwind.wwScripting.wwScripting.PropertyTest"/>
+            <seealso cref="M:Westwind.wwScripting.wwScripting.AddAssembly(System.String,System.String)"/>
+            <list>
+            	<item></item> 
+            	<description></description>
+            </list>
+            <remarks>Here are some extra remarks we're pulling</remarks>	
+            <example>Here's an example piece of code
+            asdkjlaksdjlaksdjasd
+            asdlkjaslkdjaskldjasd</example>
+        </member>
+        <member name="T:Westwind.Tools.wwUtils">
+            <summary>
+            Summary description for Class1.
+            </summary>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.FixHTMLForDisplay(System.String)">
+            <summary>
+            Replaces and  and Quote characters to HTML safe equivalents.
+            </summary>
+            <param name="lcHTML">HTML to convert</param>
+            <returns>Returns an HTML string of the converted text</returns>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StringToFile(System.String,System.String)">
+            <summary>
+            Writes a string to a file.
+            </summary>
+            <param name="lcString"></param>
+            <param name="lcFile"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrTran(System.String,System.String)">
+            <summary>
+            Searches one string into another string and replaces all occurences with
+            a blank character.
+            <pre>
+            Example:
+            VFPToolkit.strings.StrTran("Joe Doe", "o");		//returns "J e D e" :)
+            </pre>
+            </summary>
+            <param name="cSearchIn"> </param>
+            <param name="cSearchFor"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrTran(System.String,System.String,System.String)">
+            <summary>
+            Searches one string into another string and replaces all occurences with
+            a third string.
+            <pre>
+            Example:
+            VFPToolkit.strings.StrTran("Joe Doe", "o", "ak");		//returns "Jake Dake" 
+            </pre>
+            </summary>
+            <param name="cSearchIn"> </param>
+            <param name="cSearchFor"> </param>
+            <param name="cReplaceWith"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrTran(System.String,System.String,System.String,System.Int32,System.Int32)">
+            Searches one string into another string and replaces each occurences with
+            a third string. The fourth parameter specifies the starting occurence and the 
+            number of times it should be replaced
+            <pre>
+            Example:
+            VFPToolkit.strings.StrTran("Joe Doe", "o", "ak", 2, 1);		//returns "Joe Dake" 
+            </pre>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrExtract(System.String,System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Receives a string along with starting and ending delimiters and returns the 
+            part of the string between the delimiters. Receives a beginning occurence
+            to begin the extraction from and also receives a flag (0/1) where 1 indicates
+            that the search should be case insensitive.
+            <pre>
+            Example:
+            string cExpression = "JoeDoeJoeDoe";
+            VFPToolkit.strings.StrExtract(cExpression, "o", "eJ", 1, 0);		//returns "eDo"
+            </pre>
+            </summary>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrExtract(System.String,System.String)">
+            <summary>
+            Receives a string and a delimiter as parameters and returns a string starting 
+            from the position after the delimiter
+            <pre>
+            Example:
+            string cExpression = "JoeDoeJoeDoe";
+            VFPToolkit.strings.StrExtract(cExpression, "o");		//returns "eDoeJoeDoe"
+            </pre>
+            </summary>
+            <param name="cSearchExpression"> </param>
+            <param name="cBeginDelim"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrExtract(System.String,System.String,System.String)">
+            <summary>
+            Receives a string along with starting and ending delimiters and returns the 
+            part of the string between the delimiters
+            <pre>
+            Example:
+            string cExpression = "JoeDoeJoeDoe";
+            VFPToolkit.strings.StrExtract(cExpression, "o", "eJ");		//returns "eDo"
+            </pre>
+            </summary>
+            <param name="cSearchExpression"> </param>
+            <param name="cBeginDelim"> </param>
+            <param name="cEndDelim"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.StrExtract(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Receives a string along with starting and ending delimiters and returns the 
+            part of the string between the delimiters. It also receives a beginning occurence
+            to begin the extraction from.
+            <pre>
+            Example:
+            string cExpression = "JoeDoeJoeDoe";
+            VFPToolkit.strings.StrExtract(cExpression, "o", "eJ", 2);		//returns ""
+            </pre>
+            </summary>
+            <param name="cSearchExpression"> </param>
+            <param name="cBeginDelim"> </param>
+            <param name="cEndDelim"> </param>
+            <param name="nBeginOccurence"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.__at(System.String,System.String,System.Int32,System.Int32)">
+            Private Implementation: This is the actual implementation of the At() and RAt() functions. 
+            Receives two strings, the expression in which search is performed and the expression to search for. 
+            Also receives an occurence position and the mode (1 or 0) that specifies whether it is a search
+            from Left to Right (for At() function)  or from Right to Left (for RAt() function)
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.At(System.String,System.String)">
+            <summary>
+            Receives two strings as parameters and searches for one string within another. 
+            If found, returns the beginning numeric position otherwise returns 0
+            <pre>
+            Example:
+            VFPToolkit.strings.At("D", "Joe Doe");	//returns 5
+            </pre>
+            </summary>
+            <param name="cSearchFor"> </param>
+            <param name="cSearchIn"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.At(System.String,System.String,System.Int32)">
+            <summary>
+            Receives two strings and an occurence position (1st, 2nd etc) as parameters and 
+            searches for one string within another for that position. 
+            If found, returns the beginning numeric position otherwise returns 0
+            <pre>
+            Example:
+            VFPToolkit.strings.At("o", "Joe Doe", 1);	//returns 2
+            VFPToolkit.strings.At("o", "Joe Doe", 2);	//returns 6
+            </pre>
+            </summary>
+            <param name="cSearchFor"> </param>
+            <param name="cSearchIn"> </param>
+            <param name="nOccurence"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.AtC(System.String,System.String)">
+            <summary>
+            Receives two strings as parameters and searches for one string within another. 
+            This function ignores the case and if found, returns the beginning numeric position 
+            otherwise returns 0
+            <pre>
+            Example:
+            VFPToolkit.strings.AtC("d", "Joe Doe");	//returns 5
+            </pre>
+            </summary>
+            <param name="cSearchFor"> </param>
+            <param name="cSearchIn"> </param>
+        </member>
+        <member name="M:Westwind.Tools.wwUtils.AtC(System.String,System.String,System.Int32)">
+            <summary>
+            Receives two strings and an occurence position (1st, 2nd etc) as parameters and 
+            searches for one string within another for that position. This function ignores the
+            case of both the strings and if found, returns the beginning numeric position 
+            otherwise returns 0.
+            <pre>
+            Example:
+            VFPToolkit.strings.AtC("d", "Joe Doe", 1);	//returns 5
+            VFPToolkit.strings.AtC("O", "Joe Doe", 2);	//returns 6
+            </pre>
+            </summary>
+            <param name="cSearchFor"> </param>
+            <param name="cSearchIn"> </param>
+            <param name="nOccurence"> </param>
+        </member>
+    </members>
+</doc>

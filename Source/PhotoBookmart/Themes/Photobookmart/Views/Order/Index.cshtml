@@ -1,0 +1,117 @@
+﻿@model List<Order>
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.User.cshtml";
+
+    ViewBag.Title = "My Orders";
+    var cats = Db.Where<Product_Category>(x => x.Status);
+}
+@section _TitleMain {
+    <a href='@Url.Action("Index", "Orders", new { })' title='Permanent Link: My Orders'>
+        My Orders</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">My Orders</span>
+}
+<script type="text/javascript" src="@Url.ContentTheme("Content/scripts/jquery.dataTables.min.js")"></script>
+<div class="block-fluid table-sorting clearfix">
+    <table cellpadding="0" cellspacing="0" width="100%" class="table" id="myorder_table">
+        <thead>
+            <tr>
+                <th id="first_column">
+                    Order
+                </th>
+                <th>
+                    On
+                </th>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Category
+                </th>
+                <th>
+                    Cost
+                </th>
+                <th style="width: 60px;">
+                    Shipping
+                </th>
+                <th>
+                    Status
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var product = Db.Select<Product>(x => x.Where(m => m.Id == item.Product_Id).Limit(1)).FirstOrDefault();
+
+                <tr @if (item.FlagHistoryMessage == (int)Enum_FlagOrderMessage.NewMessageFromPhotobookmart)
+                    { <text>class="bold"</text>}>
+                    <td>
+                        <a href="@Url.Action("Detail", new { id = item.Order_Number })" title="View order @item.Order_Number detail">
+                            @item.Order_Number</a>
+                    </td>
+                    <td>
+                        @item.CreatedOn.ToShortDateString()
+                    </td>
+                    <td>
+                        @item.Product_Name
+                        @if (product != null)
+                        {
+                            <br />
+                            @product.Size
+                        }
+                    </td>
+                    <td>
+                        @if (product != null)
+                        {
+                            var cat = cats.Where(x => x.Id == product.CatId).FirstOrDefault();
+                            if (cat == null)
+                            {
+                            <span></span>
+                            }
+                            else
+                            {
+                            <span>@cat.Name</span>
+                            }
+                        }
+                    </td>
+                    <td>
+                        @item.Bill_Total.ToMoneyFormated(item.Shipping_DisplayPriceSign)
+                    </td>
+                    <td>
+                        @item.Shipping_Status.DisplayName()
+                    </td>
+                    <td>
+                        @if (item.StatusEnum == Enum_OrderStatus.Received)
+                        {
+                            <text>Waiting</text>
+                        }
+                        else if (item.StatusEnum != Enum_OrderStatus.Finished)
+                        {
+                            <text>Processing</text>
+                        }
+                        else
+                        {
+                            <text>Finished</text>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script language="javascript" type="text/javascript">
+    jQuery(document).ready(function () {
+        jQuery("#myorder_table").dataTable(
+            { "iDisplayLength": 20, "sPaginationType": "full_numbers", "bLengthChange": false, "bFilter": true, "bInfo": false, "bPaginate": true });
+
+        setTimeout(function () {
+            jQuery("#first_column").trigger("click");
+        }, 500);
+    });
+</script>
+@{
+    Db.Close();
+}

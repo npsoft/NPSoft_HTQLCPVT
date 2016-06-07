@@ -1,0 +1,458 @@
+﻿@model DoiTuongSearchModel
+@{
+    Layout = null;
+}
+<div class="mws-panel grid_8 hide" id="PanelOrderSearch"><!-- mws-collapsible mws-collapsed -->
+    <div class="mws-panel-header">
+        <span>
+            <i class="icon-calendar"></i>Tìm kiếm nâng cao
+            <span data-action="search-quick" class="float-right cursor-pointer"><i class="icon-remove"></i></span>
+        </span>
+    </div>
+    <div class="mws-panel-body no-padding">
+        @using (Html.BeginForm("List", "WebsiteProduct", FormMethod.Post, new { enctype = "multipart/form-data", @id = "Order_Search", @class = "mws-form" }))
+        {
+            <div class="mws-form-inline">
+                <div class="mws-form-row">
+                    <div class="mws-form-cols">						
+						<div class="mws-form-col-4-8">
+							<label class="mws-form-label">Tỉnh</label>
+							<div class="mws-form-item">
+								<select name="MaHC_Province" class="mws-select2 large">
+									<option value="">- - Chọn - -</option>
+								</select>
+							</div>
+						</div>
+						<div class="mws-form-col-4-8">
+							<label class="mws-form-label">Huyện</label>
+							<div class="mws-form-item">
+								<select name="MaHC_District" class="mws-select2 large">
+									<option value="">- - Chọn - -</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="mws-form-row">
+					<div class="mws-form-cols">
+						<div class="mws-form-col-4-8">
+							<label class="mws-form-label">Xã</label>
+							<div class="mws-form-item">
+								<select name="MaHC_Village" class="mws-select2 large">
+									<option value="">- - Chọn - -</option>
+								</select>
+							</div>
+						</div>
+						<div class="mws-form-col-4-8">
+							<label class="mws-form-label">Xóm</label>
+							<div class="mws-form-item ">
+								<select name="IDDiaChi" class="mws-select2 large">
+									<option value="">- - Chọn - -</option>
+								</select>
+							</div>
+						</div>					
+					</div>
+				</div>
+                <div class="mws-form-row">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Loại</label>
+                            <div class="mws-form-item">
+                                <select name="MaLDT" class="mws-select2 large">
+                                    <optgroup label="">
+                                        <option value="">- - Chọn - -</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Tình trạng</label>
+                            <div class="mws-form-item">
+                                <select name="TinhTrang" class="mws-select2 large">
+                                    <option value="">- - Chọn - -</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Duyệt?</label>
+                            <div class="mws-form-item ">
+                                <select name="IsDuyet" class="mws-select2 large">
+                                    <option value="">- - Chọn - -</option>
+                                    <option value="true">Đã duyệt</option>
+                                    <option value="false">Chưa duyệt</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Từ khóa</label>
+                            <div class="mws-form-item">
+                                @Html.TextBoxFor(m => m.Keywords, new { @class = "large" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mws-form-row">
+                    <div class="mws-form-cols">
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Sắp xếp theo</label>
+                            <div class="mws-form-item">
+                                <select name="OrderBy" class="mws-select2 large">
+                                    <option value="">- - Chọn - -</option>
+                                    <option value="HoTen">Họ & Tên</option>
+                                    <option value="NgaySinh">Ngày sinh</option>
+                                    <option value="GioiTinh">Giới tính</option>
+                                    <option value="MaLDT">Loại</option>
+                                    <option value="TinhTrang">Tình trạng</option>
+                                    <option value="IsDuyet">Tình trạng (duyệt)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mws-form-col-4-8">
+                            <label class="mws-form-label">Thứ tự sắp xếp</label>
+                            <div class="mws-form-item">
+                                <select name="OrderDesc" class="mws-select2 large">
+                                    <option value="false">Tăng dần</option>
+                                    <option value="true">Giảm dần</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hide">
+                    <input type="text" name="Page" value="@Model.Page" />
+                </div>
+            </div>
+            <div class="mws-button-row">
+                <input type="submit" value="Tìm kiếm" class="btn btn-danger" />
+                <input data-action="search-quick" type="button" value="Đóng lại" class="btn" />
+            </div>
+        }
+    </div>
+</div>
+<script>
+    var $con_advanced, $frm_search, $ddl_MaHC_Province, $ddl_MaHC_District, $ddl_MaHC_Village, $ddl_IDDiaChi, $ddl_MaLDT, $ddl_TinhTrang, $ddl_IsDuyet, $ddl_OrderBy, $ddl_OrderDesc, $txt_Keywords, $hdf_Page, $btn_submit;
+    var $con_quick, $ddl_quick_MaHC_Province, $ddl_quick_MaHC_District, $ddl_quick_MaHC_Village, $ddl_quick_IDDiaChi, $ddl_quick_MaLDT, $txt_quick_Keywords;
+    var $con_combine, $ddl_combine_MaHC_Province, $ddl_combine_MaHC_District, $ddl_combine_MaHC_Village, $ddl_combine_IDDiaChi, $txt_combine_Keywords;
+    var $list, $popup_bien_dong, $popup_lich_su;
+    var count_change_hamlet = 0; // For: Stupid trick :)
+
+    function QuickFilter(_data) {
+        if (!$con_quick.hasClass("hide")) {
+            var data = $frm_search.serializeObject();
+            $.post("@Url.Action("List", "WebsiteProduct", new { })", data, function (data) {
+                $list.html(data);
+            });
+        }
+    };
+
+    function AdvancedFilter(_data) {
+        if (!$con_advanced.hasClass("hide")) {
+            var data = $frm_search.serializeObject();
+            $.post("@Url.Action("List", "WebsiteProduct", new { })", data, function (data) {
+                $list.html(data);
+            });
+        }
+    };
+
+    function Filter(_data) {
+        if ($con_quick.hasClass("hide")) {
+            AdvancedFilter({});
+        } else {
+            QuickFilter({});
+        }
+    };
+
+    function Paging(_data) {
+        $hdf_Page.val(_data);
+        Filter({});
+    };
+
+    function InitCtrls(_data) {
+        $con_advanced = $("#PanelOrderSearch");
+        $frm_search = $con_advanced.find("#Order_Search");
+        $ddl_MaHC_Province = $frm_search.find("[name='MaHC_Province']");
+        $ddl_MaHC_District = $frm_search.find("[name='MaHC_District']");
+        $ddl_MaHC_Village = $frm_search.find("[name='MaHC_Village']");
+        $ddl_IDDiaChi = $frm_search.find("[name='IDDiaChi']");
+        $ddl_MaLDT = $frm_search.find("[name='MaLDT']");
+        $ddl_TinhTrang = $frm_search.find("[name='TinhTrang']");
+        $ddl_IsDuyet = $frm_search.find("[name='IsDuyet']");
+        $ddl_OrderBy = $frm_search.find("[name='OrderBy']");
+        $ddl_OrderDesc = $frm_search.find("[name='OrderDesc']");
+        $txt_Keywords = $frm_search.find("[name='Keywords']");
+        $hdf_Page = $frm_search.find("[name='Page']");
+        $btn_submit = $frm_search.find("[type='submit']");
+
+        $con_quick = $(".search-quick");
+        $ddl_quick_MaHC_Province = $con_quick.find("#quick-MaHC_Province");
+        $ddl_quick_MaHC_District = $con_quick.find("#quick-MaHC_District");
+        $ddl_quick_MaHC_Village = $con_quick.find("#quick-MaHC_Village");
+        $ddl_quick_IDDiaChi = $con_quick.find("#quick-IDDiaChi");
+        $ddl_quick_MaLDT = $con_quick.find("#quick-MaLDT");
+        $txt_quick_Keywords = $con_quick.find("#quick-Keywords");
+
+        $con_combine = $con_advanced.add($con_quick);
+        $ddl_combine_MaHC_Province = $ddl_MaHC_Province.add($ddl_quick_MaHC_Province);
+        $ddl_combine_MaHC_District = $ddl_MaHC_District.add($ddl_quick_MaHC_District);
+        $ddl_combine_MaHC_Village = $ddl_MaHC_Village.add($ddl_quick_MaHC_Village);
+        $ddl_combine_IDDiaChi = $ddl_IDDiaChi.add($ddl_quick_IDDiaChi);
+        $ddl_combine_MaLDT = $ddl_MaLDT.add($ddl_quick_MaLDT);
+        $txt_combine_Keywords = $txt_Keywords.add($txt_quick_Keywords);
+
+        $list = $(".listuser");
+        $popup_bien_dong = $("#dialog-bien-dong");
+        $popup_lich_su = $("#dialog-lich-su");
+    };
+
+    function InitEvents(_data) {
+        $("[data-action='search-quick'], [data-action='search-advanced']").on("click", function (e) {
+            $("#PanelOrderSearch, .search-quick, [data-action='search-advanced']").toggleClass("hide");
+        });
+
+        $ddl_combine_MaHC_Province.on("change", function (e) {
+            var data = { MaHC: e.val };
+            $ddl_combine_MaHC_Province.select2().select2("val", data.MaHC);
+            count_change_hamlet = count_change_hamlet > 0 ? count_change_hamlet : 8;
+            if (IsNullOrEmpty(data.MaHC)) {
+                RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_District, val: "", data: [], id: "MaHC", name: "TenHC" });
+                $ddl_combine_MaHC_District.trigger("change");
+            } else {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, data, function (data) {
+                    RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_District, val: "", data: data, id: "MaHC", name: "TenHC" });
+                    $ddl_combine_MaHC_District.trigger("change");
+                });
+            }
+        });
+
+        $ddl_combine_MaHC_District.on("change", function (e) {
+            var data = { MaHC: e.val };
+            $ddl_combine_MaHC_District.select2().select2("val", data.MaHC);
+            count_change_hamlet = count_change_hamlet > 0 ? count_change_hamlet : 4;
+            if (IsNullOrEmpty(data.MaHC)) {
+                RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_Village, val: "", data: [], id: "MaHC", name: "TenHC" });
+                $ddl_combine_MaHC_Village.trigger("change");
+            } else {
+                $.post(SVC_GETVILLAGESBYDISTRICT, data, function (data) {
+                    RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_Village, val: "", data: data, id: "MaHC", name: "TenHC" });
+                    $ddl_combine_MaHC_Village.trigger("change");
+                });
+            }
+        }).on("open", function (e) {
+            var $ddl_parent = $ddl_MaHC_Province;
+            if ($.contains($con_quick[0], e.target)) { $ddl_parent = $ddl_quick_MaHC_Province; }
+            if (IsNullOrEmpty($ddl_parent.val())) {
+                notify_info("Thông báo", "Vui lòng chọn tỉnh trước.");
+                setTimeout(function () { $ddl_parent.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_combine_MaHC_Village.on("change", function (e) {
+            var data = { MaHC: e.val };
+            $ddl_combine_MaHC_Village.select2().select2("val", data.MaHC);
+            count_change_hamlet = count_change_hamlet > 0 ? count_change_hamlet : 2;
+            if (IsNullOrEmpty(data.MaHC)) {
+                RefillDataForSelect2({ $ddl: $ddl_combine_IDDiaChi, val: "", data: [], id: "IDDiaChi", name: "TenDiaChi" });
+                $ddl_combine_IDDiaChi.trigger("change");
+            } else {
+                $.post(SVC_GETHAMLETSBYVILLAGE, data, function (data) {
+                    RefillDataForSelect2({ $ddl: $ddl_combine_IDDiaChi, val: "", data: data, id: "IDDiaChi", name: "TenDiaChi" });
+                    $ddl_combine_IDDiaChi.trigger("change");
+                });
+            }
+        }).on("open", function (e) {
+            var $ddl_parent = $ddl_MaHC_District;
+            if ($.contains($con_quick[0], e.target)) { $ddl_parent = $ddl_quick_MaHC_District; }
+            if (IsNullOrEmpty($ddl_parent.val())) {
+                notify_info("Thông báo", "Vui lòng chọn huyện trước.");
+                setTimeout(function () { $ddl_parent.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_combine_IDDiaChi.on("change", function (e) {
+            count_change_hamlet = count_change_hamlet > 0 ? count_change_hamlet : 1;
+            $ddl_combine_IDDiaChi.select2().select2("val", e.val);
+            if (count_change_hamlet-- == 1 &&
+                $.contains($con_quick[0], e.target)) {
+                $hdf_Page.val(1);
+                QuickFilter({});
+            }
+        }).on("open", function (e) {
+            var $ddl_parent = $ddl_MaHC_Village;
+            if ($.contains($con_quick[0], e.target)) { $ddl_parent = $ddl_quick_MaHC_Village; }
+            if (IsNullOrEmpty($ddl_parent.val())) {
+                notify_info("Thông báo", "Vui lòng chọn xã trước.");
+                setTimeout(function () { $ddl_parent.select2("open"); }, 200);
+                return false;
+            }
+        });
+
+        $ddl_combine_MaLDT.on("change", function (e) {
+            $ddl_combine_MaLDT.select2().select2("val", $(this).val());
+            if ($con_quick[0], e.target) {
+                $hdf_Page.val(1);
+                QuickFilter({});
+            }
+        });
+
+        $txt_combine_Keywords.on("change", function (e) {
+            $txt_combine_Keywords.val($(this).val());
+        });
+
+        $txt_quick_Keywords.keypress(function (e) {
+            if (e.which == 13) {
+                $txt_Keywords.val($(this).val());
+                $hdf_Page.val(1);
+                QuickFilter({});
+            }
+        });
+
+        $btn_submit.on("click", function (e) {
+            $frm_search.trigger("submit");
+            return false;
+        });
+
+        $frm_search.on("submit", function (e) {
+            $hdf_Page.val(1);
+            AdvancedFilter({});
+            return false;
+        });
+
+        $popup_bien_dong.dialog({
+            modal: true,
+            autoOpen: false,
+            closeOnEscape: true,
+            buttons: {
+                "Đóng lại": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+        $popup_lich_su.dialog({
+            modal: true,
+            autoOpen: false,
+            closeOnEscape: true,
+            close: function () { Filter({}); }
+        });
+
+        $list.on("click", "[data-action='approve']", function (e) {
+            var id = $(this).closest("tr").attr("data-id");
+            if (confirm("Bạn chắc chắn muốn duyệt đối tượng này?")) {
+                $.ajax({
+                    url: "@Url.Action("BienDong_Duyet", "WebsiteProduct", new { })",
+                    type: "post",
+                    data: JSON.stringify({ model: { Id: id } }, null, 0),
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result, textStatus, jqXHR) {
+                        if (result != null && result.Status == "error") {
+                            notify_error("Lỗi", result.Message);
+                        } else {
+                            notify_info("Thông báo", "Duyệt đối tượng thành công.");
+                            Filter({});
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.warn("textStatus: " + textStatus + " | errorThrown: " + errorThrown);
+                    }
+                });
+            }
+        });
+
+        $list.on("click", "[data-action='delete']", function (e) {
+            var id = $(this).closest("tr").attr("data-id");
+            if (confirm("Bạn chắc chắn muốn xóa đối tượng này?")) {
+                $.post("@Url.Action("Delete", "WebsiteProduct", new { })", { id: id }, function (data) {
+                    if (data != null && data.Status == "error") {
+                        notify_error("Lỗi", data.Message);
+                    } else {
+                        notify_info("Thông báo", "Xóa đối tượng thành công.");
+                        Filter({});
+                    }
+                });
+            }
+        });
+
+        $list.on("click", "[data-action='bien-dong']", function (e) {
+            var id = $(this).closest("tr").attr("data-id");
+            var name = $(this).closest("tr").attr("data-name");
+            $.post("@Url.Action("BienDong", "WebsiteProduct", new { })", { Id: id }, function (data) {
+                $popup_bien_dong.html(data);
+                $popup_bien_dong.dialog("option", "title", "Tạo biến động » " + name);
+                $popup_bien_dong.dialog("option", "width", $(document).width() * 0.9);
+                $popup_bien_dong.dialog("open");
+            });
+        });
+
+        $list.on("click", "[data-action='lich-su']", function (e) {
+            var $row = $(this).closest("tr");
+            $.post("@Url.Action("LichSu", "WebsiteProduct", new { })", { Id: $row.attr("data-id") }, function (data) {
+                $popup_lich_su.html(data);
+                $popup_lich_su.dialog("option", "title", "Lịch sử biến động » " + $row.attr("data-name"));
+                $popup_lich_su.dialog("option", "width", $(document).width() * 0.9);
+                $popup_lich_su.dialog("open");
+            });
+        });
+    };
+
+    function InitData(_data) {
+        $.post(SVC_GETALLPROVINCES, {}, function (_data) {
+            RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_Province, val: "@Model.MaHC_Province", data: _data, id: "MaHC", name: "TenHC" });
+            if (!IsNullOrEmpty("@Model.MaHC_Province")) {
+                $.post(SVC_GETDISTRICTSBYPROVINCE, { MaHC: "@Model.MaHC_Province" }, function (_data) {
+                    RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_District, val: "@Model.MaHC_District", data: _data, id: "MaHC", name: "TenHC" });
+                    if (!IsNullOrEmpty("@Model.MaHC_District")) {
+                        $.post(SVC_GETVILLAGESBYDISTRICT, { MaHC: "@Model.MaHC_District" }, function (_data) {
+                            RefillDataForSelect2({ $ddl: $ddl_combine_MaHC_Village, val: "@Model.MaHC_Village", data: _data, id: "MaHC", name: "TenHC" });
+                            if (!IsNullOrEmpty("@Model.MaHC_Village")) {
+                                $.post(SVC_GETHAMLETSBYVILLAGE, { MaHC: "@Model.MaHC_Village" }, function (_data) {
+                                    RefillDataForSelect2({ $ddl: $ddl_combine_IDDiaChi, val: "@if (Model.IDDiaChi.HasValue) {<text>@Model.IDDiaChi.Value</text>}", data: _data, id: "IDDiaChi", name: "TenDiaChi" });
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        $.post(SVC_GETALLTYPESOBJ, {}, function (data) {
+            var opts = "";
+            data.forEach(function (group, index, array) {
+                opts += "<optgroup label='" + group.Key.MaLDT + " - " + group.Key.TenLDT + "'>";
+                group.Value.forEach(function (type, index, array) {
+                    opts += "<option value='" + type.MaLDT + "'>" + type.MaLDT + " - " + type.TenLDT + "</option>";
+                });
+                opts += "</optgroup>";
+            });
+            $ddl_combine_MaLDT.append(opts);
+            $ddl_combine_MaLDT.select2().select2("val", "@Model.MaLDT");
+        });
+
+        $.post(SVC_GETTINHTRANGDTSBYPARAMS, { IsDuyet: true }, function (data) {
+            RefillDataForSelect2({ $ddl: $ddl_TinhTrang, val: "@Model.TinhTrang", data: data, id: "MaTT", name: "TenTT" });
+        });
+
+        setTimeout(function () {
+            $ddl_combine_MaHC_Province.select2().select2("val", "@Model.MaHC_Province");
+            $ddl_combine_MaHC_District.select2().select2("val", "@Model.MaHC_District");
+            $ddl_combine_MaHC_Village.select2().select2("val", "@Model.MaHC_Village");
+            $ddl_combine_IDDiaChi.select2().select2("val", "@Model.IDDiaChi");
+            $ddl_IsDuyet.select2().select2("val", "@Model.IsDuyet");
+            $ddl_OrderBy.select2().select2("val", "@Model.OrderBy");
+            $ddl_OrderDesc.select2().select2("val", "@if (Model.OrderDesc) {<text>true</text>} else {<text>false</text>}");
+        }, 100);
+        $txt_combine_Keywords.val("@Model.Keywords");
+    };
+
+    jQuery(document).ready(function ($) {
+        InitCtrls({});
+        InitEvents({});
+        InitData({});
+    });
+</script>

@@ -1,0 +1,24 @@
+﻿@model Order
+@{
+    Layout = "~/Themes/Photobookmart/Views/Shared/_Layout.Navigation.Full.cshtml";
+    ViewBag.Title = string.Format("Order {0} detail", Model.Order_Number);
+}
+@section _TitleMain {
+    <a href='@Url.Action("OrderDetail", "Product", new { id = Model.Order_Number })' rel='contact-us' title='Permanent Link: Order Invoice'>
+        Order Invoice</a>
+}
+@section _TrailLink {
+    <a href="/" rel="/" title="Home" class="trail-begin">Home</a> <span class="sep">&raquo;</span>
+    <span class="trail-end">Order Invoice</span>
+}
+@* Page content detail*@
+@if (Model.Id == 0)
+{
+    <div id="neworder_error">
+        Your order Id can not be found.
+    </div>
+}
+else
+{
+   @Html.Partial("InvoiceDetail", Model)
+}

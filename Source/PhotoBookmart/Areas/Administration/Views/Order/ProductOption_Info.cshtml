@@ -1,0 +1,83 @@
+﻿@model Order
+@{
+    var material = Db.Select<ProductCategoryMaterialDetail>(m => m.Where(x => x.Id == Model.CoverMaterial).Limit(1)).FirstOrDefault();
+    ProductCategoryMaterial material_cat = new ProductCategoryMaterial();
+    if (material != null)
+    {
+        material_cat = Db.Select<ProductCategoryMaterial>(x => x.Where(m => m.Id == material.ProductCategoryMaterialId).Limit(1)).FirstOrDefault();
+    }
+    var cats = Db.Select<Product_Category>();
+    Db.Close();
+}
+<div class="block-fluid ucard">
+    <div class="info">
+        <ul class="rows">
+            <li>
+                <div class="title tt" title="Start using on">
+                    Product</div>
+                <div class="text">
+                    @Model.ProductModel.Name &nbsp;
+                    <br />
+                    @Model.ProductModel.Size
+                    <br />
+                    @{
+                        if (Model.ProductModel != null)
+                        {
+                            var cat = cats.Where(x => x.Id == Model.ProductModel.CatId).FirstOrDefault();
+                            if (cat == null)
+                            {
+                                <span></span>
+                            }
+                            else
+                            {
+                                <span>@cat.Name</span>
+                            }
+                        }
+                    }
+                </div>
+            </li>
+            <li>
+                <div class="title tt" title="Start using on">
+                    Pages</div>
+                <div class="text">
+                    @Model.ProductModel.Pages (pages)
+                </div>
+            </li>
+            @if (material != null)
+            {
+                <li>
+                    <div class="title tt" title="Start using on">
+                        Cover style</div>
+                    <div class="text" style="vertical-align: top;">
+                        <img src="/@material.Thumbnail" style="max-width: 25px;" />
+                        @material.Name / @material_cat.Name
+                    </div>
+                </li>
+            }
+            @if (Model.Product_OptionsModel.Count > 0)
+            {
+                <li>
+                    <div class="title tt" title="Start using on">
+                        <strong>Options</strong></div>
+                    <div class="text">
+                        &nbsp;
+                    </div>
+                </li>
+                foreach (var opt in Model.Product_OptionsModel)
+                {
+                <li>
+                    <div style="padding-left: 10px;">
+                        <div class="grid_8">@opt.Option_Name
+                            @if (!string.IsNullOrEmpty(opt.Unit_Name))
+                            { <span>(@opt.Unit_Name)</span> }</div>
+                        <div class="grid_8">
+                            @opt.Price.ToMoneyFormated(Model.Shipping_DisplayPriceSign) X @opt.Option_Quantity</div>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </li>
+                }
+            }
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,5 @@
+G:\NPSoft_HTQLNHCS\packages\libphonenumber-source\bin\Debug\libphonenumber.dll
+G:\NPSoft_HTQLNHCS\packages\libphonenumber-source\bin\Debug\libphonenumber.pdb
+G:\NPSoft_HTQLNHCS\packages\libphonenumber-source\obj\Debug\libphonenumber.dll
+G:\NPSoft_HTQLNHCS\packages\libphonenumber-source\obj\Debug\libphonenumber.pdb
+G:\NPSoft_HTQLNHCS\packages\libphonenumber-source\obj\Debug\libphonenumber.csprojResolveAssemblyReference.cache

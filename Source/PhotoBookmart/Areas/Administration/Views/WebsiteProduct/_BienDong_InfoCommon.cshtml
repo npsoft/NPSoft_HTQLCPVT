@@ -1,0 +1,58 @@
+﻿@model DoiTuong
+<form id="" name="" action="" method="post" enctype="multipart/form-data" class="mws-form">
+    <div class="mws-form-inline">
+        <div class="mws-form-row">
+            <div class="mws-form-cols">
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Họ & Tên:</label>
+                    <div class="mws-form-item"><strong>@Model.HoTen</strong></div>
+                </div>
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Ngày sinh:</label>
+                    <div class="mws-form-item"><strong>@Model.ToStringNgaySinh()</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <div class="mws-form-cols">
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Tỉnh:</label>
+                    <div class="mws-form-item"><strong>@Model.Province_Name</strong></div>
+                </div>
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Huyện:</label>
+                    <div class="mws-form-item"><strong>@Model.District_Name</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="mws-form-row">
+            <div class="mws-form-cols">
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Xã:</label>
+                    <div class="mws-form-item"><strong>@Model.Village_Name</strong></div>
+                </div>
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Xóm:</label>
+                    <div class="mws-form-item"><strong>@Model.Hamlet_Name</strong></div>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="mws-form-row">
+            <label class="mws-form-label">Loại:</label>
+            <div class="mws-form-item"><strong>@Model.MaLDT_Name</strong></div>
+        </div>
+        <div class="mws-form-row">
+            <div class="mws-form-cols">
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Mức TC:</label>
+                    <div class="mws-form-item"><strong>@if (Model.MucTC.HasValue){<text>@((int)Model.MucTC.Value)</text>}else{<text>N/A</text>}</strong></div>
+                </div>
+                <div class="mws-form-col-4-8">
+                    <label class="mws-form-label">Ngày BD:</label>
+                    <div class="mws-form-item"><strong>@string.Format("{0:dd/MM/yyyy}", Model.NgayHuong)</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
